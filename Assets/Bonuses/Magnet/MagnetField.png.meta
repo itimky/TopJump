@@ -1,0 +1,166 @@
+fileFormatVersion: 2
+guid: a7c6970e8afb941eda5af9b7aa7ad3e0
+timeCreated: 1444922502
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: MagnetField_1
+    21300002: MagnetField_10
+    21300004: MagnetField_2
+    21300006: MagnetField_3
+    21300008: MagnetField_4
+    21300010: MagnetField_5
+    21300012: MagnetField_6
+    21300014: MagnetField_7
+    21300016: MagnetField_8
+    21300018: MagnetField_9
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: .25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 8
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 1024
+  textureSettings:
+    filterMode: 1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: MagnetField_1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 815
+        width: 207
+        height: 207
+      alignment: 9
+      pivot: {x: .497584552, y: .492753625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_10
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 771
+        width: 251
+        height: 251
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_2
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 812
+        width: 210
+        height: 210
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_3
+      rect:
+        serializedVersion: 2
+        x: 676
+        y: 807
+        width: 215
+        height: 215
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_4
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 549
+        width: 221
+        height: 220
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_5
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 544
+        width: 226
+        height: 225
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_6
+      rect:
+        serializedVersion: 2
+        x: 453
+        y: 539
+        width: 230
+        height: 230
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_7
+      rect:
+        serializedVersion: 2
+        x: 685
+        y: 533
+        width: 236
+        height: 236
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_8
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 290
+        width: 241
+        height: 241
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: MagnetField_9
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 285
+        width: 246
+        height: 246
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

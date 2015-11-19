@@ -1,0 +1,22 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# http://www.codeandweb.com/texturepacker/unity
+#
+# $TexturePacker:SmartUpdate:7cd64ad9016b8a49183107d5765353d7:7b612de3af324f31eb83c26cfebffaa0:f75c3d66744280120c523bad2ca3a8c7$
+#
+:format=40000
+:texture=MagnetField.png
+:size=1024x1024
+
+MagnetField_1;2;815;207;207;0.4975845410628019;0.49275362318840576
+MagnetField_10;211;771;251;251;0.5;0.5
+MagnetField_2;464;812;210;210;0.5;0.5
+MagnetField_3;676;807;215;215;0.5;0.5
+MagnetField_4;2;549;221;220;0.5;0.5
+MagnetField_5;225;544;226;225;0.5;0.5
+MagnetField_6;453;539;230;230;0.5;0.5
+MagnetField_7;685;533;236;236;0.5;0.5
+MagnetField_8;2;290;241;241;0.5;0.5
+MagnetField_9;245;285;246;246;0.5;0.5

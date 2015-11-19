@@ -1,0 +1,12 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# http://www.codeandweb.com/texturepacker/unity
+#
+# Sprite sheet: BonusScale.png (1024 x 1024)
+# $TexturePacker:SmartUpdate:283c0dee82dc4d2a1bcf46d2cdc6c01c:6149bf24f4cf111134d84452f3b9eee2:e157aa84ab109ea88480298066cbee57$
+#
+
+BonusScaleBackground;2;767;950;255;0.5;0.5
+BonusScaleFill;2;510;950;255;0.5;0.5

@@ -1,0 +1,11 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# http://www.codeandweb.com/texturepacker/unity
+#
+# Sprite sheet: Platform.png (1024 x 128)
+# $TexturePacker:SmartUpdate:6e9ff37cdb69f8999d2d1b2c66769577:c091d019fda1fed32c9cf829b08b251b:6bdd92abf2f878375b0c9d1ba8a2a27c$
+#
+
+Platform;2;35;517;91;0.5009671179883946;0.48901098901098905

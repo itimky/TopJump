@@ -1,0 +1,20 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# http://www.codeandweb.com/texturepacker/unity
+#
+# $TexturePacker:SmartUpdate:5d3c3a40bdf289ac4dc858e7c6673e84:49a432c6d2b4e96400c7bf923ed3e126:a5120befe553ba0a809d48aaf306d4d7$
+#
+:format=40000
+:texture=SuperJumpPlatform.png
+:size=1024x256
+
+SuperJumpPlatform_1;2;190;256;64;0.5;0.5
+SuperJumpPlatform_2;2;124;256;64;0.5;0.5
+SuperJumpPlatform_3;2;58;256;64;0.5;0.5
+SuperJumpPlatform_4;260;190;256;64;0.5;0.5
+SuperJumpPlatform_5;260;124;256;64;0.5;0.5
+SuperJumpPlatform_6;260;58;256;64;0.5;0.5
+SuperJumpPlatform_7;518;190;256;64;0.5;0.5
+SuperJumpPlatform_8;518;124;256;64;0.5;0.5

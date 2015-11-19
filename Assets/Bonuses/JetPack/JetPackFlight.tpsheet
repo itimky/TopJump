@@ -1,0 +1,22 @@
+#
+# Sprite sheet data for Unity.
+#
+# To import these sprites into your Unity project, download "TexturePackerImporter":
+# http://www.codeandweb.com/texturepacker/unity
+#
+# $TexturePacker:SmartUpdate:59a72a4b9d025565ad954ab05e4d9410:20ddbf649f34b322fbe6b5a6b5e5d6f8:c1a199088550ec65a96797e5c5325976$
+#
+:format=40000
+:texture=JetPackFlight.png
+:size=512x512
+
+JetPack;281;386;118;124;1;1
+JetPackFlight_1;97;35;90;151;1;1
+JetPackFlight_2;2;184;91;160;1;1
+JetPackFlight_3;189;36;91;150;1;1
+JetPackFlight_4;190;210;91;144;1;1
+JetPackFlight_5;2;26;93;156;1;1
+JetPackFlight_6;2;346;92;164;1;1
+JetPackFlight_7;95;188;93;156;1;1
+JetPackFlight_8;96;355;90;155;1;1
+JetPackFlight_9;188;356;91;154;1;1
