@@ -5,7 +5,7 @@ public class SortingLayerExposer : MonoBehaviour
 {
 
     public string SortingLayerName = "Default";
-    public int SortingOrder = 1;
+    public int SortingOrder = 0;
 
     void Awake()
     {
