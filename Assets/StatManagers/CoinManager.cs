@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CoinManager : MonoBehaviour, IGameOverHandler
 {
@@ -14,10 +15,19 @@ public class CoinManager : MonoBehaviour, IGameOverHandler
     public GameObject CoinMultiplier;
     static MultiplierPanel MultiplierPanel;
 
+    public AudioClip CoinPickup1;
+    public AudioClip CoinPickup2;
+    public AudioClip CoinPickup3;
+    private static List<AudioClip> CoinPickups;
+    private static AudioSource audioSource;
+
     void Start()
     {
         Gold = 0;
         GoldText = GetComponent<Text>();
+        audioSource = GetComponent<AudioSource>();
+//        AudioSource.Sp
+        CoinPickups = new List<AudioClip>(){ CoinPickup1, CoinPickup2, CoinPickup3 };
         MultiplierPanel = new MultiplierPanel(CoinMultiplier);
         ResetMultiplier();
         Game.RegisterGameOverHandler(this);
@@ -47,9 +57,16 @@ public class CoinManager : MonoBehaviour, IGameOverHandler
     }
 
     public static void AddGold(GameObject gold)
-    {
+    {        
         CoinFactory.GoldBeenUsed(gold);
         Gold += multiplier;
+        var pickupAudio = CoinPickups[MoveController.currentTileNum];
+        audioSource.PlayOneShot(pickupAudio, 0.1f);
+//        audioSource.Play();
+
+//        AudioSource.PlayClipAtPoint(CoinPickAudio, gold.transform.position);
+//        AudioSource.PlayClipAtPoint()
+//        CoinPick.Play();
         DrawScore();
     }
 

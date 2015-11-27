@@ -15,7 +15,8 @@ public class MoveController : MonoBehaviour
 {
     public float speed;
 
-    private int currentTileNum;
+    public static int currentTileNum { get; private set; }
+
     private Queue<float> targets;
     private float startPos;
     private float startTime;

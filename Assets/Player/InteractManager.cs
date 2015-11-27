@@ -12,18 +12,24 @@ public class InteractManager
             return;
 
         if (platform.CompareTag(TagManager.SimplePlatform) || platform.CompareTag(TagManager.AstralPlatform))
-            player.GetComponent<Rigidbody2D>().velocity = jumpVelocity;
+            Jump(player, jumpVelocity);
 
         if (platform.CompareTag(TagManager.SuperJumpPlatform))
-            player.GetComponent<Rigidbody2D>().velocity = superJumpVelocity;
+            Jump(player, superJumpVelocity);
 
         if (platform.CompareTag(TagManager.SpikePlatform))
         {
             if (platform.GetComponent<SpikePlatformBehavior>().IsHarmful && !PlayerInfo.IsInvulnerable)
                 player.GetComponent<PlayerInfo>().MakeDamage();
             else
-                player.GetComponent<Rigidbody2D>().velocity = jumpVelocity;
+                Jump(player, jumpVelocity);
         }
             
+    }
+
+    private static void Jump(GameObject player, Vector2 velocity)
+    {
+        player.GetComponent<Rigidbody2D>().velocity = velocity;
+        player.GetComponent<AudioSource>().Play();
     }
 }
