@@ -1,14 +1,33 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SpikePlatformBehavior : MonoBehaviour
+public class SpikePlatformBehavior : Pausable
 {
-    public bool IsHarmful { get { return Spikes.AreSpikesUp; } }
+    public bool IsHarmful { get; private set; }
 
-    private SpikesBehavior Spikes;
+    private Animator animator;
 
     void Start()
     {
-        Spikes = transform.Find("Spikes").GetComponent<SpikesBehavior>();
+        animator = GetComponent<Animator>();
+        Game.RegisterPausableObject(this);
+    }
+
+    void Toggle()
+    {        
+        IsHarmful = !IsHarmful;
+    }
+
+    float prepauseSpeed;
+
+    public override void Pause()
+    {        
+        prepauseSpeed = animator.speed;
+        animator.speed = 0;
+    }
+
+    public override void Resume()
+    {
+        animator.speed = prepauseSpeed;
     }
 }

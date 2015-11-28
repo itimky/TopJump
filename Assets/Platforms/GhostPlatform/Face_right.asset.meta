@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: b1bfcce203ab7454bb7cf144cb1cecfc
+timeCreated: 1448720130
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 81 34\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g transform=\"matrix(1,0,0,1,-421,-18)\">\n        <g id=\"Face_right\" transform=\"matrix(0.396196,1.7965e-17,2.20514e-17,0.421519,136.946,-31.6254)\">\n
+    \           <g id=\"Eye\" transform=\"matrix(0.370044,-3.183e-17,-3.8196e-17,0.6,480.854,70)\">\n
+    \               <ellipse cx=\"721.119\" cy=\"133.333\" rx=\"27.024\" ry=\"16.667\"
+    style=\"fill:rgb(0,76,89);stroke-width:2.04px;stroke:rgb(0,76,89);\"/>\n            </g>\n
+    \           <g id=\"Eye1\" transform=\"matrix(0.370044,-3.183e-17,-3.8196e-17,0.6,641.493,70)\">\n
+    \               <ellipse cx=\"721.119\" cy=\"133.333\" rx=\"27.024\" ry=\"16.667\"
+    style=\"fill:rgb(0,76,89);stroke-width:2.04px;stroke:rgb(0,76,89);\"/>\n            </g>\n
+    \           <g id=\"Mouth\" transform=\"matrix(1,0,0,1,-10,0)\">\n                <path
+    d=\"M729.134,195.28C729.132,195.227 729.131,195.174 729.131,195.12C729.131,184.061
+    773.416,175.083 827.963,175.083C882.509,175.083 926.794,184.061 926.794,195.12C926.794,195.174
+    926.793,195.227 926.791,195.28C904.225,190.945 868.342,188.14 827.963,188.14C787.584,188.14
+    751.7,190.945 729.134,195.28Z\" style=\"fill:rgb(230,230,230);fill-opacity:0.678431;stroke-width:2.04px;stroke:rgb(0,76,89);\"/>\n
+    \           </g>\n            <g id=\"Brow\" transform=\"matrix(1,0,0,1,0,-0.333333)\">\n
+    \               <path d=\"M719.131,121.667L756.155,133.333\" style=\"fill:none;stroke-width:2.04px;stroke:rgb(0,76,89);\"/>\n
+    \           </g>\n            <g id=\"Brow1\" transform=\"matrix(-1,0,0,1,1635.93,-0.333333)\">\n
+    \               <path d=\"M719.131,121.667L756.155,133.333\" style=\"fill:none;stroke-width:2.04px;stroke:rgb(0,76,89);\"/>\n
+    \           </g>\n        </g>\n    </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 4299f719f7c704f16a0cbea40ebbb1f4
+timeCreated: 1448744922
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 128 128\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g id=\"Magnet\" transform=\"matrix(0.181245,-3.69685e-19,-3.69685e-19,0.182754,-72.1923,-305.188)\">\n
+    \       <g id=\"Base\" transform=\"matrix(1,0,0,1,7.11138,424.164)\">\n            <path
+    d=\"M982.666,1253.98L982.666,1511.65C982.666,1673.72 906.381,1801.16 744.315,1801.16C582.249,1801.16
+    505.964,1669.58 505.964,1507.52L505.964,1253.98L616.548,1253.98L616.548,1469.45C616.548,1570.49
+    643.282,1670 744.315,1670C845.348,1670 872.082,1580.34 872.082,1479.31L872.082,1253.98L982.666,1253.98Z\"
+    style=\"fill:rgb(255,6,0);stroke-width:4.4px;stroke:black;\"/>\n        </g>\n
+    \       <g transform=\"matrix(1.00579,0,0,1,52.643,0)\">\n            <rect x=\"457.783\"
+    y=\"1678.14\" width=\"109.948\" height=\"78.747\" style=\"fill:rgb(227,227,227);stroke-width:4.38px;stroke:black;\"/>\n
+    \       </g>\n        <g transform=\"matrix(1.00579,0,0,1,418.761,0)\">\n            <rect
+    x=\"457.783\" y=\"1678.14\" width=\"109.948\" height=\"78.747\" style=\"fill:rgb(227,227,227);stroke-width:4.38px;stroke:black;\"/>\n
+    \       </g>\n    </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 

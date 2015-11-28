@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 73d994bfcf87b4a2394300274cb0cec8
+timeCreated: 1448747605
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 59 57\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g transform=\"matrix(1,0,0,1,-625,-313)\">\n        <g id=\"Flame_6\" transform=\"matrix(0.569336,0.100389,-0.11013,0.62458,351.907,109.064)\">\n
+    \           <path d=\"M615.433,247.46L630.454,263.917L609.244,267.802L610.241,294.96L588.112,262.77C588.112,262.77
+    579.01,320.812 579.01,320.812C579.01,320.812 576.06,264.707 576.06,264.707L553.107,292.496L556.808,267.802L535.597,263.917L550.619,247.46L583.026,236.473L615.433,247.46Z\"
+    style=\"fill:rgb(255,212,0);stroke-width:3.71px;stroke:rgb(255,88,0);\"/>\n        </g>\n
+    \   </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 

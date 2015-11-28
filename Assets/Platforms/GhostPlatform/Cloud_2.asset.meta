@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 51c7caada11634ddb93f4fa5669842f9
+timeCreated: 1448720130
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 60 61\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g transform=\"matrix(1,0,0,1,-492,-92)\">\n        <g id=\"Cloud_2\" transform=\"matrix(0.438613,-0.36804,0.493021,0.587559,-274.134,483.309)\">\n
+    \           <path d=\"M1452.64,278.563C1454.55,272.745 1462.21,268.223 1471.2,268.223C1480.19,268.223
+    1487.86,272.745 1489.77,278.563C1497.05,276.047 1506.56,277.703 1512.17,282.949C1517.77,288.196
+    1517.82,295.491 1512.91,300.229C1520.09,302.91 1524.29,309.497 1522.29,316.039C1520.28,322.582
+    1512.67,327.156 1504.65,327.247C1506.32,333.105 1502.04,339.664 1493.94,342.576C1485.84,345.487
+    1476.3,343.896 1471.2,339.272C1466.11,343.896 1456.57,345.487 1448.47,342.576C1440.37,339.664
+    1436.09,333.105 1437.76,327.247C1429.73,327.156 1422.12,322.582 1420.12,316.039C1418.12,309.497
+    1422.32,302.91 1429.5,300.229C1424.59,295.491 1424.63,288.196 1430.24,282.949C1435.84,277.703
+    1445.36,276.047 1452.64,278.563Z\" style=\"fill:white;stroke-width:0.6px;stroke:rgb(0,76,89);\"/>\n
+    \       </g>\n    </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 
