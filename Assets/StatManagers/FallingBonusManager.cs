@@ -32,8 +32,8 @@ public class FallingBonusManager : Pausable
         for (int i = 1; i < platformPositions.Count; i++)
             BonusPositions.Add((platformPositions[i - 1] + platformPositions[i]) / 2);
 
-        Bonuses.Add(Instantiate(ScoreX2Prefab));
-        Bonuses.Add(Instantiate(GoldX2Prefab));
+        Bonuses.Add(Game.MakePrefabInstance(ScoreX2Prefab));
+        Bonuses.Add(Game.MakePrefabInstance(GoldX2Prefab));
 //        Bonuses.Add(Instantiate(JetPackPrefab));
         RegisterRepeating();
     }

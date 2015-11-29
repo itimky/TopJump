@@ -85,7 +85,7 @@ public class CloudManager : MonoBehaviour
         while (AllClouds.Count < InstanceCount)
         {
             var prefab = prefabs[i];
-            var gameObject = Instantiate(prefab);
+            var gameObject = Game.MakePrefabInstance(prefab);
             gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(3 * direction, 0);
 
             var cloud = new Cloud(gameObject.transform, nextY);

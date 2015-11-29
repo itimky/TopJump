@@ -22,11 +22,11 @@ public class BonusPanel : MonoBehaviour
         AllBonuses = new List<BonusItem>();
         Panel = GetComponent<RectTransform>();
 
-        AllBonuses.Add(MakeBonusItem(Instantiate(CoinBonus)));
-        AllBonuses.Add(MakeBonusItem(Instantiate(ScoreBonus)));
-        AllBonuses.Add(MakeBonusItem(Instantiate(MagnetBonus)));
-        AllBonuses.Add(MakeBonusItem(Instantiate(BubbleBonus)));
-        AllBonuses.Add(MakeBonusItem(Instantiate(JetPackBonus)));
+        AllBonuses.Add(MakeBonusItem(Game.MakePrefabInstance(CoinBonus)));
+        AllBonuses.Add(MakeBonusItem(Game.MakePrefabInstance(ScoreBonus)));
+        AllBonuses.Add(MakeBonusItem(Game.MakePrefabInstance(MagnetBonus)));
+        AllBonuses.Add(MakeBonusItem(Game.MakePrefabInstance(BubbleBonus)));
+        AllBonuses.Add(MakeBonusItem(Game.MakePrefabInstance(JetPackBonus)));
     }
 
     private BonusItem MakeBonusItem(RectTransform bonus)

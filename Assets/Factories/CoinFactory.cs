@@ -35,7 +35,7 @@ public class CoinFactory : MonoBehaviour
         toSetPosition = new List<Transform>();
         AllCoins = new List<GameObject>();
         for (int i = 0; i < instanceCount; i++)
-            AllCoins.Add(Instantiate(CoinPrefab));
+            AllCoins.Add(Game.MakePrefabInstance(CoinPrefab));
     }
 
     void UpdateCoins()

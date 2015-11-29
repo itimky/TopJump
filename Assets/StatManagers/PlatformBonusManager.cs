@@ -21,10 +21,12 @@ public class PlatformBonusManager : MonoBehaviour
 //        Instance = this;
         PlatformToBonus = new Dictionary<GameObject, GameObject>();
         AvailableBonuses = new List<GameObject>();
-        AvailableBonuses.Add(Instantiate(JetPackPrefab));
-        AvailableBonuses.Add(Instantiate(BubblePrefab));
-        AvailableBonuses.Add(Instantiate(MagnetPrefab));
+        AvailableBonuses.Add(Game.MakePrefabInstance(JetPackPrefab));
+        AvailableBonuses.Add(Game.MakePrefabInstance(BubblePrefab));
+        AvailableBonuses.Add(Game.MakePrefabInstance(MagnetPrefab));
     }
+
+
 
     public static void OnPlatformCreated(GameObject platform)
     {

@@ -52,18 +52,19 @@ public class PlatformFactory : MonoBehaviour
         bonusPlatformQueue = new Queue<GameObject>();
 
         for (int i = 0; i < instanceCount; i++)
-            simpleQueue.Enqueue(Instantiate(simplePrefab));        
+            simpleQueue.Enqueue(Game.MakePrefabInstance(simplePrefab));        
 
         for (int i = 0; i < instanceCount / 3; i++)
         {
-            updatingQueue.Enqueue(Instantiate(astralPrefab));
-            updatingQueue.Enqueue(Instantiate(spikePrefab));
+            updatingQueue.Enqueue(Game.MakePrefabInstance(astralPrefab));
+            updatingQueue.Enqueue(Game.MakePrefabInstance(spikePrefab));
         }
 
         for (int i = 0; i < instanceCount / 3; i++)
-            bonusPlatformQueue.Enqueue(Instantiate(superJumpPrefab));
+            bonusPlatformQueue.Enqueue(Game.MakePrefabInstance(superJumpPrefab));
 
-        Instantiate(floorPrefab);
+        var grass = Game.MakePrefabInstance(floorPrefab);
+        grass.transform.localPosition = new Vector2(0, -5);
         AllPlatforms = simpleQueue.Concat(updatingQueue).Concat(bonusPlatformQueue).ToList();
     }
 

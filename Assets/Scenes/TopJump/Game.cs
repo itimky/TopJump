@@ -24,6 +24,27 @@ public class Game : MonoBehaviour
         Resume();
     }
 
+
+    public static GameObject MakePrefabInstance(GameObject prefab)
+    {
+        var instance = Instantiate(prefab);
+        instance.transform.localPosition = new Vector2(0, -60);
+        return instance;
+    }
+
+    public static Transform MakePrefabInstance(Transform prefab)
+    {
+        var instance = Instantiate(prefab);
+        instance.localPosition = new Vector2(0, -60);
+        return instance;
+    }
+
+    public static RectTransform MakePrefabInstance(RectTransform prefab)
+    {
+        return Instantiate(prefab);
+    }
+
+
     public static void RegisterPausableObject(Pausable pausable)
     {
         if (!PausableObjects.Contains(pausable))
