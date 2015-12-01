@@ -102,7 +102,8 @@ public class MultiplierPanel
             return;
         
         isEnabled = true;
-        panel.SetActive(true);
+        panel.transform.localScale = new Vector3(1, 1, 1);
+//        panel.SetActive(true);
 
     }
 
@@ -112,7 +113,8 @@ public class MultiplierPanel
             return;
         
         isEnabled = false;
-        panel.SetActive(false);
+        panel.transform.localScale = Vector3.zero;
+//        panel.SetActive(false);
     }
 
     public void SetMultiplier(int multiplier)
