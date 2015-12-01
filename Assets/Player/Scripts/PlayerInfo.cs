@@ -6,8 +6,13 @@ using System.Linq;
 public class PlayerInfo : MonoBehaviour
 {
     public static float maxTraveled;
+    public GameObject Magnet_Active;
+    public GameObject Bubble_Active;
+    public GameObject JetPack_Active;
+
 
     private static List<GameObject> activeBonuses;
+    private Dictionary<string, GameObject> bonuses;
     private Transform tr;
 
     public static bool IsInvulnerable { get; private set; }
@@ -35,6 +40,10 @@ public class PlayerInfo : MonoBehaviour
         tr = transform;
         maxTraveled = 0;
         activeBonuses = new List<GameObject>();
+        bonuses = new Dictionary<string, GameObject>();
+        bonuses[TagManager.JetPack] = GameObject.Find("JetPack_Active");//Game.MakePrefabInstance(JetPack_Active);
+        bonuses[TagManager.Magnet] = GameObject.Find("Magnet_Active");//Game.MakePrefabInstance(Magnet_Active);
+        bonuses[TagManager.Bubble] = GameObject.Find("Bubble_Active");//Game.MakePrefabInstance(Bubble_Active);
 //        Game.RegisterPausableObject(this);
     }
 
@@ -148,7 +157,7 @@ public class PlayerInfo : MonoBehaviour
         var rigidBody2d = GetComponent<Rigidbody2D>();
         rigidBody2d.gravityScale = 0;
         rigidBody2d.velocity = new Vector2(rigidBody2d.velocity.x, 20);
-        var jetPack = transform.Find("JetPackFlight").gameObject;
+        var jetPack = bonuses[TagManager.JetPack];//transform.Find("JetPackFlight").gameObject;
         StartBonusUsageCoroutine(bonus, jetPack, () => rigidBody2d.gravityScale = 1);
     }
 
@@ -160,13 +169,13 @@ public class PlayerInfo : MonoBehaviour
             StopCoroutine("Invulnerable");
             IsInvulnerable = false;
         }
-        var bubble = transform.Find("Bubble").gameObject;
+        var bubble = bonuses[TagManager.Bubble];//transform.Find("Bubble").gameObject;
         StartBonusUsageCoroutine(bonus, bubble);
     }
 
     void UseMagnet(GameObject bonus)
     {
-        var magnet = transform.Find("MagnetField").gameObject;
+        var magnet = bonuses[TagManager.Magnet];//transform.Find("MagnetField").gameObject;
         StartBonusUsageCoroutine(bonus, magnet);
     }
 
@@ -179,6 +188,7 @@ public class PlayerInfo : MonoBehaviour
 
     IEnumerator StartBonusUsage(GameObject bonus, GameObject visual, System.Action onExpired)
     {   
+        EnableVisual(visual);
         PlatformBonusManager.BonusUsed(bonus);
         activeBonuses.Add(bonus);
         BonusPanel.AddBonus(bonus.tag);
@@ -186,7 +196,7 @@ public class PlayerInfo : MonoBehaviour
         var duration = (float)PlayerPrefManager.GetDuration(bonus.tag) * Time.timeScale;
         var timeLeft = duration;
         var updateRate = 0.01f * Time.timeScale;
-        visual.SetActive(true);
+//        visual.SetActive(true);
         while (true)
         {
             if (!Game.IsPaused && !Game.IsGameOver)
@@ -211,8 +221,28 @@ public class PlayerInfo : MonoBehaviour
     void StopBonusUsage(GameObject bonus, GameObject visual)
     {
         BonusPanel.RemoveBonus(bonus.tag);
-        visual.SetActive(false);
+//        visual.SetActive(false);
         activeBonuses.Remove(bonus);
         PlatformBonusManager.BonusExpired(bonus);
+        DisableVisual(visual);
+    }
+
+    void EnableVisual(GameObject visual)
+    {
+        visual.transform.localScale = new Vector3(1, 1, 1);
+//        visual.transform.SetParent(this.tr);
+//        visual.transform.localPosition = Vector3.zero;
+        var boxCollider2d = visual.GetComponent<BoxCollider2D>();
+        if (boxCollider2d != null)
+            boxCollider2d.enabled = true;        
+    }
+
+    void DisableVisual(GameObject visual)
+    {
+        visual.transform.localScale = Vector3.zero;
+        var boxCollider2d = visual.GetComponent<BoxCollider2D>();
+        if (boxCollider2d != null)
+            boxCollider2d.enabled = false;
+//        visual.transform.SetParent(null);
     }
 }

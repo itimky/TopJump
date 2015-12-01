@@ -3,25 +3,35 @@ using System.Collections;
 
 public class CameraUpdater : MonoBehaviour
 {
-    private float startY;
+    //    private float startY;
+    //
+    Rigidbody2D rigid;
 
     void Start()
     {
-        enabled = false;
-        startY = transform.position.y;
-        enabled = true;
+        rigid = GetComponent<Rigidbody2D>();
+//        GetComponent<Rigidbody2D>().inertia = 0;
+        //GetComponent<Rigidbody2D> = 0;
+//            enabled = false;
+//            startY = transform.position.y;
+//            enabled = true;
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        UpdatePosition();
+        rigid.velocity = Vector2.zero;
     }
-
-    private void UpdatePosition()
-    {
-        var y = transform.localPosition.y;
-        if (y < PlayerInfo.maxTraveled + startY)
-            Camera.main.gameObject.transform.localPosition +=
-                new Vector3(0, PlayerInfo.maxTraveled - y + startY, 0);
-    }
+    //
+    //    void Update()
+    //    {
+    //        UpdatePosition();
+    //    }
+    //
+    //    private void UpdatePosition()
+    //    {
+    //        var y = transform.localPosition.y;
+    //        if (y < PlayerInfo.maxTraveled + startY)
+    //            Camera.main.gameObject.transform.localPosition +=
+    //                new Vector3(0, PlayerInfo.maxTraveled - y + startY, 0);
+    //    }
 }
