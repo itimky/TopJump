@@ -26,7 +26,7 @@ public class CloudManager : MonoBehaviour
 
     void Start()
     {
-        nextY = verticalDistance;
+//        nextY = verticalDistance;
         prefabs = new List<Transform>();
         prefabs.Add(CloudPrefab_1);
         prefabs.Add(CloudPrefab_2);
@@ -40,7 +40,7 @@ public class CloudManager : MonoBehaviour
         AllClouds = new List<Cloud>();
 
         CreateClouds();
-        InvokeRepeating("CheckClouds", 1f, 1f);
+        InvokeRepeating("CheckClouds", 1f, 0.2f);
     }
 
     void CheckClouds()
@@ -103,7 +103,7 @@ public class CloudManager : MonoBehaviour
         var sign = direction > 0 ? -1 : 1;
         foreach (var cloud in AllClouds)
         {
-            var scale = Random.Range(1, 5);
+            var scale = Random.Range(1, 4);
             cloud.Transform.localScale = new Vector3(scale, scale, 1);
             cloud.Transform.position += new Vector3(sign * Random.Range(0, deltaX + 1), 0, 0);
         }

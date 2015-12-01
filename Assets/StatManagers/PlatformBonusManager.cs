@@ -40,7 +40,7 @@ public class PlatformBonusManager : MonoBehaviour
         if (!AvailableBonuses.Any())
             return;
 
-        var random = Random.Range(42, 42);
+        var random = Random.Range(0, 100);
         if (random != 42)
             return;
             
