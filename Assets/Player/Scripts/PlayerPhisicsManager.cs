@@ -26,7 +26,7 @@ public class PlayerPhisicsManager : Pausable
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (rigidbody2d.velocity.y == 0)
+        if (rigidbody2d.velocity.y == 0) 
             InteractWithPlatform(collision.gameObject);
         //InteractManager.Interact(this.gameObject, collision.gameObject);
     }

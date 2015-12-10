@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ae82186c414a842dc85c098c049fb6a8
+timeCreated: 1449179710
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 4 65\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g transform=\"matrix(1,0,0,1,-149,-159)\">\n        <g transform=\"matrix(0.00452777,-2.27616e-17,-2.46489e-17,0.10554,147.96,133.9)\">\n
+    \           <g id=\"Coin_11\">\n                <ellipse cx=\"605.242\" cy=\"545.763\"
+    rx=\"347.853\" ry=\"298.465\" style=\"fill:rgb(255,243,0);stroke-width:1.49px;stroke:black;\"/>\n
+    \           </g>\n        </g>\n    </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 

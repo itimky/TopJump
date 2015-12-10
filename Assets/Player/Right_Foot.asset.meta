@@ -1,0 +1,39 @@
+fileFormatVersion: 2
+guid: 4ec03f520518c4e0dafebac4bc7c31c8
+timeCreated: 1449215003
+licenseType: Free
+NativeFormatImporter:
+  userData: "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD
+    SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg width=\"100%\"
+    height=\"100%\" viewBox=\"0 0 37 22\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"
+    xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" style=\"fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;\">\n
+    \   <g transform=\"matrix(1,0,0,1,-122,-236)\">\n        <g id=\"Right_Foot\"
+    transform=\"matrix(0.365355,0,0,0.365355,-78.3783,-447.614)\">\n            <g
+    transform=\"matrix(1.06522,0,0,0.587838,-22.837,803.115)\">\n                <path
+    d=\"M630,1861.5C630,1851.29 625.425,1843 619.791,1843L548.209,1843C542.575,1843
+    538,1851.29 538,1861.5L538,1898.5C538,1908.71 542.575,1917 548.209,1917L619.791,1917C625.425,1917
+    630,1908.71 630,1898.5L630,1861.5Z\" style=\"fill:rgb(186,186,186);\"/>\n            </g>\n
+    \           <g transform=\"matrix(1,0,0,1.61224,0,-1130)\">\n                <path
+    d=\"M637.375,1868.12C637.375,1864.75 634.63,1862 631.25,1862L567.25,1862C563.87,1862
+    561.125,1864.75 561.125,1868.12L566.125,1880.38C566.125,1883.76 577.12,1886.5
+    580.5,1886.5L618,1886.5C621.38,1886.5 631.25,1883.76 631.25,1880.38L637.375,1868.12Z\"
+    style=\"fill:rgb(151,151,151);\"/>\n            </g>\n            <path d=\"M648.25,1919.12C648.25,1917.12
+    646.626,1915.5 644.625,1915.5L553.875,1915.5C551.874,1915.5 550.25,1917.12 550.25,1919.12L550.25,1926.38C550.25,1928.38
+    551.874,1930 553.875,1930L644.625,1930C646.626,1930 648.25,1928.38 648.25,1926.38L648.25,1919.12Z\"
+    style=\"fill:white;\"/>\n            <g id=\"Strings\">\n                <g transform=\"matrix(1.5,1.22465e-16,1.22465e-16,1,-299.625,8)\">\n
+    \                   <g transform=\"matrix(1,0,0,1,6.25,0)\">\n                        <circle
+    cx=\"580.5\" cy=\"1892.5\" r=\"2.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \                   </g>\n                    <g transform=\"matrix(1,0,0,1,31.25,0)\">\n
+    \                       <circle cx=\"580.5\" cy=\"1892.5\" r=\"2.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \                   </g>\n                    <path d=\"M611.75,1892.5C611.75,1892.5
+    603.417,1889.5 599.25,1889.5C595.083,1889.5 586.75,1892.5 586.75,1892.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \               </g>\n                <g transform=\"matrix(1.5,1.22465e-16,1.22465e-16,1,-299.625,16.75)\">\n
+    \                   <g transform=\"matrix(1,0,0,1,6.25,0)\">\n                        <circle
+    cx=\"580.5\" cy=\"1892.5\" r=\"2.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \                   </g>\n                    <g transform=\"matrix(1,0,0,1,31.25,0)\">\n
+    \                       <circle cx=\"580.5\" cy=\"1892.5\" r=\"2.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \                   </g>\n                    <path d=\"M611.75,1892.5C611.75,1892.5
+    603.417,1889.5 599.25,1889.5C595.083,1889.5 586.75,1892.5 586.75,1892.5\" style=\"fill:none;stroke-width:2.15px;stroke:black;\"/>\n
+    \               </g>\n            </g>\n        </g>\n    </g>\n</svg>\n"
+  assetBundleName: 
+  assetBundleVariant: 

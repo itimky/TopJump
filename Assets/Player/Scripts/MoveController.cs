@@ -20,14 +20,18 @@ public class MoveController : MonoBehaviour
     private Queue<float> targets;
     private float startPos;
     private float startTime;
+    private Transform tr;
+    private PlayerInfo playerInfo;
 
     public static bool Paused { get; set; }
 
     void Start()
     {
+        tr = transform;
+        this.playerInfo = GetComponent<PlayerInfo>();
         currentTileNum = Game.positions.Count / 2;
         targets = new Queue<float>();
-        startPos = transform.position.x;
+        startPos = tr.position.x;
     }
 
     public void QueueMove(MoveDirection direction)
@@ -61,25 +65,35 @@ public class MoveController : MonoBehaviour
         {
             if (!Game.IsPaused)
             {
-                if (startPos == transform.position.x)
+                // pre move start
+                if (startPos == tr.position.x)
                 {
 //                    traveled = 0;
+                    var trg = targets.Peek();
+                    MoveDirection dir;
+                    if (trg > tr.position.x)
+                        dir = MoveDirection.Right;
+                    else
+                        dir = MoveDirection.Left;
+                    playerInfo.MoveTo(dir);
                     startTime = Time.time;
                     yield return null;
                 }
      
                 var target = targets.Peek();
-                if (transform.position.x == target)
-                {
-                    transform.position = new Vector2(target, transform.position.y);
+                // move ending
+                if (tr.position.x == target)
+                {                    
+                    tr.position = new Vector2(target, tr.position.y);
                     targets.Dequeue();
-                    startPos = transform.position.x;
+                    startPos = tr.position.x;
                 }
+                // move process
                 else
                 {
 //                    traveled += speed;
                     float newXPos = Mathf.MoveTowards(startPos, target, speed * (Time.time - startTime));
-                    transform.position = new Vector2(newXPos, transform.position.y);
+                    tr.position = new Vector2(newXPos, tr.position.y);
                 }
 
             }
