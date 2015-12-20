@@ -11,13 +11,13 @@ public class Game : MonoBehaviour
 
 	private static List<Pausable> PausableObjects;
 	private static List<IGameOverHandler> GameOverHandlers;
-	public List<float> Positions;
-	//	public static readonly List<float> positions = new List<float> { -4f, 0f, 4f };
-	public static List<float> positions { get; private set; }
+	//	public List<float> Positions;
+	public static readonly List<float> positions = new List<float> { -7f, 0f, 7f };
+	//	public static List<float> positions { get; private set; }
 
 	void Awake()
 	{
-		positions = Positions;
+//		positions = Positions;
 		Screen.fullScreen = false;
 		PausableObjects = new List<Pausable>();
 		GameOverHandlers = new List<IGameOverHandler>();
