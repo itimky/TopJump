@@ -11,13 +11,13 @@ public class Game : MonoBehaviour
 
 	private static List<Pausable> PausableObjects;
 	private static List<IGameOverHandler> GameOverHandlers;
-	public List<float> Pos;
+	public List<float> Positions;
 	//	public static readonly List<float> positions = new List<float> { -4f, 0f, 4f };
 	public static List<float> positions { get; private set; }
 
 	void Awake()
 	{
-		positions = Pos;
+		positions = Positions;
 		Screen.fullScreen = false;
 		PausableObjects = new List<Pausable>();
 		GameOverHandlers = new List<IGameOverHandler>();
@@ -107,7 +107,7 @@ public class Game : MonoBehaviour
 public abstract class Pausable : MonoBehaviour
 {
 	public virtual void Pause()
-	{
+	{		
 		enabled = false;
 	}
 

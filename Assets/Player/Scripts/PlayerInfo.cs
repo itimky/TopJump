@@ -20,6 +20,7 @@ public class PlayerInfo : MonoBehaviour
 
 	private bool faceLeft;
 	private bool HaveLost;
+	private bool isDead;
 
 	void Awake()
 	{
@@ -39,6 +40,8 @@ public class PlayerInfo : MonoBehaviour
 		//
 		//до 19:00
 		//
+		HaveLost = false;
+		isDead = false;
 		tr = transform;
 		maxTraveled = 0;
 		activeBonuses = new List<GameObject>();
@@ -87,6 +90,7 @@ public class PlayerInfo : MonoBehaviour
 	void OnBecameInvisible()
 	{
 		HaveLost = true;
+		isDead = true;
 	}
 
 	private bool CheckGameOver()
@@ -99,9 +103,18 @@ public class PlayerInfo : MonoBehaviour
 	}
 
 	public void GameOver()
-	{
+	{		
 		HaveLost = false;
+		if (!isDead)
+			Die();
 		Game.GameOver();
+	}
+
+	public void Die()
+	{
+		isDead = true;
+		GetComponent<Rigidbody2D>().velocity = new Vector2(0, 5);
+		GetComponent<BoxCollider2D>().isTrigger = true;
 	}
 
 
