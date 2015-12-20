@@ -50,6 +50,8 @@ namespace SVGImporter
 
             Vector3[] vertices = sharedMesh.vertices;
             Vector2[] uv = sharedMesh.uv;
+            if(uv == null || uv.Length != vertices.Length) uv = new Vector2[vertices.Length];
+
             for (int i = 0; i < vertexCount; i++)
             {
                 uv[i].x = -vertices[i].x + tempTransform.position.x;

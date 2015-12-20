@@ -326,8 +326,15 @@ namespace SVGImporter
                     tempVBO[i].position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, sharedUIMesh[i].position.x) * v.z;
                     tempVBO[i].position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, sharedUIMesh[i].position.y) * v.w;
                     tempVBO[i].color = sharedUIMesh[i].color * color;
-                    tempVBO[i].uv0 = sharedUIMesh[i].uv0;
-                    tempVBO[i].uv1 = sharedUIMesh[i].uv1;
+                }
+
+                if(_vectorGraphics.hasGradients)
+                {
+                    for(int i = 0; i < tempVBOLength; i++)
+                    {
+                        tempVBO[i].uv0 = sharedUIMesh[i].uv0;
+                        tempVBO[i].uv1 = sharedUIMesh[i].uv1;
+                    }
                 }
             } else {
                 
@@ -376,8 +383,15 @@ namespace SVGImporter
                     }
                     
                     tempVBO[i].color = sharedUIMesh[i].color * color;
-                    tempVBO[i].uv0 = sharedUIMesh[i].uv0;
-                    tempVBO[i].uv1 = sharedUIMesh[i].uv1;
+                }
+                
+                if(_vectorGraphics.hasGradients)
+                {
+                    for(int i = 0; i < tempVBOLength; i++)
+                    {
+                        tempVBO[i].uv0 = sharedUIMesh[i].uv0;
+                        tempVBO[i].uv1 = sharedUIMesh[i].uv1;
+                    }
                 }
             }
             

@@ -136,8 +136,8 @@ namespace SVGImporter.Rendering
 
             _stopColorList.Add(GetColor(_stopList [0].stopColor));
             _stopOffsetList.Add(0f);
-            int i = 0;
-            for (i = 0; i < _length; i++)
+
+            for (int i = 0; i < _length; i++)
             {
                 float t_offset = _stopList [i].offset;
                 if ((t_offset > _stopOffsetList [_stopOffsetList.Count - 1]) && (t_offset <= 100f))

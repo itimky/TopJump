@@ -42,7 +42,7 @@ Shader "SVG Importer/GradientColor/GradientColorAlphaBlended" {
 			sampler2D _GradientShape;
 			float4 _Params;
 			
-			struct appdata
+			struct vertex_input
 			{
 			    float4 vertex : POSITION;	
 			    float2 texcoord0 : TEXCOORD0;
@@ -50,8 +50,7 @@ Shader "SVG Importer/GradientColor/GradientColorAlphaBlended" {
 			    half4 color : COLOR;
 			};
 			
-			// vertex output
-			struct vertdata
+			struct vertex_output
 			{
 			    float4 vertex : POSITION;			    
 			    float2 uv0 : TEXCOORD0;
@@ -60,28 +59,28 @@ Shader "SVG Importer/GradientColor/GradientColorAlphaBlended" {
 			    half4 color : COLOR;
 			};
 			
-			vertdata vert(appdata ad)
+			vertex_output vert(vertex_input v)
 			{
-			    vertdata o;
-			    o.vertex = mul(UNITY_MATRIX_MVP, ad.vertex);			    
-			    o.uv0 = ad.texcoord0;
-			    o.color = ad.color;
+			    vertex_output o;
+			    o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);			    
+			    o.uv0 = v.texcoord0;
+			    o.color = v.color;
 				
 				// half pixel
 				float2 texelOffset = float2(0.5 / _Params.x, 0.5 / _Params.y);
-				float imageIndex = ad.texcoord1.x * _Params.z;
+				float imageIndex = v.texcoord1.x * _Params.z;
 				
 				// Horizontal Start
 			    o.uv1.x = saturate((fmod(imageIndex, _Params.x) / _Params.x) + texelOffset.x);
 			    // Horizontal Width
-			    o.uv2 = saturate((1.0 - abs(float4(0.0, 1.0, 2.0, 3.0) - ad.texcoord1.y)) * (_Params.z / _Params.x - texelOffset.x * 2.0));
+			    o.uv2 = saturate((1.0 - abs(float4(0.0, 1.0, 2.0, 3.0) - v.texcoord1.y)) * (_Params.z / _Params.x - texelOffset.x * 2.0));
 			    // Vertical Start
 			    o.uv1.y = saturate((floor((imageIndex / _Params.x) * _Params.w) / _Params.y) + texelOffset.y);
 			    
 			    return o;
 			}
 			
-			float4 frag(vertdata i) : COLOR
+			float4 frag(vertex_output i) : COLOR
 			{
 				float gradient = dot(tex2D(_GradientShape, i.uv0), i.uv2) ;
 				float2 gradientColorUV = float2(i.uv1.x + gradient, i.uv1.y);

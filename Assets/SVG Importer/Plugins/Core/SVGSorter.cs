@@ -14,20 +14,24 @@ namespace SVGImporter
     [AddComponentMenu("Rendering/SVG Sorter", 20)]
     public class SVGSorter : MonoBehaviour {
 
-        public float depthOffset = -0.01f;
+        public float depthOffset = 0.01f;
         public int layerIndex = 0;
         public bool sort = true;
 
         float zOffsetStart;
         int layerIndexStart;
 
+        #if UNITY_EDITOR
     	void LateUpdate()
         {
-            if(sort)
-            {
-                zOffsetStart = transform.position.z;
-                SortRecursive(transform, ref zOffsetStart, ref layerIndexStart);
-            }
+            if(sort) Sort();
+        }
+        #endif
+
+        public void Sort()
+        {
+            zOffsetStart = transform.position.z;
+            SortRecursive(transform, ref zOffsetStart, ref layerIndexStart);
         }
 
         void SortRecursive(Transform transform, ref float zOffset, ref int layerIndex)
@@ -42,18 +46,24 @@ namespace SVGImporter
             {
                 child = transform.GetChild(i);
                 renderer = child.GetComponent<SVGRenderer>();
-                if(renderer != null && !renderer.overrideSorter)
+                if(renderer != null)
                 {
-                    vectorGraphics = renderer.vectorGraphics;
-                    if(vectorGraphics == null)
-                        continue;
-
-                    bounds = vectorGraphics.bounds;
-                    position = renderer.transform.position;
-                    position.z = zOffset;
-                    renderer.transform.position = position;
-                    zOffset += bounds.size.z + depthOffset;
-                    renderer.sortingOrder = layerIndex++;
+                    if(!renderer.overrideSorter)
+                    {
+                        vectorGraphics = renderer.vectorGraphics;
+                        if(vectorGraphics != null)
+                        {
+                            bounds = vectorGraphics.bounds;
+                            position = renderer.transform.position;
+                            zOffset += bounds.size.z * Mathf.Sign(depthOffset);
+                            position.z = zOffset;
+                            renderer.transform.position = position;
+                            zOffset += depthOffset;
+                            renderer.sortingOrder = layerIndex++;
+                        }
+                    } else {
+                        if(renderer.overrideSorterChildren) continue;
+                    }
                 }
 
                 SortRecursive(child, ref zOffset, ref layerIndex);

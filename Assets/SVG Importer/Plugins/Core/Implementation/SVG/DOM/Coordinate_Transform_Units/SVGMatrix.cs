@@ -38,6 +38,10 @@ namespace SVGImporter.Rendering
             get {
                 return new Vector2(e, f);
             }
+            set {
+                e = value.x;
+                f = value.y;
+            }
         }
 
         public Vector2 scale

@@ -183,17 +183,20 @@ namespace SVGImporter
         [SerializeField]
         protected int _sortingLayerID = 0;
         protected int _lastSortingLayerID = 0;
-
         /// <summary>
         /// Unique ID of the Renderer's sorting layer.
         /// </summary>
         public int sortingLayerID
         {
             get {
-                return _sortingLayerID;
+                return meshRenderer.sortingLayerID;
             }
             set {
-                _sortingLayerID = value;
+#if UNITY_EDITOR
+                _lastSortingLayerID = value;
+#endif
+                meshRenderer.sortingLayerID = _sortingLayerID = value;
+                _sortingLayerName = meshRenderer.sortingLayerName;
             }
         }
 
@@ -201,17 +204,17 @@ namespace SVGImporter
         [FormerlySerializedAs("sortingLayerName")]
         [SerializeField]
         protected string _sortingLayerName;
-        protected string _lastSortingLayerName;
         /// <summary>
         /// Name of the Renderer's sorting layer.
         /// </summary>
         public string sortingLayerName
         {
             get {
-                return _sortingLayerName;
+                return meshRenderer.sortingLayerName;
             }
             set {
-                _sortingLayerName = value;
+                meshRenderer.sortingLayerName = _sortingLayerName = value;
+                _lastSortingLayerID = _sortingLayerID = meshRenderer.sortingLayerID;
             }
         }
 
@@ -226,15 +229,17 @@ namespace SVGImporter
         public int sortingOrder
         {
             get {
-                return _sortingOrder;
+                return meshRenderer.sortingOrder;
             }
             set {
-                _sortingOrder = value;
+#if UNITY_EDITOR
+                _lastSortingOrder = value;
+#endif
+                meshRenderer.sortingOrder = _sortingOrder = value;
             }
         }
 
-        // Unity default transparent sorting order
-        [FormerlySerializedAs("override sorter")]
+        [FormerlySerializedAs("overrideSorter")]
         [SerializeField]
         protected bool _overrideSorter = false;
         protected bool _lastOverrideSorter = false;
@@ -248,6 +253,23 @@ namespace SVGImporter
             }
             set {
                 _overrideSorter = value;
+            }
+        }
+
+        [FormerlySerializedAs("overrideSorterChildren")]
+        [SerializeField]
+        protected bool _overrideSorterChildren = false;
+        protected bool _lastOverrideSorterChildren = false;
+        /// <summary>
+        /// Override SVG Sorter Default Behaviour
+        /// </summary>
+        public bool overrideSorterChildren
+        {
+            get {
+                return _overrideSorterChildren;
+            }
+            set {
+                _overrideSorterChildren = value;
             }
         }
 
@@ -266,6 +288,9 @@ namespace SVGImporter
         // Also it handles duplicating game objects
         protected override void Awake()
         {
+            meshFilter.sharedMesh = null;
+            meshRenderer.sharedMaterials = new Material[0];
+
             base.Awake();
             Clear(true);
             PrepareForRendering(true);
@@ -284,23 +309,15 @@ namespace SVGImporter
 
         // This is the main rendering method
         protected void PrepareForRendering(bool force = false)
-        {             
-            if(_sortingLayerID != meshRenderer.sortingLayerID || force)
-            {
-                meshRenderer.sortingLayerID = _sortingLayerID;
+        {           
+#if UNITY_EDITOR
+            if(_lastSortingOrder != _sortingOrder){ 
+                sortingOrder = _sortingOrder;
             }
-            
-            if(_sortingOrder != meshRenderer.sortingOrder || force)
-            {
-                meshRenderer.sortingOrder = _sortingOrder;
+            if(_lastSortingLayerID != _sortingLayerID){ 
+                sortingLayerID = _sortingLayerID;
             }
-            /*
-            if(_sortingLayerName != meshRenderer.sortingLayerName || force)
-            {
-                meshRenderer.sortingLayerName = _sortingLayerName;
-            }
-            */
-
+#endif
             if(_vectorGraphics == null)
             {
                 _lastVectorGraphics = null;
@@ -488,7 +505,15 @@ namespace SVGImporter
 
         protected void SwapMaterials(bool transparent = true)
         {
-            if(_sharedMaterials != null && _sharedMaterials.Length > 0)
+            if(_vectorGraphics == null || _sharedMesh == null || _sharedMaterials == null || _sharedMaterials.Length == 0)
+            {
+                meshRenderer.sharedMaterials = new Material[]{};
+                return;
+            }
+
+            int subMeshCount = _sharedMesh.subMeshCount;
+
+            if(_vectorGraphics.hasGradients)
             {
                 if(_transparentMaterial != null)
                     ApplyMaterialGradient(_sharedMaterials[0], _transparentMaterial);
@@ -496,19 +521,19 @@ namespace SVGImporter
                     ApplyMaterialGradient(_sharedMaterials[0], _opaqueMaterial);
             }
 
-            if(_vectorGraphics.format == SVGAssetFormat.Opaque)
+            if(_vectorGraphics.isOpaque)
             {
                 if(transparent)
                 {
                     if(_transparentMaterial != null)
                     {
-                        meshRenderer.sharedMaterials = new Material[]{ _transparentMaterial, _transparentMaterial };
+                        SetSharedMaterials(subMeshCount, _transparentMaterial, _transparentMaterial);
                     } else {
                         if(_sharedMaterials.Length > 1)
                         {
-                            meshRenderer.sharedMaterials = new Material[]{ _sharedMaterials[1], _sharedMaterials[1] };
+                            SetSharedMaterials(subMeshCount, _sharedMaterials[1], _sharedMaterials[1]);
                         } else {
-                            meshRenderer.sharedMaterials = new Material[]{ _sharedMaterials[0], _sharedMaterials[0] };
+                            SetSharedMaterials(subMeshCount, _sharedMaterials[0], _sharedMaterials[0]);
                         }
                     }
                 } else {
@@ -517,20 +542,18 @@ namespace SVGImporter
                         meshRenderer.sharedMaterials = _sharedMaterials;
                     } else if(_transparentMaterial != null && _opaqueMaterial != null)
                     {
-                        meshRenderer.sharedMaterials = new Material[]{ _opaqueMaterial, _transparentMaterial };
+                        SetSharedMaterials(subMeshCount, _opaqueMaterial, _transparentMaterial);
                     } else if(_transparentMaterial != null)
                     {
-                        meshRenderer.sharedMaterials = new Material[]{ _sharedMaterials[0], _transparentMaterial };
+                        SetSharedMaterials(subMeshCount, _sharedMaterials[0], _transparentMaterial);
                     } else if(_opaqueMaterial != null)
                     {
                         if(_sharedMaterials.Length > 1)
                         {
-                            meshRenderer.sharedMaterials = new Material[]{ _opaqueMaterial, _sharedMaterials[1] };
+                            SetSharedMaterials(subMeshCount, _opaqueMaterial, _sharedMaterials[1]);
                         } else {
-                            meshRenderer.sharedMaterials = new Material[]{ _opaqueMaterial };
+                            SetSharedMaterials(subMeshCount, _opaqueMaterial, _opaqueMaterial);
                         }
-                    } else {
-
                     }
                 }
             } else {
@@ -540,6 +563,16 @@ namespace SVGImporter
                 } else {
                     meshRenderer.sharedMaterial = _transparentMaterial;
                 }
+            }
+        }
+
+        void SetSharedMaterials(int subMeshCount, Material firstMaterial, Material secondMaterial)
+        {
+            if(subMeshCount < 2)
+            {
+                meshRenderer.sharedMaterials = new Material[]{ firstMaterial };
+            } else {
+                meshRenderer.sharedMaterials = new Material[]{ firstMaterial, secondMaterial };
             }
         }
         
@@ -660,7 +693,10 @@ namespace SVGImporter
                     {
                         _sharedMaterials = _vectorGraphics.materials;
                         SetHideFlags(_sharedMaterials, HideFlags.DontSave);
-                        UpdateGradientShapeTexture(_sharedMaterials);
+                        if(_vectorGraphics.hasGradients)
+                        {
+                            UpdateGradientShapeTexture(_sharedMaterials);
+                        }
                     }
                 } else {
                     if(_sharedMaterials == null)
@@ -846,7 +882,7 @@ namespace SVGImporter
             {
                 target[i].hideFlags = hideFlags;
             }
-        }
+        }            
         #endif
     }
 }

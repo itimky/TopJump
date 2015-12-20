@@ -215,6 +215,15 @@ namespace SVGImporter
             FieldInfo _editor_format = typeof(SVGAsset).GetField("_format", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_format.SetValue(asset, SVGImporterEditor.settings.defaultSVGFormat);
 
+            FieldInfo _editor_useGradients = typeof(SVGAsset).GetField("_useGradients", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_useGradients.SetValue(asset, SVGImporterEditor.settings.defaultUseGradients);
+
+            FieldInfo _editor_antialiasing = typeof(SVGAsset).GetField("_antialiasing", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_antialiasing.SetValue(asset, SVGImporterEditor.settings.defaultAntialiasing);
+
+            FieldInfo _editor_antialiasingWidth = typeof(SVGAsset).GetField("_antialiasingWidth", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_antialiasingWidth.SetValue(asset, SVGImporterEditor.settings.defaultAntialiasingWidth);
+
 			FieldInfo _editor_meshCompression = typeof(SVGAsset).GetField("_meshCompression", BindingFlags.NonPublic | BindingFlags.Instance);
 			_editor_meshCompression.SetValue(asset, SVGImporterEditor.settings.defaultMeshCompression);
 
@@ -241,6 +250,9 @@ namespace SVGImporter
 
 			FieldInfo _editor_keepSVGFile = typeof(SVGAsset).GetField("_keepSVGFile", BindingFlags.NonPublic | BindingFlags.Instance);
 			_editor_keepSVGFile.SetValue(asset, SVGImporterEditor.settings.defaultKeepSVGFile);
+
+            FieldInfo _editor_ignoreSVGCanvas = typeof(SVGAsset).GetField("_ignoreSVGCanvas", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_ignoreSVGCanvas.SetValue(asset, SVGImporterEditor.settings.defaultIgnoreSVGCanvas);
 
             FieldInfo _editor_optimizeMesh = typeof(SVGAsset).GetField("_optimizeMesh", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_optimizeMesh.SetValue(asset, SVGImporterEditor.settings.defaultOptimizeMesh);

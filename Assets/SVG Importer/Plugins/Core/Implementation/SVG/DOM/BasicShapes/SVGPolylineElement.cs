@@ -143,10 +143,17 @@ namespace SVGImporter.Rendering
                 path = new List<List<Vector2>>(){SVGGraphics.position_buffer};
             }
             
-            Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix);
+            Mesh antialiasingMesh;
+            Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
             if(mesh == null) return;
             mesh.name = name;
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable));
+            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
+            if(antialiasingMesh != null)
+            {
+                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
+                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
+                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
+            }
         }
         
         static void CreateStroke(SVGPolylineElement svgElement)
@@ -161,10 +168,17 @@ namespace SVGImporter.Rendering
                 stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
             }
             
-            Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable));
+            Mesh antialiasingMesh;
+            Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
             if(mesh == null) return;            
-            mesh.name = name;            
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable));
+            mesh.name = name;
+            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
+            if(antialiasingMesh != null)
+            {
+                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
+                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
+                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
+            }
         }
     }
 }

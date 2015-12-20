@@ -15,6 +15,13 @@ namespace SVGImporter
     using Geometry;
     using Utils;
 
+    public enum SVGUseGradients
+    {
+        Always,
+        Auto,
+        Never
+    }
+
     public enum SVGMeshCompression
     {
         Off,
@@ -63,6 +70,21 @@ namespace SVGImporter
     #endif
             }
         }
+
+        public bool isOpaque
+        {
+            get {
+                if(_format == SVGAssetFormat.Transparent || _format == SVGAssetFormat.uGUI) return false;
+                if(_sharedShaders == null || _sharedShaders.Length == 0) return true;
+                for(int i = 0; i < _sharedShaders.Length; i++)
+                {
+                    if(string.IsNullOrEmpty(_sharedShaders[i])) continue;
+                    if(_sharedShaders[i].ToLower().Contains("opaque")) return true;
+                }
+
+                return false;
+            }
+        }
         
         /// <summary>
         /// Returns the instanced mesh of the SVG Asset. (Read Only)
@@ -103,14 +125,17 @@ namespace SVGImporter
                         }
 
                         _runtimeMesh = SVGMeshUtils.Clone(_sharedMesh);
-                        if(_runtimeMesh.uv2 != null && _runtimeMesh.uv2.Length > 0)
+                        if(hasGradients)
                         {
-                            Vector2[] uv2 = _runtimeMesh.uv2;
-                            for(int i = 0; i < uv2.Length; i++)
+                            if(_runtimeMesh.uv2 != null && _runtimeMesh.uv2.Length > 0)
                             {
-                                uv2[i].x = (float)gradientCache[(int)uv2[i].x];
+                                Vector2[] uv2 = _runtimeMesh.uv2;
+                                for(int i = 0; i < uv2.Length; i++)
+                                {
+                                    uv2[i].x = (float)gradientCache[(int)uv2[i].x];
+                                }
+                                _runtimeMesh.uv2 = uv2;
                             }
-                            _runtimeMesh.uv2 = uv2;
                         }
 
                         if(SVGAtlas.Instance.atlasTextures != null && SVGAtlas.Instance.atlasTextures.Count > 0)
@@ -394,7 +419,33 @@ namespace SVGImporter
                 return _atlasTextures;
             }
         }
-        
+
+        /// <summary>
+        /// Use antialiasing (Read Only)
+        /// </summary>
+        [FormerlySerializedAs("antialiasing")]
+        [SerializeField]
+        protected bool _antialiasing = false;
+        public bool antialiasing
+        {
+            get {
+                return _antialiasing;
+            }
+        }
+
+        /// <summary>
+        /// Antialiasing width, zero value turns antialiasing off (Read Only)
+        /// </summary>
+        [FormerlySerializedAs("antialiasingWidth")]
+        [SerializeField]
+        protected float _antialiasingWidth = 0f;
+        public float antialiasingWidth
+        {
+            get {
+                return _antialiasingWidth;
+            }
+        }
+
         [FormerlySerializedAs("generateCollider")]
         [SerializeField]
         protected bool _generateCollider = false;
@@ -422,6 +473,19 @@ namespace SVGImporter
             }
         }
 
+        /// <summary>
+        /// Trim the document canvas to object bounding box (Read Only)
+        /// </summary>
+        [FormerlySerializedAs("ignoreSVGCanvas")]
+        [SerializeField]
+        protected bool _ignoreSVGCanvas = true;
+        public bool ignoreSVGCanvas
+        {
+            get {
+                return _ignoreSVGCanvas;
+            }
+        }
+
         [FormerlySerializedAs("colliderShape")]
         [SerializeField]
         protected SVGPath[] _colliderShape;
@@ -446,6 +510,19 @@ namespace SVGImporter
         {
             get {
                 return _format;
+            }
+        }
+        
+        [FormerlySerializedAs("useGradients")]
+        [SerializeField]
+        protected SVGUseGradients _useGradients = SVGUseGradients.Always;
+        /// <summary>
+        /// Returns if the mesh was compressed. (Read Only)
+        /// </summary>
+        public SVGUseGradients useGradients
+        {
+            get {
+                return _useGradients;
             }
         }
 
@@ -678,6 +755,30 @@ namespace SVGImporter
             }
         }
 
+        [FormerlySerializedAs("canvasRectangle")]
+        [SerializeField]
+        protected Rect _canvasRectangle;
+        /// <summary>
+        /// Returns the Original Canvas rectangle of the SVG Asset. (Read Only)
+        /// </summary>
+        public Rect canvasRectangle
+        {
+            get {
+                return _canvasRectangle;
+            }
+        }
+
+        /// <summary>
+        /// Returns if the SVG Asset contains any gradients. (Read Only)
+        /// </summary>
+        public bool hasGradients
+        {
+            get {
+                if(_sharedGradients == null || _sharedGradients.Length == 0) return false;
+                return true;
+            }
+        }
+
         protected Material CloneMaterial(Material original)
         {
             if(original == null)
@@ -694,7 +795,7 @@ namespace SVGImporter
         public int uiVertexCount
         {
             get {
-                if(_sharedMesh == null)
+                if(_sharedMesh == null || _sharedMesh.triangles == null)
                     return 0;
 
                 int trianglesCount = _sharedMesh.triangles.Length;
@@ -997,6 +1098,11 @@ namespace SVGImporter
             _colliderShape = shape;
         }
 
+        internal void _editor_SetCanvasRectangle(Rect rectangle)
+        {
+            _canvasRectangle = rectangle;
+        }
+
         internal void _editor_LoadSVG()
         {        
             SVGAssetImport assetImport;
@@ -1010,6 +1116,17 @@ namespace SVGImporter
                 SVGMesh.compressDepth = _compressDepth;
 
                 assetImport = new SVGAssetImport(svgFile, _vpm);            
+                SVGAssetImport.useGradients = _useGradients;
+
+                if(_antialiasing)
+                {
+                    SVGAssetImport.antialiasingWidth = _antialiasingWidth;
+                } else {
+                    SVGAssetImport.antialiasingWidth = 0f;
+                }
+
+                SVGAssetImport.ignoreSVGCanvas = _ignoreSVGCanvas;
+
                 assetImport.StartProcess(this);
             }
         }
@@ -1042,7 +1159,10 @@ namespace SVGImporter
 						_sharedMaterials[i] = new Material(Shader.Find(_sharedShaders[i]));
 						_sharedMaterials[i].hideFlags = HideFlags.DontSave;
 					}
-					AssignMaterialGradients(_sharedMaterials, atlasTextures[0], SVGAtlas.gradientShapeTexture, 64, 4);
+                    if(hasGradients)
+                    {
+					    AssignMaterialGradients(_sharedMaterials, atlasTextures[0], SVGAtlas.gradientShapeTexture, 64, 4);
+                    }
 	            }
 	            return _sharedMaterials;
 			}
@@ -1113,8 +1233,10 @@ namespace SVGImporter
                 */
                 
                 var fileInfo = new System.IO.FileInfo(UnityEditor.AssetDatabase.GetAssetPath(this));
-                output += ", FileSize: "+string.Format(new FileSizeFormatProvider(), "{0:fs}", fileInfo.Length);
-                
+                if(fileInfo != null)
+                {
+                    output += ", FileSize: "+string.Format(new FileSizeFormatProvider(), "{0:fs}", fileInfo.Length);
+                }
                 return output;
             }
         }

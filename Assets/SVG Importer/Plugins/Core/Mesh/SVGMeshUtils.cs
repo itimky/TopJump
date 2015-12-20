@@ -7,7 +7,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace SVGImporter.Utils
-{
+{    
+    public class Edge
+    {
+        // The indiex to each vertex
+        public int[] vertexIndex = new int[2];
+        // The index into the face.
+        // (faceindex[0] == faceindex[1] means the edge connects to only one triangle)
+        public int[] faceIndex = new int[2];
+    }
+
     public class SVGMeshUtils {
     	
     	public enum ColorChannel
@@ -502,8 +511,8 @@ namespace SVGImporter.Utils
             return mesh;
         }
 
-        public static Mesh VectorLine(Vector2[] positions, Color32 color, float size, ClosePathRule closeLine = ClosePathRule.NEVER)
-        {        
+        public static Mesh VectorLine(Vector2[] positions, Color32 colorA, Color32 colorB, float size, float offset, ClosePathRule closeLine = ClosePathRule.NEVER)
+        {
             if (positions == null)
             {
 #if DEBUG
@@ -527,145 +536,239 @@ namespace SVGImporter.Utils
                 if(closeLine == ClosePathRule.AUTO)
                 {
                     if(positions[0] == positions[positions.Length - 1]) closeLine = ClosePathRule.ALWAYS;
-                }
+                } 
             }
+
+            SVGLineData lineData = new SVGLineData(positions);
+            lineData.UpdateAll();
                     
-            int _tessellation = 2;
-            float _tessellationProgress;
             size *= 0.5f;
 
-            int _vertexCount = positions.Length * _tessellation;
+            int _vertexCount = positions.Length * 2;
             int _positionsLength = positions.Length;
-            int totalTriangles = (_positionsLength - 1) * (_tessellation - 1) * 6;
+            int totalTriangles = (_positionsLength - 1) * (2 - 1) * 6;
+            int positionIndex = 0, verticeIndex = 0;
 
-            Vector3[] _vertices = new Vector3[_vertexCount];       
-            int[] _triangles = new int[totalTriangles];
-            
-            Color32[] _colors = null;
-            _colors = new Color32[_vertexCount];        
+            List<Vector3> _vertices = new List<Vector3>(_vertexCount);
+            List<int> _triangles = new List<int>(totalTriangles);
+            List<Color32> _colors = new List<Color32>(_vertexCount);
 
-            Vector3[] normals = new Vector3[_positionsLength];
-            float[] magnitudes = new float[_positionsLength];
-            
-            int i = 0, j = 0, ij = 0, positionIndex;       
-            Vector3 lastPosition = positions [0], currentPosition = positions [0];
+            Vector2 previousPosition;
+            Vector2 currentPosition;
+            Vector2 nextPosition;
+            Vector2 currentEdge, nextEdge;
 			float magnitude = 0f, totalCurveLength = 0f;//currentMagnitude = 0f, 
-            
-            // Pre-Processing
-            for (i = 0; i < _positionsLength; i++)
-            {
-                // Normal direction
-                normals [i].x = positions [i].x - lastPosition.x;
-                normals [i].y = positions [i].y - lastPosition.y;
-                
-                // Normal magnitude
-                magnitudes [i] = Mathf.Sqrt(normals [i].x * normals [i].x + normals [i].y * normals [i].y + normals [i].z * normals [i].z);
-                
-                if (magnitudes [i] != 0f)
-                {
-                    normals [i].x /= magnitudes [i];
-                    normals [i].y /= magnitudes [i];
-                    normals [i].z /= magnitudes [i];
-                }
 
-                // Total curve magnitude
-                totalCurveLength += magnitudes [i];
-                lastPosition = positions [i];
-            }
-            
-            //totalCurveLength = (totalCurveLength * (1f / totalCurveLength)) * 5f;
-            
-            normals [0] = (positions [1] - positions [0]).normalized;
-            lastPosition = positions [0];
-            
             int tl = 0;
-            
-            Vector3 currentNormal, rotatedNormal, lastRotatedNormal = Vector3.Cross(normals [0], Vector3.forward);
-            
-            int normalsLength = normals.Length;
-            int normalsLengthMinusOne = normalsLength - 1;
-//            int _vertexCountMinuOne = _vertexCount - 1;
-            
-            for (i = 0; i < _vertexCount; i+= _tessellation)
-            {                       
-                positionIndex = i / _tessellation;
-                
+
+            Vector2 rotatedNormal, nextRotatedNormal;
+            Vector2 normal, offsetNormal, directionA, directionB, intersection;
+
+            int edgeCount = lineData.GetEdgeCount();
+            int edgeCountMinusOne = edgeCount - 1;
+
+            float finSize = size;
+
+            for (positionIndex = 0; positionIndex <= edgeCount; positionIndex++)
+            {   
                 currentPosition = positions [positionIndex];
 
-                currentNormal = normals [positionIndex];            
-                rotatedNormal = Vector3.Cross(currentNormal, Vector3.forward);
-                if (positionIndex < normalsLengthMinusOne)
-                    lastRotatedNormal = Vector3.Cross(normals [positionIndex + 1], Vector3.forward);
-                
-                magnitude += magnitudes [positionIndex] / totalCurveLength;
-                
-                for (j = 0; j < _tessellation; j++)
+                if(positionIndex == 0)
                 {
-                    ij = i + j;
-                    _tessellationProgress = (float)j / (float)(_tessellation - 1);              
-                    _vertices [ij] = currentPosition + Vector3.Lerp(rotatedNormal, lastRotatedNormal, 0.5f).normalized * (-1f + _tessellationProgress * 2f) * size;                
-                    _colors [ij] = color;
-
-                    if (i != 0 && j != 0)
-                    {                   
-                        _triangles [tl] = ij - _tessellation - 1;
-                        _triangles [tl + 1] = ij - 1;
-                        _triangles [tl + 2] = ij;
-                        
-                        _triangles [tl + 3] = ij - _tessellation - 1;
-                        _triangles [tl + 4] = ij;
-                        _triangles [tl + 5] = ij - _tessellation;
-                        tl += 6;
+                    previousPosition = positions[0];
+                    rotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(0));
+                    nextPosition = positions[1];
+                    nextRotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(0));
+                } else if(positionIndex == edgeCount)
+                {
+                    previousPosition = positions[positionIndex - 1];
+                    rotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(positionIndex - 1));
+                    if(closeLine == ClosePathRule.ALWAYS)
+                    {
+                        nextPosition = positions[0];
+                        nextRotatedNormal = SVGMath.RotateVectorClockwise((positions[positions.Length-1] - positions[0]).normalized);
+                    } else {
+                        nextPosition = positions[positions.Length - 1];
+                        nextRotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(edgeCountMinusOne));
                     }
-                }   
-                
-                lastRotatedNormal = rotatedNormal;
-            }
-            
-            if (closeLine == ClosePathRule.ALWAYS)
-            {
-                int indexA, indexB;
-                Vector3 normal = Vector3.Cross(Vector3.Lerp(normals [0], normals [_positionsLength - 1], 0.5f).normalized, Vector3.forward);
-                Vector3 position = Vector3.Lerp(positions [0], positions [_positionsLength - 1], 0.5f);
-                Vector3 posA = position - normal * size;
-                Vector3 posB = position + normal * size;
-                
-                float progress;
-                float tesselationMinusOne = _tessellation - 1;
-                for (i = 0; i < _tessellation; i++)
+                } else {
+                    previousPosition = positions[positionIndex - 1];
+                    rotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(positionIndex - 1));
+                    nextRotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(positionIndex));
+                    nextPosition = positions[positionIndex + 1];
+                }
+
+
+                Vector2 startA = previousPosition + rotatedNormal * finSize + rotatedNormal * offset;
+                Vector2 endA = currentPosition + rotatedNormal * finSize + rotatedNormal * offset;
+
+                Vector2 startB = currentPosition + nextRotatedNormal * finSize + nextRotatedNormal * offset;
+                Vector2 endB = nextPosition + nextRotatedNormal * finSize + nextRotatedNormal * offset;
+
+                if(positionIndex == 0)
                 {
-                    progress = (float)i / tesselationMinusOne;
+                    _vertices.AddRange(new Vector3[]{   
+                        currentPosition + rotatedNormal * -finSize + rotatedNormal * offset, 
+                        currentPosition + rotatedNormal * finSize + rotatedNormal * offset,
+                    });
+                    _colors.AddRange(new Color32[]{colorA, colorB});
                     
-                    indexA = _vertexCount - _tessellation + i;
-                    indexB = i;
-                    
-                    _vertices [indexA] = _vertices [indexB] = Vector3.Lerp(posA, posB, progress);
-                    _colors [indexA] = _colors [indexB] = Color32.Lerp(_colors [indexA], _colors [indexB], .5f);
-                }  
-            } else
-            {
-				int indexA;//, indexB;
-                Vector3 normal = Vector3.Cross(normals [_positionsLength - 1], Vector3.forward);
-                Vector3 position = positions [_positionsLength - 1];
-                Vector3 posA = position - normal * size;
-                Vector3 posB = position + normal * size;
-                
-                float progress;
-                float tesselationMinusOne = _tessellation - 1;
-                for (i = 0; i < _tessellation; i++)
-                {
-                    progress = (float)i / tesselationMinusOne;
-                    
-                    indexA = _vertexCount - _tessellation + i;                
-                    _vertices [indexA] = Vector3.Lerp(posA, posB, progress);
-                    _colors [indexA] = _colors [indexA];
-                }  
+                    verticeIndex += 2;
+                } else {
+                    bool intersect = SVGMath.LineLineIntersection(out intersection, startA, endA, startB, endB);
+                    if(!intersect)
+                    {
+                        normal = Vector2.Lerp(rotatedNormal, nextRotatedNormal, 0.5f).normalized;                
+                        offsetNormal = normal * offset;
+
+                        if(positionIndex == edgeCount && closeLine != ClosePathRule.ALWAYS)
+                        {
+                            _vertices.AddRange(new Vector3[]{   
+                                endA, 
+                                currentPosition + normal * -finSize + offsetNormal,
+                            });
+                            _colors.AddRange(new Color32[]{colorB, colorA});
+                            
+                            verticeIndex += 2;
+
+                            _triangles.AddRange(new int[]{
+                                verticeIndex - 4,
+                                verticeIndex - 2,
+                                verticeIndex - 1,
+
+                                verticeIndex - 2,
+                                verticeIndex - 4,
+                                verticeIndex - 3,
+                            });
+
+                        } else {
+                            _vertices.AddRange(new Vector3[]{   
+                                endA, 
+                                currentPosition + normal * -finSize + offsetNormal,
+                                startB
+                            });
+                            _colors.AddRange(new Color32[]{colorB, colorA, colorB});
+                            
+                            verticeIndex += 3;
+
+                            _triangles.AddRange(new int[]{
+                                verticeIndex - 3,
+                                verticeIndex - 2,
+                                verticeIndex - 5,
+                                
+                                verticeIndex - 5,
+                                verticeIndex - 4,
+                                verticeIndex - 3,
+                                
+                                verticeIndex - 1,
+                                verticeIndex - 2,
+                                verticeIndex - 3,
+                            }); 
+                        }
+                    } else {
+                        normal = Vector2.Lerp(rotatedNormal, nextRotatedNormal, 0.5f).normalized;                
+                        offsetNormal = normal * offset;
+
+                        _vertices.AddRange(new Vector3[]{   currentPosition + normal * -finSize + offsetNormal,
+                                                            intersection});
+                        _colors.AddRange(new Color32[]{colorA, colorB});
+
+                        verticeIndex += 2;
+
+                        _triangles.AddRange(new int[]{
+                            verticeIndex - 4,
+                            verticeIndex - 2,
+                            verticeIndex - 1,
+                            
+                            verticeIndex - 4,
+                            verticeIndex - 1,
+                            verticeIndex - 3
+                        });                       
+                    }
+                }
             }
-            
+
+            if(closeLine == ClosePathRule.ALWAYS)
+            {
+                previousPosition = positions[positions.Length - 1];
+                currentPosition = positions [0];
+                nextPosition = positions [1];
+
+                rotatedNormal = SVGMath.RotateVectorClockwise(
+                    (previousPosition - currentPosition).normalized
+                    );
+                nextRotatedNormal = SVGMath.RotateVectorClockwise(lineData.GetNormal(0));
+
+                Vector2 startA = previousPosition + rotatedNormal * finSize + rotatedNormal * offset;
+                Vector2 endA = currentPosition + rotatedNormal * finSize + rotatedNormal * offset;
+                
+                Vector2 startB = currentPosition + nextRotatedNormal * finSize + nextRotatedNormal * offset;
+                Vector2 endB = nextPosition + nextRotatedNormal * finSize + nextRotatedNormal * offset;
+
+                bool intersect = SVGMath.LineLineIntersection(out intersection, startA, endA, startB, endB);
+
+                if(!intersect)
+                {
+                    normal = Vector2.Lerp(rotatedNormal, nextRotatedNormal, 0.5f).normalized;                
+                    offsetNormal = normal * offset;
+
+                    _vertices.AddRange(new Vector3[]{   
+                        endA, 
+                        currentPosition + normal * -finSize + offsetNormal,
+                        startB
+                    });
+                    _colors.AddRange(new Color32[]{colorB, colorA, colorB});
+                    
+                    verticeIndex += 3;
+                    
+                    if (positionIndex != 0)
+                    {
+                        _triangles.AddRange(new int[]{
+                            verticeIndex - 3,
+                            verticeIndex - 2,
+                            verticeIndex - 5,
+                            
+                            verticeIndex - 5,
+                            verticeIndex - 4,
+                            verticeIndex - 3,
+                            
+                            verticeIndex - 1,
+                            verticeIndex - 2,
+                            verticeIndex - 3,
+                        });
+                    }  
+                } else {
+                    normal = Vector2.Lerp(rotatedNormal, nextRotatedNormal, 0.5f).normalized;                
+                    offsetNormal = normal * offset;
+
+                    _vertices.AddRange(new Vector3[]{   currentPosition + normal * -finSize + offsetNormal,
+                        intersection});
+                    _colors.AddRange(new Color32[]{colorA, colorB});
+                    
+                    verticeIndex += 2;
+                    
+                    if (positionIndex != 0)
+                    {
+                        _triangles.AddRange(new int[]{
+                            verticeIndex - 4,
+                            verticeIndex - 2,
+                            verticeIndex - 1,
+                            
+                            verticeIndex - 4,
+                            verticeIndex - 1,
+                            verticeIndex - 3
+                        });
+                    }  
+                }
+
+                _vertices[1] = _vertices[_vertices.Count - 1];
+                _vertices[0] = _vertices[_vertices.Count - 2];
+            }
+
             Mesh mesh = new Mesh();
-            mesh.vertices = _vertices;
-            mesh.triangles = _triangles;
-            mesh.colors32 = _colors;
+            mesh.vertices = _vertices.ToArray();
+            mesh.triangles = _triangles.ToArray();
+            mesh.colors32 = _colors.ToArray();
             
             return mesh;
         }
@@ -1027,6 +1130,349 @@ namespace SVGImporter.Utils
             Material material = new Material(original.shader);
             material.CopyPropertiesFromMaterial(original);
             return material;
+        }
+
+        public static List<Vector3> GetEdgePoints(int[] triangles, Vector3[] positions)
+        {
+            List<int> edges = new List<int>();
+            for(int i = 0; i < triangles.Length; i+=3)
+            {
+                edges.Add(triangles[i]);
+                edges.Add(triangles[i + 1]);
+
+                edges.Add(triangles[i + 1]);
+                edges.Add(triangles[i + 2]);
+
+                edges.Add(triangles[i + 2]);
+                edges.Add(triangles[i]);
+            }
+
+            var visited = new Dictionary<int, bool>();
+            var edgeList = new List<int>();
+            var resultList = new List<Vector3>();
+            var nextIndex = -1;
+            while (resultList.Count < edges.Count)
+            {
+                if (nextIndex < 0)
+                {
+                    for (int i = 0; i < edges.Count; i += 2)
+                    {
+                        if (!visited.ContainsKey(i))
+                        {
+                            nextIndex = edges[i];
+                            break;
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < edges.Count; i += 2)
+                {
+                    if (visited.ContainsKey(i))
+                        continue;
+                    
+                    int j = i + 1;
+                    int k = -1;
+                    if (edges[i] == nextIndex)
+                        k = j;
+                    else if (edges[j] == nextIndex)
+                        k = i;
+                    
+                    if (k >= 0)
+                    {
+                        var edge = edges[k];
+                        visited[i] = true;
+                        edgeList.Add(nextIndex);
+                        edgeList.Add(edge);
+                        nextIndex = edge;
+                        i = 0;
+                    }
+                }
+                
+                // calculate winding order - then add to final result.
+                var borderPoints = new List<Vector3>();
+                edgeList.ForEach(ei => borderPoints.Add(positions[ei]));
+                var winding = CalculateWindingOrder(borderPoints);
+                if (winding > 0)
+                    borderPoints.Reverse();
+                
+                resultList.AddRange(borderPoints);
+                edgeList.Clear();
+                nextIndex = -1;
+            }
+            
+            return resultList;
+        }
+
+        /// <summary>
+        /// returns 1 for CW, -1 for CCW, 0 for unknown.
+        /// </summary>
+        public static int CalculateWindingOrder(IList<Vector3> points)
+        {
+            // the sign of the 'area' of the polygon is all we are interested in.
+            var area = CalculateSignedArea(points);
+            if (area < 0.0)
+                return 1;
+            else if (area > 0.0)
+                return - 1;        
+            return 0; // error condition - not even verts to calculate, non-simple poly, etc.
+        }
+
+        public static int CalculateWindingOrder(IList<Vector2> points)
+        {
+            // the sign of the 'area' of the polygon is all we are interested in.
+            var area = CalculateSignedArea(points);
+            if (area < 0.0)
+                return 1;
+            else if (area > 0.0)
+                return - 1;        
+            return 0; // error condition - not even verts to calculate, non-simple poly, etc.
+        }
+
+        public static int CalculateWindingOrder(Vector2[] points)
+        {
+            // the sign of the 'area' of the polygon is all we are interested in.
+            var area = CalculateSignedArea(points);
+            if (area < 0.0)
+                return 1;
+            else if (area > 0.0)
+                return - 1;        
+            return 0; // error condition - not even verts to calculate, non-simple poly, etc.
+        }
+
+        public static double CalculateSignedArea(IList<Vector3> points)
+        {
+            double area = 0.0;
+            for (int i = 0; i < points.Count; i++)
+            {
+                int j = (i + 1) % points.Count;
+                area += points[i].x * points[j].y;
+                area -= points[i].y * points[j].x;
+            }
+            area /= 2.0f;
+            
+            return area;
+        }
+
+        public static double CalculateSignedArea(Vector3[] points)
+        {
+            double area = 0.0;
+            for (int i = 0; i < points.Length; i++)
+            {
+                int j = (i + 1) % points.Length;
+                area += points[i].x * points[j].y;
+                area -= points[i].y * points[j].x;
+            }
+            area /= 2.0f;
+            
+            return area;
+        }
+
+        public static double CalculateSignedArea(IList<Vector2> points)
+        {
+            double area = 0.0;
+            for (int i = 0; i < points.Count; i++)
+            {
+                int j = (i + 1) % points.Count;
+                area += points[i].x * points[j].y;
+                area -= points[i].y * points[j].x;
+            }
+            area /= 2.0f;
+            
+            return area;
+        }
+
+        public static double CalculateSignedArea(Vector2[] points)
+        {
+            double area = 0.0;
+            for (int i = 0; i < points.Length; i++)
+            {
+                int j = (i + 1) % points.Length;
+                area += points[i].x * points[j].y;
+                area -= points[i].y * points[j].x;
+            }
+            area /= 2.0f;
+            
+            return area;
+        }
+
+        public static List<int[]> BuildManifoldPoints(Vector3[] vertices, int[] triangles)
+        {
+            List<int[]> paths = new List<int[]>();
+            Edge[] edges = BuildManifoldEdges(vertices, triangles);
+            int edgesLength = edges.Length;
+            List<int> path = new List<int>();
+            if(edgesLength == 0) return paths;
+            if(edgesLength == 1)
+            {
+                paths.Add(new int[]{edges[0].vertexIndex[0], edges[0].vertexIndex[1]});
+                return paths;
+            }
+
+            Edge currentEdge, lastEdge = edges[0];
+            for(int i = 1; i < edgesLength; i++)
+            {
+                currentEdge = edges[i];
+                if(path.Count > 0)
+                {
+                    if(lastEdge.vertexIndex[1] != currentEdge.vertexIndex[0])
+                    {
+                        paths.Add(path.ToArray());
+                        path = new List<int>();
+                    }
+                }
+
+                path.Add(currentEdge.vertexIndex[0]);
+                lastEdge = currentEdge;
+            }
+
+            if(path.Count > 0)
+                paths.Add(path.ToArray());
+
+            return paths;
+        }
+
+        /// Builds an array of edges that connect to only one triangle.
+        /// In other words, the outline of the mesh    
+        public static Edge[] BuildManifoldEdges(Vector3[] vertices, int[] triangles)
+        {
+            // Build a edge list for all unique edges in the mesh
+            Edge[] edges = BuildEdges(vertices.Length, triangles);
+            
+            // We only want edges that connect to a single triangle
+            List<Edge> culledEdges = new List<Edge>();
+            foreach (Edge edge in edges)
+            {
+                if (edge.faceIndex[0] == edge.faceIndex[1])
+                {
+                    culledEdges.Add(edge);
+                }
+            }
+            
+            return culledEdges.ToArray() as Edge[];
+        }
+        
+        /// Builds an array of unique edges
+        /// This requires that your mesh has all vertices welded. However on import, Unity has to split
+        /// vertices at uv seams and normal seams. Thus for a mesh with seams in your mesh you
+        /// will get two edges adjoining one triangle.
+        /// Often this is not a problem but you can fix it by welding vertices 
+        /// and passing in the triangle array of the welded vertices.
+        public static Edge[] BuildEdges(int vertexCount, int[] triangleArray)
+        {
+            int maxEdgeCount = triangleArray.Length;
+            int[] firstEdge = new int[vertexCount + maxEdgeCount];
+            int nextEdge = vertexCount;
+            int triangleCount = triangleArray.Length / 3;
+            
+            for (int a = 0; a < vertexCount; a++)
+                firstEdge[a] = -1;
+            
+            // First pass over all triangles. This finds all the edges satisfying the
+            // condition that the first vertex index is less than the second vertex index
+            // when the direction from the first vertex to the second vertex represents
+            // a counterclockwise winding around the triangle to which the edge belongs.
+            // For each edge found, the edge index is stored in a linked list of edges
+            // belonging to the lower-numbered vertex index i. This allows us to quickly
+            // find an edge in the second pass whose higher-numbered vertex index is i.
+            Edge[] edgeArray = new Edge[maxEdgeCount];
+            
+            int edgeCount = 0;
+            for (int a = 0; a < triangleCount; a++)
+            {
+                int i1 = triangleArray[a * 3 + 2];
+                for (int b = 0; b < 3; b++)
+                {
+                    int i2 = triangleArray[a * 3 + b];
+                    if (i1 < i2)
+                    {
+                        Edge newEdge = new Edge();
+                        newEdge.vertexIndex[0] = i1;
+                        newEdge.vertexIndex[1] = i2;
+                        newEdge.faceIndex[0] = a;
+                        newEdge.faceIndex[1] = a;
+                        edgeArray[edgeCount] = newEdge;
+                        
+                        int edgeIndex = firstEdge[i1];
+                        if (edgeIndex == -1)
+                        {
+                            firstEdge[i1] = edgeCount;
+                        }
+                        else
+                        {
+                            while (true)
+                            {
+                                int index = firstEdge[nextEdge + edgeIndex];
+                                if (index == -1)
+                                {
+                                    firstEdge[nextEdge + edgeIndex] = edgeCount;
+                                    break;
+                                }
+                                
+                                edgeIndex = index;
+                            }
+                        }
+                        
+                        firstEdge[nextEdge + edgeCount] = -1;
+                        edgeCount++;
+                    }
+                    
+                    i1 = i2;
+                }
+            }
+            
+            // Second pass over all triangles. This finds all the edges satisfying the
+            // condition that the first vertex index is greater than the second vertex index
+            // when the direction from the first vertex to the second vertex represents
+            // a counterclockwise winding around the triangle to which the edge belongs.
+            // For each of these edges, the same edge should have already been found in
+            // the first pass for a different triangle. Of course we might have edges with only one triangle
+            // in that case we just add the edge here
+            // So we search the list of edges
+            // for the higher-numbered vertex index for the matching edge and fill in the
+            // second triangle index. The maximum number of comparisons in this search for
+            // any vertex is the number of edges having that vertex as an endpoint.
+            
+            for (int a = 0; a < triangleCount; a++)
+            {
+                int i1 = triangleArray[a * 3 + 2];
+                for (int b = 0; b < 3; b++)
+                {
+                    int i2 = triangleArray[a * 3 + b];
+                    if (i1 > i2)
+                    {
+                        bool foundEdge = false;
+                        for (int edgeIndex = firstEdge[i2]; edgeIndex != -1; edgeIndex = firstEdge[nextEdge + edgeIndex])
+                        {
+                            Edge edge = edgeArray[edgeIndex];
+                            if ((edge.vertexIndex[1] == i1) && (edge.faceIndex[0] == edge.faceIndex[1]))
+                            {
+                                edgeArray[edgeIndex].faceIndex[1] = a;
+                                foundEdge = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!foundEdge)
+                        {
+                            Edge newEdge = new Edge();
+                            newEdge.vertexIndex[0] = i1;
+                            newEdge.vertexIndex[1] = i2;
+                            newEdge.faceIndex[0] = a;
+                            newEdge.faceIndex[1] = a;
+                            edgeArray[edgeCount] = newEdge;
+                            edgeCount++;
+                        }
+                    }
+                    
+                    i1 = i2;
+                }
+            }
+            
+            Edge[] compactedEdges = new Edge[edgeCount];
+            for (int e = 0; e < edgeCount; e++)
+                compactedEdges[e] = edgeArray[e];
+            
+            return compactedEdges;
         }
     }
 }

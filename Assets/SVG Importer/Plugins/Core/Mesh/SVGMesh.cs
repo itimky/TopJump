@@ -85,13 +85,13 @@ namespace SVGImporter.Geometry
             set { _bounds = value; }
         }
         
-        public SVGMesh(Mesh mesh, SVGPaintable paintable)
+        public SVGMesh(Mesh mesh, SVGFill svgFill, float opacity = 1f)
         {
             if (mesh == null)
                 return;
 
             _name = mesh.name;
-            _fill = paintable.svgFill.Clone();
+            _fill = svgFill.Clone();
 
             int length = mesh.vertices.Length;
             int trianglesLength = mesh.triangles.Length;
@@ -167,10 +167,11 @@ namespace SVGImporter.Geometry
                 for (int i = 0; i < length; i++)
                 {        
                     _colors [i] = mesh.colors32 [i];
+                    if(opacity != 1f) _colors[i].a = (byte)Mathf.RoundToInt((_colors[i].a / 255 * opacity) * 255);
                 }
             } else {
 				_colors = new Color32[length];
-                Color32 color = new Color32((byte)255, (byte)255, (byte)255, (byte)Mathf.RoundToInt(paintable.opacity * 255));
+                Color32 color = new Color32((byte)255, (byte)255, (byte)255, (byte)Mathf.RoundToInt(opacity * 255));
 				for (int i = 0; i < length; i++)
 				{
                     _colors [i] = color;
@@ -220,10 +221,7 @@ namespace SVGImporter.Geometry
             if(format == SVGAssetFormat.Opaque)
             {
                 return CreateAutomaticMesh(out materials);
-            } else if(format == SVGAssetFormat.Transparent)
-            {
-                return CreateTransparentMesh(out materials);
-            } else if(format == SVGAssetFormat.uGUI)
+            } else if(format == SVGAssetFormat.Transparent || format == SVGAssetFormat.uGUI)
             {
                 return CreateTransparentMesh(out materials);
             }

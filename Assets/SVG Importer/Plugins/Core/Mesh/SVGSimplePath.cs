@@ -72,7 +72,7 @@ namespace SVGImporter.Rendering
         }      
 
         public static Color GetStrokeColor(SVGPaintable paintable)
-        {            
+        {   
             Color color = paintable.strokeColor.Value.color;
             color.a *= paintable.strokeOpacity * paintable.opacity;
             paintable.svgFill = new SVGFill(color, FILL_BLEND.OPAQUE, FILL_TYPE.SOLID);
@@ -142,7 +142,8 @@ namespace SVGImporter.Rendering
 
             AddInputShape(inputShapes);
 
-            Color color = GetStrokeColor(paintable);
+            Color color = GetStrokeColor(paintable);            
+
             float strokeWidth = paintable.strokeWidth;
             if(inputShapes.Count > 1)
             {
@@ -150,48 +151,66 @@ namespace SVGImporter.Rendering
                 for(int i = 0; i < inputShapes.Count; i++)
                 {
                     combineInstances[i] = new CombineInstance();
-                    combineInstances[i].mesh = SVGMeshUtils.VectorLine(inputShapes[i].ToArray(), color, strokeWidth, closePath);
+                    combineInstances[i].mesh = SVGMeshUtils.VectorLine(inputShapes[i].ToArray(), color, color, strokeWidth, 0f, closePath);
                 }
 
                 Mesh mesh = new Mesh();
                 mesh.CombineMeshes(combineInstances, true, false);
                 return mesh;
             } else {
-                return SVGMeshUtils.VectorLine(inputShapes[0].ToArray(), color, strokeWidth, closePath);
+                return SVGMeshUtils.VectorLine(inputShapes[0].ToArray(), color, color, strokeWidth, 0f, closePath);
             }
         }
 
-        public static Mesh CreatePolygon(List<Vector2> inputShapes, SVGPaintable paintable, SVGMatrix matrix)
-        {        
+        public static Mesh CreateAntialiasing(List<List<Vector2>> inputShapes, Color colorA, float width, ClosePathRule closePath = ClosePathRule.NEVER)
+        {
             if(inputShapes == null || inputShapes.Count == 0)
                 return null;
 
-            return CreatePolygon(new List<List<Vector2>>(){inputShapes}, paintable, matrix);
+            Color colorB = new Color(colorA.r, colorA.g, colorA.b, 0f);
+            if(inputShapes.Count > 1)
+            {
+                CombineInstance[] combineInstances = new CombineInstance[inputShapes.Count];
+                for(int i = 0; i < inputShapes.Count; i++)
+                {         
+                    combineInstances[i] = new CombineInstance();
+                    combineInstances[i].mesh = SVGMeshUtils.VectorLine(inputShapes[i].ToArray(), colorA, colorB, width, width * 0.5f, closePath);
+                }
+                
+                Mesh mesh = new Mesh();
+                mesh.CombineMeshes(combineInstances, true, false);
+                return mesh;
+            } else {
+                return SVGMeshUtils.VectorLine(inputShapes[0].ToArray(), colorA, colorB, width, width * 0.5f, closePath);
+            }
         }
 
-        public static Mesh CreatePolygon(List<List<Vector2>> inputShapes, SVGPaintable paintable, SVGMatrix matrix)
-        {   
+        public static Mesh CreatePolygon(List<Vector2> inputShapes, SVGPaintable paintable, SVGMatrix matrix, out Mesh antialiasingMesh)
+        {        
             if(inputShapes == null || inputShapes.Count == 0)
+            {
+                antialiasingMesh = null;
                 return null;
+            }
+
+            return CreatePolygon(new List<List<Vector2>>(){inputShapes}, paintable, matrix, out antialiasingMesh);
+        }
+
+        public static Mesh CreatePolygon(List<List<Vector2>> inputShapes, SVGPaintable paintable, SVGMatrix matrix, out Mesh antialiasingMesh)
+        {   
+            antialiasingMesh = null;
+            if(inputShapes == null || inputShapes.Count == 0)
+            {
+                return null;
+            }
 
             List<List<Vector2>> simplifiedShapes = new List<List<Vector2>>();
 
             PolyFillType fillType = PolyFillType.pftNonZero;
             if(paintable.fillRule == SVGFillRule.EvenOdd) { fillType = PolyFillType.pftEvenOdd; }
 
-            for(int i = 0; i < inputShapes.Count; i++)
-            {
-                if(inputShapes[i] == null || inputShapes.Count == 0)
-                    continue;
-
-                List<List<Vector2>> output = SVGGeom.SimplifyPolygon(inputShapes[i], fillType);
-                if(output == null || output.Count == 0)
-                {
-                    simplifiedShapes.Add(inputShapes[i]);
-                } else {
-                    simplifiedShapes.AddRange(output);
-                }
-            }
+            simplifiedShapes = SVGGeom.SimplifyPolygons(inputShapes, fillType);
+            if(simplifiedShapes == null || simplifiedShapes.Count == 0) return null;
 
             AddInputShape(simplifiedShapes);
 
@@ -205,11 +224,11 @@ namespace SVGImporter.Rendering
                     SVGColorType colorType = paintable.fillColor.Value.colorType;
                     if(colorType == SVGColorType.Unknown || colorType == SVGColorType.None)
                     {
-                        color.a *= paintable.fillOpacity * paintable.opacity; 
+                        color.a *= paintable.fillOpacity;
                         paintable.svgFill = new SVGFill(color);
                     } else {
                         color = paintable.fillColor.Value.color;
-                        color.a *= paintable.fillOpacity * paintable.opacity; 
+                        color.a *= paintable.fillOpacity; 
                         paintable.svgFill = new SVGFill(color);
                     }
                     
@@ -246,11 +265,11 @@ namespace SVGImporter.Rendering
                     SVGColorType colorType = paintable.fillColor.Value.colorType;
                     if(colorType == SVGColorType.Unknown || colorType == SVGColorType.None)
                     {
-                        color.a *= paintable.strokeOpacity * paintable.opacity; 
+                        color.a *= paintable.strokeOpacity;
                         paintable.svgFill = new SVGFill(color);
                     } else {
                         color = paintable.fillColor.Value.color;
-                        color.a *= paintable.strokeOpacity * paintable.opacity; 
+                        color.a *= paintable.strokeOpacity;
                         paintable.svgFill = new SVGFill(color);
                     }
                     
@@ -262,6 +281,8 @@ namespace SVGImporter.Rendering
                         paintable.svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
                     }
                 }
+                    break;
+                default:
                     break;
             }
 
@@ -289,6 +310,9 @@ namespace SVGImporter.Rendering
             Mesh mesh = new Mesh();
             int meshVertexCount = tesselation.Vertices.Length;
             Vector3[] vertices = new Vector3[meshVertexCount];
+            Vector2[] uv = null;
+            Vector2[] uv2 = null;
+
             for(int i = 0; i < meshVertexCount; i++)
             {
                 vertices[i] = new Vector3(tesselation.Vertices[i].Position.X, tesselation.Vertices[i].Position.Y, 0f);
@@ -303,37 +327,87 @@ namespace SVGImporter.Rendering
                 triangles[i * 3 + 2] = tesselation.Elements[i * 3 + 2];
             }
 
+            SVGFill svgFill = paintable.svgFill;
+            Color32 fillColor = Color.white;
+            if (svgFill.fillType != FILL_TYPE.GRADIENT && svgFill.gradientColors == null)
+                fillColor = svgFill.color;
+
+            antialiasingMesh = CreateAntialiasing(simplifiedShapes, fillColor, -SVGAssetImport.antialiasingWidth, false, SVGImporter.Utils.ClosePathRule.ALWAYS);
+
+            Color32[] colors32 = new Color32[meshVertexCount];
+
+            for (int i = 0; i < meshVertexCount; i++) 
+            {
+                colors32 [i].r = fillColor.r;
+                colors32 [i].g = fillColor.g;
+                colors32 [i].b = fillColor.b;
+                colors32 [i].a = fillColor.a;
+            }
+
+            if(antialiasingMesh != null)
+            {
+                Vector3[] antialiasingVertices = antialiasingMesh.vertices;
+                Vector2[] antialiasingUV = antialiasingMesh.uv;
+                Vector2[] antialiasingUV2 = antialiasingMesh.uv2;
+                WriteUVGradientCoordinates(ref antialiasingUV, antialiasingVertices, paintable, bounds);
+                WriteUVGradientIndexType(ref antialiasingUV2, antialiasingVertices.Length, paintable);
+                antialiasingMesh.uv = antialiasingUV;
+                antialiasingMesh.uv2 = antialiasingUV2;
+            }
+
+            WriteUVGradientCoordinates(ref uv, vertices, paintable, bounds);
+            WriteUVGradientIndexType(ref uv2, meshVertexCount, paintable);
+
             mesh.vertices = vertices;
             mesh.triangles = triangles;
+            if(colors32 != null) mesh.colors32 = colors32;
+            if(uv != null) mesh.uv = uv;
+            if(uv2 != null) mesh.uv2 = uv2;
 
-            SVGFill svgFill = paintable.svgFill;
+            return mesh;
+        }
+
+        protected static void WriteUVGradientIndexType(ref Vector2[] uv, int meshVertexCount, SVGPaintable svgPaintable)
+        {
+            SVGFill svgFill = svgPaintable.svgFill;
+            if (svgFill.fillType == FILL_TYPE.GRADIENT && svgFill.gradientColors != null)
+            {
+                Vector2 gradientUV = new Vector2(svgFill.gradientColors.index, (int)svgFill.gradientType);
+                uv = new Vector2[meshVertexCount];
+                for (int i = 0; i < meshVertexCount; i++) {
+                    uv [i].x = gradientUV.x;
+                    uv [i].y = gradientUV.y;
+                }
+            }
+        }
+
+        protected static void WriteUVGradientCoordinates(ref Vector2[] uv, Vector3[] vertices, SVGPaintable svgPaintable, Rect bounds)
+        {
+            SVGFill svgFill = svgPaintable.svgFill;
             if(svgFill.fillType == FILL_TYPE.GRADIENT)
             {
-                Vector2[] uv = new Vector2[meshVertexCount];
-                Vector2 uvPoint = Vector2.zero;
-                
-                svgFill.transform = GetFillTransform(paintable, bounds);
+                int meshVertexCount = vertices.Length;
 
-                Rect viewport = paintable.viewport;
-//                Debug.Log(viewport);
-//                Debug.Log(svgFill.transform);
-                
+                uv = new Vector2[meshVertexCount];
+                Vector2 uvPoint = Vector2.zero;
+                SVGMatrix svgFillTransform = GetFillTransform(svgPaintable, bounds);                
+                Rect viewport = svgPaintable.viewport;
                 for (int i = 0; i < meshVertexCount; i++)
                 {
-                    uvPoint.x = mesh.vertices [i].x;
-                    uvPoint.y = mesh.vertices [i].y;
-                    uvPoint = svgFill.transform.Transform(uvPoint);
-
+                    uvPoint.x = vertices [i].x;
+                    uvPoint.y = vertices [i].y;
+                    uvPoint = svgFillTransform.Transform(uvPoint);
+                    
                     uv [i].x = (uvPoint.x - viewport.x) / viewport.width;
                     uv [i].y = (uvPoint.y - viewport.y) / viewport.height;
                 }
-                              
-                mesh.uv = uv;       
             }
-            
-            UpdateMesh(mesh, svgFill);
+        }
 
-            return mesh;
+        public static Mesh CreateAntialiasing(List<List<Vector2>> paths, Color color, float antialiasingWidth, bool isStroke = false, ClosePathRule closePath = ClosePathRule.NEVER)
+        {
+            if(SVGAssetImport.antialiasingWidth <= 0f) return null;
+            return SVGSimplePath.CreateAntialiasing(paths, color, antialiasingWidth, closePath);
         }
 
         private static void UpdateMesh(Mesh mesh, SVGFill svgFill)
@@ -551,8 +625,10 @@ namespace SVGImporter.Rendering
 
         protected static void AddInputShape(List<List<Vector2>> inputShapes)
         {            
+            if(inputShapes == null) return;
             for(int i = 0; i < inputShapes.Count; i++)
             {
+                if(inputShapes[i] == null || inputShapes[i].Count == 0) continue;
                 SVGGraphics.paths.Add(new SVGPath(inputShapes[i].ToArray()));
             }
             

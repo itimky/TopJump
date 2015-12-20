@@ -19,7 +19,33 @@ public class SVGDebugMeshEditor : Editor {
         TANGENTS
     }
 
-    public DebugType debugType;
+    const string SVG_IMPORTER_SVGDEBUGMESH_KEY = "SVG_IMPORTER_SVGDEBUGMESH_KEY";
+    public DebugType debugType
+    {
+        get {
+            if(EditorPrefs.HasKey(SVG_IMPORTER_SVGDEBUGMESH_KEY))
+                return (DebugType)EditorPrefs.GetInt(SVG_IMPORTER_SVGDEBUGMESH_KEY);
+
+            return DebugType.NONE;
+        }
+        set {
+            EditorPrefs.SetInt(SVG_IMPORTER_SVGDEBUGMESH_KEY, (int)value);
+        }
+    }
+
+    const string SVG_IMPORTER_SHOWPOINTS_KEY = "SVG_IMPORTER_SHOWPOINTS_KEY";
+    public bool showPoints
+    {
+        get {
+            if(EditorPrefs.HasKey(SVG_IMPORTER_SHOWPOINTS_KEY))
+                return EditorPrefs.GetBool(SVG_IMPORTER_SHOWPOINTS_KEY);
+            
+            return false;
+        }
+        set {
+            EditorPrefs.SetBool(SVG_IMPORTER_SHOWPOINTS_KEY, value);
+        }
+    }
 
 	public override void OnInspectorGUI()
     {
@@ -69,6 +95,7 @@ public class SVGDebugMeshEditor : Editor {
 
             EditorGUI.BeginChangeCheck();
             debugType = (DebugType)EditorGUILayout.EnumPopup(debugType);
+            showPoints = EditorGUILayout.Toggle("Show Points", showPoints);
             if(EditorGUI.EndChangeCheck())
             {
                 Repaint();
@@ -108,7 +135,7 @@ public class SVGDebugMeshEditor : Editor {
 
                         for(int i = 0; i < vertexCount; i++)
                         {
-                            Handles.DrawWireDisc(vertices[i], Vector3.forward, HandleUtility.GetHandleSize(debugMesh.transform.position) * 0.1f);
+                            if(showPoints) Handles.DrawWireDisc(vertices[i], Vector3.forward, HandleUtility.GetHandleSize(debugMesh.transform.position) * 0.1f);
                             switch(debugType)
                             {
                                 case DebugType.INDEXES:

@@ -51,6 +51,7 @@ namespace SVGImporter
 //        SerializedProperty sortingLayerName;
         SerializedProperty sortingOrder;
         SerializedProperty overrideSorter;
+        SerializedProperty overrideSorterChildren;
 
         void OnEnable()
         {
@@ -62,6 +63,7 @@ namespace SVGImporter
 //            sortingLayerName = serializedObject.FindProperty("_sortingLayerName");
             sortingOrder = serializedObject.FindProperty("_sortingOrder");
             overrideSorter = serializedObject.FindProperty("_overrideSorter");
+            overrideSorterChildren = serializedObject.FindProperty("_overrideSorterChildren");
 
             if (serializedObject.isEditingMultipleObjects)
             {
@@ -90,9 +92,38 @@ namespace SVGImporter
             }
         }
 
+        bool HasSelectedTransparentAsset()
+        {
+            if (serializedObject.isEditingMultipleObjects)
+            {
+                UnityEngine.Object[] renderers = (UnityEngine.Object[])targets;
+                for(int i = 0; i < renderers.Length; i++)
+                {
+                    renderer = renderers [i] as SVGRenderer;
+                    if(renderer.vectorGraphics != null && renderer.vectorGraphics.format != SVGAssetFormat.Opaque)
+                    {
+                        return true;
+                    }
+                }
+            } else {
+                SVGRenderer renderer = target as SVGRenderer;
+                if(renderer.vectorGraphics != null && renderer.vectorGraphics.format != SVGAssetFormat.Opaque)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         void OpaqueMaterialHelpBox()
         {
-            EditorGUILayout.HelpBox("Opaque Material is not used when vector graphics format is set to transparent or UGUI", MessageType.Warning);
+            EditorGUILayout.HelpBox("Opaque Material is not used when vector graphics format is set to transparent or UGUI.", MessageType.Warning);
+        }
+
+        void SortingMaterialHelpBox()
+        {
+            EditorGUILayout.HelpBox("Unity sorting does not work on Opaque objects, change Format to transparent.", MessageType.Warning);
         }
 
         public override void OnInspectorGUI()
@@ -133,33 +164,18 @@ namespace SVGImporter
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(transparentMaterial, new GUIContent("Transparent"));
                 EditorGUILayout.PropertyField(opaqueMaterial, new GUIContent("Opaque"));
-
-                SVGRenderer renderer = (SVGRenderer)target;
-                if (serializedObject.isEditingMultipleObjects)
+                if(HasSelectedTransparentAsset())
                 {
-                    UnityEngine.Object[] renderers = (UnityEngine.Object[])targets;
-                    for(int i = 0; i < renderers.Length; i++)
-                    {
-                        renderer = renderers [i] as SVGRenderer;
-                        if(renderer.vectorGraphics != null && renderer.vectorGraphics.format != SVGAssetFormat.Opaque)
-                        {
-                            OpaqueMaterialHelpBox();
-                            break;
-                        }
-                    }
-                } else {
-                    if(renderer.vectorGraphics != null && renderer.vectorGraphics.format != SVGAssetFormat.Opaque)
-                    {
-                        OpaqueMaterialHelpBox();
-                    }
+                    OpaqueMaterialHelpBox();
                 }
                 EditorGUI.indentLevel--;
             }
 
-            sortingLayerFoldout = EditorGUILayout.Foldout(sortingLayerFoldout, "Sorting Layer");
+            sortingLayerFoldout = EditorGUILayout.Foldout(sortingLayerFoldout, "Sorting");
             if (sortingLayerFoldout)
             {
                 EditorGUI.indentLevel++;
+                EditorGUILayout.LabelField("Unity Sorter", EditorStyles.boldLabel);
                 MethodInfo sortingLayerField = typeof(EditorGUILayout).GetMethod("SortingLayerField", 
                                                                                  BindingFlags.Static | BindingFlags.NonPublic,
                                                                                  System.Type.DefaultBinder,
@@ -171,7 +187,17 @@ namespace SVGImporter
                     sortingLayerField.Invoke(null, new System.Object[]{ new GUIContent("Sorting Layer"), sortingLayerID, EditorStyles.popup, EditorStyles.label });
                 }
                 EditorGUILayout.PropertyField(sortingOrder);
+                if(!HasSelectedTransparentAsset())
+                {
+                    SortingMaterialHelpBox();
+                }
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("SVG Sorter", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(overrideSorter);
+                if(overrideSorter.hasMultipleDifferentValues || overrideSorter.boolValue)
+                {
+                    EditorGUILayout.PropertyField(overrideSorterChildren, new GUIContent("Override Children", "Override sorting order in all children."));
+                }
                 EditorGUI.indentLevel--;
             }
 

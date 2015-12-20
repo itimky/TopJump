@@ -4,12 +4,9 @@
 
 #define IGNORE_EXCEPTIONS
 
-#if UNITY_EDITOR
-
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace SVGImporter 
 {
@@ -30,12 +27,17 @@ namespace SVGImporter
             }
         }
 
+        public static SVGUseGradients useGradients;
+        public static float antialiasingWidth;
         public static float vpm;
+        public static bool ignoreSVGCanvas;
+
         private string _SVGFile;
         private Texture2D _texture = null;
         private SVGGraphics _graphics;
         private SVGDocument _svgDocument;
     
+#if UNITY_EDITOR
         public SVGAssetImport(string svgFile, float vertexPerMeter = 1000f)
         {
             vpm = vertexPerMeter;
@@ -53,8 +55,6 @@ namespace SVGImporter
             if(UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-//            Debug.Log("Importing asset: "+UnityEditor.AssetDatabase.GetAssetPath(asset));
-
             if(errors == null)
             {
                 errors = new List<SVGError>();
@@ -64,7 +64,6 @@ namespace SVGImporter
             _importingSVG = true;
 
             UnityEditor.SerializedObject svgAsset = new UnityEditor.SerializedObject(asset);
-//            UnityEditor.SerializedProperty gradientTexture = svgAsset.FindProperty("_gradientTexture");
             UnityEditor.SerializedProperty sharedMesh = svgAsset.FindProperty("_sharedMesh");            
             UnityEditor.SerializedProperty sharedShaders = svgAsset.FindProperty("_sharedShaders");
 
@@ -78,6 +77,8 @@ namespace SVGImporter
 
 #if IGNORE_EXCEPTIONS
             try {
+#else
+                Debug.LogWarning("Exceptions are turned on!");
 #endif
                 // Create new Asset
                 CreateEmptySVGDocument();
@@ -86,13 +87,13 @@ namespace SVGImporter
             } catch (System.Exception exception) {
                 _rootSVGElement = null;
                 errors.Add(SVGError.Syntax);
-                Debug.LogError("SVG Document Exception: "+exception.Message);
+                Debug.LogError("SVG Document Exception: "+exception.Message, asset);
             }
 #endif
 
             if(_rootSVGElement == null)
             {
-                Debug.LogError("SVG Document is corrupted! "+UnityEditor.AssetDatabase.GetAssetPath(asset));
+                Debug.LogError("SVG Document is corrupted! "+UnityEditor.AssetDatabase.GetAssetPath(asset), asset);
                 return;
             }
 
@@ -103,34 +104,60 @@ namespace SVGImporter
 #endif
                 _rootSVGElement.Render();
 
+                // Handle gradients
+                bool hasGradients = (useGradients == SVGUseGradients.Always);
                 SVGAtlas atlas = SVGAtlas.Instance;
-                atlas.hideFlags = HideFlags.DontSave;
-                if(SVGAtlas.Instance.gradients != null && atlas.gradients.Count > 1)
+                if(useGradients != SVGUseGradients.Never)
                 {
-                    int gradientCount = atlas.gradients.Count;
-                    int gradientWidth = atlas.gradientWidth;
-                    int gradientHeight = atlas.gradientHeight;
-                    atlas.atlasTextureWidth = gradientWidth * 2;
-                    atlas.atlasTextureHeight = Mathf.CeilToInt((gradientCount * gradientWidth) / atlas.atlasTextureWidth) * gradientHeight + gradientHeight;
-                    atlas.RebuildAtlas();
+                    atlas.hideFlags = HideFlags.DontSave;
+                    if(SVGAtlas.Instance.gradients != null && atlas.gradients.Count > 1)
+                    {
+                        int gradientCount = atlas.gradients.Count;
+                        int gradientWidth = atlas.gradientWidth;
+                        int gradientHeight = atlas.gradientHeight;
+                        atlas.atlasTextureWidth = gradientWidth * 2;
+                        atlas.atlasTextureHeight = Mathf.CeilToInt((gradientCount * gradientWidth) / atlas.atlasTextureWidth) * gradientHeight + gradientHeight;
+                        atlas.RebuildAtlas();
+
+                        hasGradients = true;
+                    }
                 }
 
+                // Create actual Mesh
                 Material[] outputMaterials;
                 Mesh mesh = SVGMesh.CreateMesh(out outputMaterials);
                 if(mesh == null)
                     return;
 
-                Bounds bounds = mesh.bounds;
+                // Delete gradients if needed
+                if(!hasGradients)
+                {
+                    mesh.uv = new Vector2[0];
+                    mesh.uv2 = new Vector2[0];
+                }
+
                 Vector3[] vertices = mesh.vertices;
-                Vector2 offset = new Vector2(bounds.min.x + bounds.size.x * asset.pivotPoint.x,
-                                             bounds.min.y + bounds.size.y * asset.pivotPoint.y);
+                Vector2 offset;
+                Bounds bounds = mesh.bounds;
+                Rect viewport = _rootSVGElement.paintable.viewport;
+                viewport.x *= SVGMesh.meshScale;
+                viewport.y *= SVGMesh.meshScale;
+                viewport.size *= SVGMesh.meshScale;
+
+                if(asset.ignoreSVGCanvas)
+                {
+                    offset = new Vector2(bounds.min.x + bounds.size.x * asset.pivotPoint.x,
+                                         bounds.min.y + bounds.size.y * asset.pivotPoint.y);
+                } else {
+                    offset = new Vector2(viewport.min.x + viewport.size.x * asset.pivotPoint.x,
+                                         viewport.min.y + viewport.size.y * asset.pivotPoint.y);                        
+                }
 
                 // Apply pivot point and Flip Y Axis
 				for(int i = 0; i < vertices.Length; i++)
                 {
                     vertices[i].x = vertices[i].x - offset.x;
-                    vertices[i].y = vertices[i].y - offset.y;
-                    vertices[i].y *= -1f;
+                    vertices[i].y = (vertices[i].y - offset.y) * -1f;
                 }
 
                 mesh.vertices = vertices;
@@ -141,13 +168,33 @@ namespace SVGImporter
                 if(outputMaterials != null && outputMaterials.Length > 0)
                 {
                     sharedShaders.arraySize = outputMaterials.Length;
-                    for(int i = 0; i < outputMaterials.Length; i++)
+                    if(hasGradients)
                     {
-                        sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;                                                
+                        for(int i = 0; i < outputMaterials.Length; i++)
+                        {
+                            sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;                                                
+                        }
+                    } else {
+                        for(int i = 0; i < outputMaterials.Length; i++)
+                        {
+                            if(outputMaterials[i].shader.name == SVGShader.GradientColorAlphaBlended.name)
+                            {
+                                    outputMaterials[i].shader = SVGShader.SolidColorAlphaBlended;
+                            } else if(outputMaterials[i].shader.name == SVGShader.GradientColorOpaque.name)
+                            {
+                                outputMaterials[i].shader = SVGShader.SolidColorOpaque;                                
+                            }
+                            sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;
+                        }
                     }
                 }
 
+                // Serialize the Asset
                 svgAsset.ApplyModifiedProperties();
+
+                // Handle Canvas Rectangle
+                System.Reflection.MethodInfo _editor_SetCanvasRectangle = typeof(SVGAsset).GetMethod("_editor_SetCanvasRectangle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                _editor_SetCanvasRectangle.Invoke(asset, new object[]{new Rect(viewport.x, viewport.y, viewport.size.x, viewport.size.y)});
 
                 if(asset.generateCollider)
                 {
@@ -174,8 +221,8 @@ namespace SVGImporter
                         {
                             paths[i] = new SVGPath(polygons[i].ToArray());
                         }
-                        
-                        MethodInfo _editor_SetColliderShape = typeof(SVGAsset).GetMethod("_editor_SetColliderShape", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        System.Reflection.MethodInfo _editor_SetColliderShape = typeof(SVGAsset).GetMethod("_editor_SetColliderShape", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                         if(paths != null && paths.Length > 0)
                         {
                             _editor_SetColliderShape.Invoke(asset, new object[]{paths});
@@ -184,20 +231,23 @@ namespace SVGImporter
                         }
                     }
                 } else {
-                    MethodInfo _editor_SetColliderShape = typeof(SVGAsset).GetMethod("_editor_SetColliderShape", BindingFlags.NonPublic | BindingFlags.Instance);
+                    System.Reflection.MethodInfo _editor_SetColliderShape = typeof(SVGAsset).GetMethod("_editor_SetColliderShape", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     _editor_SetColliderShape.Invoke(asset, new object[]{null});
                 }
 
-                MethodInfo _editor_SetGradients = typeof(SVGAsset).GetMethod("_editor_SetGradients", BindingFlags.NonPublic | BindingFlags.Instance);
-                if(atlas.gradients != null && atlas.gradients.Count > 0)
+                if(hasGradients)
                 {
-                    _editor_SetGradients.Invoke(asset, new object[]{atlas.gradients.ToArray()});
-                } else {
-                    _editor_SetGradients.Invoke(asset, new object[]{null});
+                    System.Reflection.MethodInfo _editor_SetGradients = typeof(SVGAsset).GetMethod("_editor_SetGradients", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if(atlas.gradients != null && atlas.gradients.Count > 0)
+                    {
+                        _editor_SetGradients.Invoke(asset, new object[]{atlas.gradients.ToArray()});
+                    } else {
+                        _editor_SetGradients.Invoke(asset, new object[]{null});
+                    }
                 }
 #if IGNORE_EXCEPTIONS
             } catch(System.Exception exception) {
-                Debug.LogWarning("Asset: "+UnityEditor.AssetDatabase.GetAssetPath(asset)+" Failed to import\n"+exception.Message);
+                Debug.LogWarning("Asset: "+UnityEditor.AssetDatabase.GetAssetPath(asset)+" Failed to import\n"+exception.Message, asset);
                 errors.Add(SVGError.CorruptedFile);
             }
 #endif
@@ -249,7 +299,7 @@ namespace SVGImporter
             output.filterMode = FilterMode.Bilinear;
             output.Apply();
             return output;
-        }    
+        }  
+#endif
     }
 }
-#endif

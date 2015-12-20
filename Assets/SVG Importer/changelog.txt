@@ -1,3 +1,28 @@
+Version 1.1.1
+Release Date: 4. December. 2015
+
+- Fixed, Transparency on elements
+- Fixed, Transparency on gradients
+
+--------------------------------------------
+
+Version 1.1.0
+Release Date: 29. November. 2015
+
+- Added, Standard and Diffuse Shader - does not support gradients
+- Added, Use Gradients option for tweaking shader performance
+- Added, Antialiasing which will create feathered edges on every element
+- Added, SVG Render Texture, for special use cases
+- Added, SVG Renderer, Override sorting children
+- Added, SVG Frame Animator, previous and next frame buttons and current frame is hilighted
+- Added, SVG Asset, Ignore canvas option when set to off it will preserve the original canvas composition
+
+- Fixed, SVG Sorter, wrong sorting order
+- Fixed, SVG Renderer, sortingLayerName
+- Fixed, SVG Renderer, when colored and duplicated the mesh disapeared
+
+--------------------------------------------
+
 Version 1.0.9
 Release Date: 1. November. 2015
 

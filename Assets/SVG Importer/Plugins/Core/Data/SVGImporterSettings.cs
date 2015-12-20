@@ -9,7 +9,7 @@ namespace SVGImporter
 {
     public class SVGImporterSettings : ScriptableObject 
     {
-        protected static string _version = "1.0.9";
+        protected static string _version = "1.1.1";
         public static string version
         {
             get {
@@ -18,6 +18,9 @@ namespace SVGImporter
         }
 
         public SVGAssetFormat defaultSVGFormat = SVGAssetFormat.Transparent;
+        public SVGUseGradients defaultUseGradients = SVGUseGradients.Always;
+        public bool defaultAntialiasing = false;
+        public float defaultAntialiasingWidth = 0f;
         public SVGMeshCompression defaultMeshCompression = SVGMeshCompression.Off;
         public int defaultVerticesPerMeter = 1000;
         public float defaultScale = 0.01f;
@@ -27,6 +30,7 @@ namespace SVGImporter
         public Vector2 defaultPivotPoint = new Vector2(0.5f, 0.5f);
         public bool defaultGenerateCollider = false;
         public bool defaultKeepSVGFile = true;
+        public bool defaultIgnoreSVGCanvas = true;
         public bool defaultOptimizeMesh = true;
         public bool defaultGenerateNormals = false;
         public bool defaultGenerateTangents = false;

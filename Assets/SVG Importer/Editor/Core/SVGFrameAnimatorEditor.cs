@@ -21,6 +21,34 @@ namespace SVGImporter
 		private ReorderableList framesList;
 		private float thumbnailSize = 30f;
 
+        protected GUIStyle _bgStyle;
+        public GUIStyle bgStyle
+        {
+            get {
+
+                if( _bgStyle == null )
+                {
+                    _bgStyle = new GUIStyle( GUI.skin.box );
+                    _bgStyle.normal.background = MakeTex( 2, 2, new Color( 1f, 0f, 0f, 0.25f ) );
+                }
+
+                return _bgStyle;
+            }
+        }
+
+        private Texture2D MakeTex( int width, int height, Color col )
+        {
+            Color[] pix = new Color[width * height];
+            for( int i = 0; i < pix.Length; ++i )
+            {
+                pix[ i ] = col;
+            }
+            Texture2D result = new Texture2D( width, height );
+            result.SetPixels( pix );
+            result.Apply();
+            return result;
+        }
+
         void OnEnable()
         {
 			frames = serializedObject.FindProperty("frames");
@@ -30,11 +58,18 @@ namespace SVGImporter
 			framesList.drawHeaderCallback = (Rect rect) => {  
 				EditorGUI.LabelField(rect, "Animation Frames");
 			};
-			framesList.elementHeight = thumbnailSize + 2;
+			framesList.elementHeight = thumbnailSize + 4;
 
 			framesList.drawElementCallback =  
 			(Rect rect, int index, bool isActive, bool isFocused) => {
 				var element = framesList.serializedProperty.GetArrayElementAtIndex(index);
+                
+                if(frameIndex.floatValue == index)
+                {
+                    GUI.Box(rect, "", bgStyle);
+                }
+
+                rect.x += 2;
 				rect.y += 2;
 
 				Texture2D thumbnail = null;
@@ -43,12 +78,11 @@ namespace SVGImporter
 					thumbnail = AssetPreview.GetAssetPreview(element.objectReferenceValue);
 				}
 
-				
 				if(thumbnail != null)
 				{
 					EditorGUI.DrawPreviewTexture(new Rect(rect.x, rect.y, thumbnailSize, thumbnailSize), thumbnail);
 				}
-				EditorGUI.PropertyField(new Rect(rect.x + thumbnailSize + 4, rect.y, rect.width - thumbnailSize - 4, EditorGUIUtility.singleLineHeight), element, new GUIContent());
+				EditorGUI.PropertyField(new Rect(rect.x + thumbnailSize + 4, rect.y, rect.width - thumbnailSize - 8, EditorGUIUtility.singleLineHeight), element, new GUIContent());
 			};
         }
 
@@ -65,6 +99,19 @@ namespace SVGImporter
 			if(frames.arraySize > 1)
 			{
 				frameIndex.floatValue = EditorGUILayout.IntSlider("Current Frame", (int)frameIndex.floatValue, 0, frames.arraySize - 1);
+                GUILayout.BeginHorizontal();
+                GUI.enabled = !(frameIndex.floatValue <= 0f);
+                if(GUILayout.Button("<"))
+                {
+                    frameIndex.floatValue = Mathf.Clamp(frameIndex.floatValue - 1, 0, frames.arraySize - 1);
+                }
+                GUI.enabled = !(frameIndex.floatValue >= frames.arraySize - 1);
+                if(GUILayout.Button(">"))
+                {
+                    frameIndex.floatValue = Mathf.Clamp(frameIndex.floatValue + 1, 0, frames.arraySize - 1);
+                }
+                GUI.enabled = true;
+                GUILayout.EndHorizontal();
 			}
             if (EditorGUI.EndChangeCheck())
             {

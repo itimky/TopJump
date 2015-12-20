@@ -86,6 +86,24 @@ namespace SVGImporter.Document
             t_currentTransformList.AppendItem(temp);
 
             this.currentTransformList = t_currentTransformList;
+
+            if(_rootElement)
+            {
+                // TODO Clip Paths does not works properly
+                /*
+                if(!SVGAssetImport.ignoreSVGCanvas)
+                {
+                    Rect viewport = paintable.viewport;
+                    paintable.clipPathList.Add(new List<Vector2>{
+                        new Vector2(viewport.x, viewport.y),
+                        new Vector2(viewport.x + viewport.width, viewport.y),
+                        new Vector2(viewport.x + viewport.width, viewport.y + viewport.height),
+                        new Vector2(viewport.x, viewport.y + viewport.height)
+                    });
+                }
+                */
+            }
+
             GetElementList();
         }
 

@@ -11,6 +11,16 @@ namespace SVGImporter.Utils
 {
     public class SVGMath {
      
+        public static Vector2 RotateVectorClockwise(Vector2 vector)
+        {
+            return new Vector2(vector.y, -vector.x);
+        }
+
+        public static Vector2 RotateVectorAntiClockwise(Vector2 vector)
+        {
+            return new Vector2(-vector.y, vector.x);
+        }
+
         public static int PositiveModulo(int a, int b)
         {
             return (Mathf.Abs(a * b) + a) % b;
@@ -153,9 +163,9 @@ namespace SVGImporter.Utils
     	}
 
         public static bool LineLineIntersection(out Vector2 intersection, Vector2 line1Start, Vector2 line1End, Vector2 line2Start, Vector2 line2End){
-
+            
             intersection = Vector2.zero;
-
+            
             float s1_x, s1_y, s2_x, s2_y;
             s1_x = line1End.x - line1Start.x;     s1_y = line1End.y - line1Start.y;
             s2_x = line2End.x - line2Start.x;     s2_y = line2End.y - line2Start.y;
@@ -164,16 +174,17 @@ namespace SVGImporter.Utils
             s = (-s1_y * (line1Start.x - line2Start.x) + s1_x * (line1Start.y - line2Start.y)) / (-s2_x * s1_y + s1_x * s2_y);
             t = ( s2_x * (line1Start.y - line2Start.y) - s2_y * (line1Start.x - line2Start.x)) / (-s2_x * s1_y + s1_x * s2_y);
             
+            intersection.x = line1Start.x + (t * s1_x);
+            intersection.y = line1Start.y + (t * s1_y);
+            
             if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
             {
-                intersection.x = line1Start.x + (t * s1_x);
-                intersection.y = line1Start.y + (t * s1_y);
                 return true;
             }
             
             return false; // No collision
         }
-     
+
         public static float ClosestDistanceToLine(Vector2 lineStart, Vector2 lineEnd, Vector2 point)
         {
             Vector2 point2 = new Vector2(lineEnd.x - lineStart.x, lineEnd.y - lineStart.y);

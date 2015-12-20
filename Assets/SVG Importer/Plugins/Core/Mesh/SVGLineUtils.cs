@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace SVGImporter.Utils
 {        
+    using Rendering;
+    using ClipperLib;
+
     public enum ClosePathRule
     {
         ALWAYS,
@@ -60,28 +63,6 @@ namespace SVGImporter.Utils
 
     public class SVGLineUtils {
 
-        public static bool LineLineIntersection(out Vector2 intersection, Vector2 line1Start, Vector2 line1End, Vector2 line2Start, Vector2 line2End){
-            
-            intersection = Vector2.zero;
-            
-            float s1_x, s1_y, s2_x, s2_y;
-            s1_x = line1End.x - line1Start.x;     s1_y = line1End.y - line1Start.y;
-            s2_x = line2End.x - line2Start.x;     s2_y = line2End.y - line2Start.y;
-            
-            float s, t;
-            s = (-s1_y * (line1Start.x - line2Start.x) + s1_x * (line1Start.y - line2Start.y)) / (-s2_x * s1_y + s1_x * s2_y);
-            t = ( s2_x * (line1Start.y - line2Start.y) - s2_y * (line1Start.x - line2Start.x)) / (-s2_x * s1_y + s1_x * s2_y);
-
-            intersection.x = line1Start.x + (t * s1_x);
-            intersection.y = line1Start.y + (t * s1_y);
-
-            if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-            {
-                return true;
-            }
-            
-            return false; // No collision
-        }
 
         public static List<Vector2> Stroke(StrokeSegment[] segments, float thickness, Color32 color, StrokeLineJoin lineJoin, StrokeLineCap lineCap, float miterLimit = 4f, ClosePathRule closeLine = ClosePathRule.NEVER, float roundQuality = 10f)
         {
@@ -229,9 +210,10 @@ namespace SVGImporter.Utils
                                     Vector2 a = segments[i1].endPoint + miterVector * miterClipHalf;
                                     Vector2 b = segments[i1].endPoint + miterVectorLengthHalf;
                                     Vector2 c = a + miterVectorRotated;
-                                    
-                                    LineLineIntersection(out intersectionLeft, b, segmentRightEndB, a, c);
-                                    LineLineIntersection(out intersectionRight, b, segmentRightStartA, a, c);
+
+
+                                    SVGMath.LineLineIntersection(out intersectionLeft, b, segmentRightEndB, a, c);
+                                    SVGMath.LineLineIntersection(out intersectionRight, b, segmentRightStartA, a, c);
                                     
                                     if(miterClipHalfDouble <= (Vector2.Lerp(segmentRightEndB, segmentRightStartA, 0.5f) - segments[i1].endPoint).sqrMagnitude)
                                     {
@@ -268,8 +250,8 @@ namespace SVGImporter.Utils
                                     Vector2 b = segments[i1].endPoint - miterVectorLengthHalf;
                                     Vector2 c = a + miterVectorRotated;
                                     
-                                    LineLineIntersection(out intersectionLeft, b, segmentLeftStartA, a, c);
-                                    LineLineIntersection(out intersectionRight, b, segmentLeftEndB, a, c);
+                                    SVGMath.LineLineIntersection(out intersectionLeft, b, segmentLeftStartA, a, c);
+                                    SVGMath.LineLineIntersection(out intersectionRight, b, segmentLeftEndB, a, c);
                                     
                                     if(miterClipHalfDouble <= (Vector2.Lerp(segmentLeftStartA, segmentLeftEndB, 0.5f) - segments[i1].endPoint).sqrMagnitude)
                                     {
@@ -616,57 +598,111 @@ namespace SVGImporter.Utils
                 useDash = false;
         }
 
-        public static Mesh TessellateStroke(List<List<Vector2>> finalPoints, Color32 color)
-        {            
-            if(finalPoints == null || finalPoints.Count == 0)
-                return null;
+        public static void TesselateStroke(List<List<Vector2>> inputShapes, Color32 color, out List<List<Vector2>> simplifiedShapes, out Vector3[] vertices, out int[] triangles, out Color32[] colors32)
+        {
+            simplifiedShapes = null;
+            vertices = null;
+            triangles = null;
+            colors32 = null;
 
+            if(inputShapes == null || inputShapes.Count == 0) return;
+            
             int i, j;
-
+            
+            simplifiedShapes = new List<List<Vector2>>();
+            
+            PolyFillType fillType = PolyFillType.pftNonZero;
+            
+            for(i = 0; i < inputShapes.Count; i++)
+            {
+                if(inputShapes[i] == null || inputShapes.Count == 0)
+                    continue;
+                
+                List<List<Vector2>> output = SVGGeom.SimplifyPolygon(inputShapes[i], fillType);
+                if(output == null || output.Count == 0)
+                {
+                    simplifiedShapes.Add(inputShapes[i]);
+                } else {
+                    simplifiedShapes.AddRange(output);
+                }
+            }
+            
             LibTessDotNet.Tess tesselation = new LibTessDotNet.Tess();
             
             LibTessDotNet.ContourVertex[] path;
-            for(i = 0; i < finalPoints.Count; i++)
+            for(i = 0; i < simplifiedShapes.Count; i++)
             {
-                if(finalPoints[i] == null || finalPoints[i].Count < 2)
+                if(simplifiedShapes[i] == null || simplifiedShapes[i].Count < 2)
                     continue;
                 
-                path = new LibTessDotNet.ContourVertex[finalPoints[i].Count];
-                for(j = 0; j < finalPoints[i].Count; j++)
+                path = new LibTessDotNet.ContourVertex[simplifiedShapes[i].Count];
+                for(j = 0; j < simplifiedShapes[i].Count; j++)
                 {
-                    path[j].Position = new LibTessDotNet.Vec3{X = finalPoints[i][j].x, Y = finalPoints[i][j].y, Z = 0f };
+                    path[j].Position = new LibTessDotNet.Vec3{X = simplifiedShapes[i][j].x, Y = simplifiedShapes[i][j].y, Z = 0f };
                 }
                 tesselation.AddContour(path);
             }
             
             tesselation.Tessellate(LibTessDotNet.WindingRule.Positive, LibTessDotNet.ElementType.Polygons, 3);
-            if(tesselation.Vertices == null || tesselation.Vertices.Length == 0)
-                return null;
+            if(tesselation.Vertices == null || tesselation.Vertices.Length == 0) return;
             
             Mesh mesh = new Mesh();
             
             int numVertices = tesselation.Vertices.Length;
             int numTriangles = tesselation.ElementCount * 3;
             
-            int[] trianglesFin = new int[numTriangles];
-            Vector3[] verticesFin = new Vector3[numVertices];
-            Color32[] colorsFin = new Color32[numVertices];
+            triangles = new int[numTriangles];
+            vertices = new Vector3[numVertices];
+            colors32 = new Color32[numVertices];
             
             for(i = 0; i < numVertices; i++)
             {
-                verticesFin[i] = new Vector3(tesselation.Vertices[i].Position.X, tesselation.Vertices[i].Position.Y, 0f);
-                colorsFin[i] = color;
+                vertices[i] = new Vector3(tesselation.Vertices[i].Position.X, tesselation.Vertices[i].Position.Y, 0f);
+                colors32[i] = color;
             }
             for (i = 0; i < numTriangles; i += 3)
             {
-                trianglesFin[i] = tesselation.Elements[i];
-                trianglesFin[i + 1] = tesselation.Elements[i + 1];
-                trianglesFin[i + 2] = tesselation.Elements[i + 2];
+                triangles[i] = tesselation.Elements[i];
+                triangles[i + 1] = tesselation.Elements[i + 1];
+                triangles[i + 2] = tesselation.Elements[i + 2];
             }
+        }
+
+        public static Mesh TessellateStroke(List<List<Vector2>> inputShapes, Color32 color)
+        {            
+            List<List<Vector2>> simplifiedShapes;
+            Vector3[] vertices;
+            int[] triangles;
+            Color32[] colors32;
             
-            mesh.vertices = verticesFin;
-            mesh.triangles = trianglesFin;
-            mesh.colors32 = colorsFin;
+            TesselateStroke(inputShapes, color, out simplifiedShapes, out vertices, out triangles, out colors32);
+            if(vertices == null) return null;
+
+            Mesh mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.colors32 = colors32;
+            
+            return mesh;
+        }
+
+        public static Mesh TessellateStroke(List<List<Vector2>> inputShapes, Color32 color, out Mesh antialiasingMesh)
+        {            
+            antialiasingMesh = null;
+            List<List<Vector2>> simplifiedShapes;
+            Vector3[] vertices;
+            int[] triangles;
+            Color32[] colors32;
+
+            TesselateStroke(inputShapes, color, out simplifiedShapes, out vertices, out triangles, out colors32);
+            if(vertices == null) return null;
+
+            antialiasingMesh = SVGSimplePath.CreateAntialiasing(simplifiedShapes, color, SVGAssetImport.antialiasingWidth, true, SVGImporter.Utils.ClosePathRule.ALWAYS);
+
+            Mesh mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.colors32 = colors32;
             
             return mesh;
         }

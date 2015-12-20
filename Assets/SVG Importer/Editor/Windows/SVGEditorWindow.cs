@@ -28,8 +28,6 @@ namespace SVGImporter
         SVGRenderer _editorRenderer;
 
         int _previewResolution = 256;
-        Bounds latestBounds;
-        Rect latestRect;
         Vector2 viewScrollPosition;
         float viewZoom = 1f;
         bool viewAlpha;
@@ -40,10 +38,28 @@ namespace SVGImporter
 
         SVGEditorHandles.Styles styles;
 
+        Vector2 originalPivotPoint;
+
 		public static void GetWindow()
 		{
 			s_Instance = EditorWindow.GetWindow<SVGEditorWindow>(false, "SVG Asset Editor", true);
 		}
+
+        Bounds assetBounds
+        {
+            get {
+                if(svgAsset.ignoreSVGCanvas)
+                {
+                    return svgAsset.bounds;
+                } else {
+                    Bounds bounds = svgAsset.bounds;
+                    Vector3 size = bounds.size;
+                    Vector2 canvasSize = svgAsset.canvasRectangle.size;
+                    return new Bounds(new Vector3(-originalPivotPoint.x * canvasSize.x + canvasSize.x * 0.5f, originalPivotPoint.y * canvasSize.y - canvasSize.y * 0.5f, bounds.center.z), 
+                                      new Vector3(canvasSize.x, canvasSize.y, bounds.size.z));
+                }
+            }
+        }
 
 		Rect windowRect
 		{
@@ -52,15 +68,35 @@ namespace SVGImporter
 			}
 		}
 
+        void UpdateOriginalPivotPoint()
+        {
+            if(svgAsset != null)
+            {
+                originalPivotPoint = svgAsset.pivotPoint;
+            }
+        }
+
 		void OnEnable()
 		{
             GetSVGAsset();
+            UpdateOriginalPivotPoint();
 			base.minSize = new Vector2(360f, 200f);
 			s_Instance = this;
 			//Undo.undoRedoPerformed = (Undo.UndoRedoCallback)Delegate.Combine(Undo.undoRedoPerformed, new Undo.UndoRedoCallback(this.UndoRedoPerformed));
             CreateCamera();
             CreateSVGRenderer();
 		}
+
+        public void ManualUpdate()
+        {
+            RemoveCamera();
+            RemoveSVGRenderer();
+            CreateCamera();
+            CreateSVGRenderer();
+            OnSelectionChange();
+        }
+
+        long startRepaintTicks;
 
         void OnFocus()
         {
@@ -70,8 +106,8 @@ namespace SVGImporter
 
         void OnSelectionChange()
         {
-            //Debug.Log("OnSelectionChange");
             GetSVGAsset();
+            UpdateOriginalPivotPoint();
             if(_editorRenderer != null){_editorRenderer.vectorGraphics = svgAsset;}
             UpdateEditorRendererPosition();
             Repaint();
@@ -146,7 +182,7 @@ namespace SVGImporter
         RenderTexture GetRenderTexture()
         {            
             float aspect = 1f;
-            if(svgAsset != null) aspect = svgAsset.bounds.size.x / svgAsset.bounds.size.y;
+            if(svgAsset != null) aspect = assetBounds.size.x / assetBounds.size.y;
             _previewResolution = Mathf.CeilToInt(windowRect.width);
 			return RenderTexture.GetTemporary(_previewResolution, 
 			                                  Mathf.CeilToInt(_previewResolution / aspect), 
@@ -190,7 +226,7 @@ namespace SVGImporter
         {
             if(svgAsset != null && _editorRenderer != null && editorCamera != null)
             {
-                _editorRenderer.transform.position = editorCamera.transform.forward * (editorCamera.nearClipPlane + svgAsset.bounds.size.z + 1f) - svgAsset.bounds.center;
+                _editorRenderer.transform.position = editorCamera.transform.forward * (editorCamera.nearClipPlane + assetBounds.size.z + 1f) - assetBounds.center;
             }
         }
         
@@ -200,19 +236,13 @@ namespace SVGImporter
             if(svgAsset == null)
                 return;
 
-            if(latestBounds != svgAsset.bounds || windowRect != latestRect)
-            {              
-                latestBounds = svgAsset.bounds;
-                latestRect = windowRect;
-            }
-
             editorRenderer.vectorGraphics = svgAsset;
 
-            if(latestBounds.size.x > latestBounds.size.y)
+            if(assetBounds.size.x > assetBounds.size.y)
             {
-                editorCamera.orthographicSize = Mathf.Min(latestBounds.size.x, latestBounds.size.y) * 0.5f;
+                editorCamera.orthographicSize = Mathf.Min(assetBounds.size.x, assetBounds.size.y) * 0.5f;
             } else {
-                editorCamera.orthographicSize = Mathf.Max(latestBounds.size.x, latestBounds.size.y) * 0.5f;
+                editorCamera.orthographicSize = Mathf.Max(assetBounds.size.x, assetBounds.size.y) * 0.5f;
             }
 
             _editorRenderer.gameObject.SetActive(true);
@@ -249,11 +279,11 @@ namespace SVGImporter
 
             textureWindowRect = new Rect(windowRect.x, windowRect.y + 16f, windowRect.width - 16f, windowRect.height - 32f);
 
-            float widthScale = windowRect.width / svgAsset.bounds.size.x;
-            float heightScale = windowRect.height / svgAsset.bounds.size.y;
+            float widthScale = windowRect.width / assetBounds.size.x;
+            float heightScale = windowRect.height / assetBounds.size.y;
             float scale = Mathf.Min(widthScale, heightScale);
-            float finalWidth = svgAsset.bounds.size.x * scale;
-            float finalHeight = svgAsset.bounds.size.y * scale;
+            float finalWidth = assetBounds.size.x * scale;
+            float finalHeight = assetBounds.size.y * scale;
 
             textureOrigRect = new Rect(0f, 0f, finalWidth, finalHeight);
             textureRect = new Rect(textureWindowRect.width / 2f - finalWidth * viewZoom / 2f, textureWindowRect.height / 2f - finalHeight * viewZoom / 2f, finalWidth * viewZoom, finalHeight * viewZoom);
@@ -680,6 +710,7 @@ namespace SVGImporter
                 {
                     assetEditor.RevertChanges();
                 }
+                UpdateOriginalPivotPoint();
 			}
 			if (GUILayout.Button("Apply", EditorStyles.toolbarButton, new GUILayoutOption[0]))
             {
@@ -688,6 +719,7 @@ namespace SVGImporter
                 {
                     assetEditor.ApplyChanges();
                 }
+                UpdateOriginalPivotPoint();
             }
 		}
 

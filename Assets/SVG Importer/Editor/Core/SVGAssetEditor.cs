@@ -16,6 +16,9 @@ namespace SVGImporter
 	public class SVGAssetSnapshot
 	{
 		public SVGAssetFormat format;
+        public SVGUseGradients useGradients;
+        public bool antialiasing;
+        public float antialiasingWidth;
 		public SVGMeshCompression meshCompression;
 		public float scale;
 		public float vpm;
@@ -27,6 +30,7 @@ namespace SVGImporter
         public bool sliceMesh;
         public bool generateCollider;
 		public bool keepSVGFile;
+        public bool ignoreSVGCanvas;
         public bool optimizeMesh;
         public bool generateNormals;
         public bool generateTangents;
@@ -52,6 +56,9 @@ namespace SVGImporter
 		{
 			SVGAssetSnapshot snapshot = new SVGAssetSnapshot();
 			snapshot.format = this.format;
+            snapshot.useGradients = this.useGradients;
+            snapshot.antialiasing = this.antialiasing;
+            snapshot.antialiasingWidth = this.antialiasingWidth;
 			snapshot.meshCompression = this.meshCompression;
 			snapshot.scale = this.scale;
 			snapshot.vpm = this.vpm;
@@ -63,6 +70,7 @@ namespace SVGImporter
             snapshot.sliceMesh = this.sliceMesh;
             snapshot.generateCollider = this.generateCollider;
 			snapshot.keepSVGFile = this.keepSVGFile;
+            snapshot.ignoreSVGCanvas = this.ignoreSVGCanvas;
             snapshot.optimizeMesh = this.optimizeMesh;
             snapshot.generateNormals = this.generateNormals;
             snapshot.generateTangents = this.generateTangents;
@@ -72,6 +80,9 @@ namespace SVGImporter
 		public void Apply(SVGAsset svgAsset)
 		{
 			this.format = svgAsset.format;
+            this.useGradients = svgAsset.useGradients;
+            this.antialiasing = svgAsset.antialiasing;
+            this.antialiasingWidth = svgAsset.antialiasingWidth;
 			this.meshCompression = svgAsset.meshCompression;
 			this.scale = svgAsset.scale;
 			this.vpm = svgAsset.vpm;
@@ -83,6 +94,7 @@ namespace SVGImporter
             this.sliceMesh = svgAsset.sliceMesh;
             this.generateCollider = svgAsset.generateCollider;
 			this.keepSVGFile = svgAsset.keepSVGFile;
+            this.ignoreSVGCanvas = svgAsset.ignoreSVGCanvas;
             this.optimizeMesh = svgAsset.optimizeMesh;
             this.generateNormals = svgAsset.generateNormals;
             this.generateTangents = svgAsset.generateTangents;
@@ -91,6 +103,9 @@ namespace SVGImporter
 		public void Apply(SVGAssetSnapshot snapshot)
 		{
 			this.format = snapshot.format;
+            this.useGradients = snapshot.useGradients;
+            this.antialiasing = snapshot.antialiasing;
+            this.antialiasingWidth = snapshot.antialiasingWidth;
 			this.meshCompression = snapshot.meshCompression;
 			this.scale = snapshot.scale;
 			this.vpm = snapshot.vpm;
@@ -102,6 +117,7 @@ namespace SVGImporter
             this.sliceMesh = snapshot.sliceMesh;
             this.generateCollider = snapshot.generateCollider;
 			this.keepSVGFile = snapshot.keepSVGFile;
+            this.ignoreSVGCanvas = snapshot.ignoreSVGCanvas;
             this.optimizeMesh = snapshot.optimizeMesh;
             this.generateNormals = snapshot.generateNormals;
             this.generateTangents = snapshot.generateTangents;
@@ -110,6 +126,9 @@ namespace SVGImporter
 		public void Apply(SerializedObject serializedObject)
 		{
 			this.format = (SVGAssetFormat)serializedObject.FindProperty("_format").enumValueIndex;
+            this.useGradients = (SVGUseGradients)serializedObject.FindProperty("_useGradients").enumValueIndex;
+            this.antialiasing = serializedObject.FindProperty("_antialiasing").boolValue;
+            this.antialiasingWidth = serializedObject.FindProperty("_antialiasingWidth").floatValue;
 			this.meshCompression = (SVGMeshCompression)serializedObject.FindProperty("_meshCompression").enumValueIndex;
 			this.scale = serializedObject.FindProperty("_scale").floatValue;
 			this.vpm = serializedObject.FindProperty("_vpm").floatValue;
@@ -121,6 +140,7 @@ namespace SVGImporter
             this.sliceMesh = serializedObject.FindProperty("_sliceMesh").boolValue;
             this.generateCollider = serializedObject.FindProperty("_generateCollider").boolValue;
 			this.keepSVGFile = serializedObject.FindProperty("_keepSVGFile").boolValue;
+            this.ignoreSVGCanvas = serializedObject.FindProperty("_ignoreSVGCanvas").boolValue;
             this.optimizeMesh = serializedObject.FindProperty("_optimizeMesh").boolValue;
             this.generateNormals = serializedObject.FindProperty("_generateNormals").boolValue;
             this.generateTangents = serializedObject.FindProperty("_generateTangents").boolValue;
@@ -129,6 +149,9 @@ namespace SVGImporter
 		public void ModifySerializedObject(SerializedObject serializedObject)
 		{
 			serializedObject.FindProperty("_format").enumValueIndex = (int)this.format;
+            serializedObject.FindProperty("_useGradients").enumValueIndex = (int)this.useGradients;
+            serializedObject.FindProperty("_antialiasing").boolValue = this.antialiasing;
+            serializedObject.FindProperty("_antialiasingWidth").floatValue = this.antialiasingWidth;
 			serializedObject.FindProperty("_meshCompression").enumValueIndex = (int)this.meshCompression;
 			serializedObject.FindProperty("_scale").floatValue = this.scale;
 			serializedObject.FindProperty("_vpm").floatValue = this.vpm;
@@ -140,6 +163,7 @@ namespace SVGImporter
             serializedObject.FindProperty("_sliceMesh").boolValue = this.sliceMesh;
             serializedObject.FindProperty("_generateCollider").boolValue = this.generateCollider;
 			serializedObject.FindProperty("_keepSVGFile").boolValue = this.keepSVGFile;
+            serializedObject.FindProperty("_ignoreSVGCanvas").boolValue = this.ignoreSVGCanvas;
             serializedObject.FindProperty("_optimizeMesh").boolValue = this.optimizeMesh;
             serializedObject.FindProperty("_generateNormals").boolValue = this.generateNormals;
             serializedObject.FindProperty("_generateTangents").boolValue = this.generateTangents;
@@ -148,6 +172,9 @@ namespace SVGImporter
 		public void ModifySVGAssetSnapshot(SVGAssetSnapshot snapshot)
 		{
 			snapshot.format = this.format;
+            snapshot.useGradients = this.useGradients;
+            snapshot.antialiasing = this.antialiasing;
+            snapshot.antialiasingWidth = this.antialiasingWidth;
 			snapshot.meshCompression = this.meshCompression;
 			snapshot.scale = this.scale;
 			snapshot.vpm = this.vpm;
@@ -159,6 +186,7 @@ namespace SVGImporter
             snapshot.sliceMesh = this.sliceMesh;
             snapshot.generateCollider = this.generateCollider;
 			snapshot.keepSVGFile = this.keepSVGFile;
+            snapshot.ignoreSVGCanvas = this.ignoreSVGCanvas;
             snapshot.optimizeMesh = this.optimizeMesh;
             snapshot.generateNormals = this.generateNormals;
             snapshot.generateTangents = this.generateTangents;
@@ -219,6 +247,9 @@ namespace SVGImporter
         SVGAsset[] assets;
 
         SerializedProperty format;
+        SerializedProperty useGradients;
+        SerializedProperty antialiasing;
+        SerializedProperty antialiasingWidth;
 		SerializedProperty meshCompression;
         SerializedProperty scale;
         SerializedProperty vpm;
@@ -229,6 +260,7 @@ namespace SVGImporter
         //SerializedProperty border;
         SerializedProperty generateCollider;
 		SerializedProperty keepSVGFile;
+        SerializedProperty ignoreSVGCanvas;
         SerializedProperty optimizeMesh;
         SerializedProperty generateNormals;
         SerializedProperty generateTangents;
@@ -300,6 +332,9 @@ namespace SVGImporter
             }
 
             format = serializedObject.FindProperty("_format");
+            useGradients = serializedObject.FindProperty("_useGradients");
+            antialiasing = serializedObject.FindProperty("_antialiasing");
+            antialiasingWidth = serializedObject.FindProperty("_antialiasingWidth");
 			meshCompression = serializedObject.FindProperty("_meshCompression");
             scale = serializedObject.FindProperty("_scale");
             vpm = serializedObject.FindProperty("_vpm");
@@ -310,6 +345,7 @@ namespace SVGImporter
             //border = serializedObject.FindProperty("_border");
             generateCollider = serializedObject.FindProperty("_generateCollider");
 			keepSVGFile = serializedObject.FindProperty("_keepSVGFile");
+            ignoreSVGCanvas = serializedObject.FindProperty("_ignoreSVGCanvas");
             optimizeMesh = serializedObject.FindProperty("_optimizeMesh");
             generateNormals = serializedObject.FindProperty("_generateNormals");
             generateTangents = serializedObject.FindProperty("_generateTangents");
@@ -379,6 +415,25 @@ namespace SVGImporter
             return new Vector2(x / 2f, y / 2f);
         }
 
+        public static GUIContent FORMAT_LABEL = new GUIContent("Format", "The rendering format of the SVG Asset.");
+        public static GUIContent USE_GRADIENTS_LABEL = new GUIContent("Gradients", "Simplify shaders and mesh for specific use case");
+        public static GUIContent ANTIALIASING_LABEL = new GUIContent("Antialiasing", "Use mesh antialiasing for smooth edges, does increase mesh complexity");
+        public static GUIContent ANTIALIASING_WIDTH_LABEL = new GUIContent("Width", "Width of the antialiasing");
+        public static GUIContent MESH_COMPRESSION_LABEL = new GUIContent("Mesh Compression", "Reduce file size of the mesh, but might introduce irregularities and visual artefacts.");
+        public static string MESH_COMPRESSION_HELPBOX_LABEL = "Mesh compression can introduce unwanted visual artefacts.\nThe higher the compression, the higher the risk.";
+        public static GUIContent OPTIMIZE_MESH_LABEL = new GUIContent("Optimize Mesh", "The vertices and indices will be reorderer for better GPU performance.");
+        public static GUIContent SCALE_LABEL = new GUIContent("Scale", "The scale of the mesh relative to the SVG Asset. Does not affect the quality of the mesh");
+        public static GUIContent QUALITY_LABEL = new GUIContent("Quality", "Larger number means better but more complex mesh, Vertex Per Meter represents number of vertices in the SVG Asset that correspond to one unit in world space.");
+        public static GUIContent DEPTH_OFFSET_LABEL = new GUIContent("Depth Offset", "The minimal z-offset in WorldSpace for Opaque Rendering.");
+        public static GUIContent COMPRESS_DEPTH_LABEL = new GUIContent("Compress Depth", "Compresses the overlapping objects to reduce z-offset requirements.");
+        public static GUIContent CUSTOM_PIVOT_LABEL = new GUIContent("Custom Pivot", "Choose the predefined pivot point or the custom pivot point.");
+        public static GUIContent PIVOT_LABEL = new GUIContent("Pivot", "The location of the SVG Asset center point in the original Rect, specified in percents.");
+        public static GUIContent GENERATE_COLLIDER_LABEL = new GUIContent("Generate Collider", "Automatically generates polygon colliders.");
+        public static GUIContent KEEP_SVG_FILE_LABEL = new GUIContent("Keep SVG File", "Keep the SVG file in the final build. This increases the file size.");
+        public static GUIContent IGNORE_SVG_CANVAS_LABEL = new GUIContent("Ignore SVG Canvas", "Trim the document canvas to object bounding box.");
+        public static GUIContent GENERATE_NORMALS_LABEL = new GUIContent("Normals", "Generate normals for lighting effects.");
+        public static GUIContent GENERATE_TANGENTS_LABEL = new GUIContent("Tangents", "Generate Tangents for advanced lighting effects.");
+
         void OnFilesValid()
         {
 			bool valueChanged = false;
@@ -386,37 +441,46 @@ namespace SVGImporter
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.LabelField("Rendering", EditorStyles.boldLabel);
-			EditorGUILayout.PropertyField(format, new GUIContent("Format", "The rendering format of the SVG Asset."));
+            EditorGUILayout.PropertyField(format, FORMAT_LABEL);
+            EditorGUILayout.PropertyField(useGradients, USE_GRADIENTS_LABEL);
+            EditorGUILayout.PropertyField(antialiasing, ANTIALIASING_LABEL);
+            bool useAntialiasing = antialiasing.boolValue || antialiasing.hasMultipleDifferentValues;
+            if(useAntialiasing)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(antialiasingWidth, ANTIALIASING_WIDTH_LABEL);
+                EditorGUI.indentLevel--;
+            }
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Meshes", EditorStyles.boldLabel);
-			EditorGUILayout.PropertyField(meshCompression, new GUIContent("Mesh Compression", "Reduce file size of the mesh, but might introduce irregularities and visual artefacts."));
+			EditorGUILayout.PropertyField(meshCompression, MESH_COMPRESSION_LABEL);
             if(((SVGMeshCompression)meshCompression.enumValueIndex) != SVGMeshCompression.Off)
             {
-                EditorGUILayout.HelpBox("Mesh compression can introduce unwanted visual artefacts.\nThe higher the compression, the higher the risk.", MessageType.Warning);
+                EditorGUILayout.HelpBox(MESH_COMPRESSION_HELPBOX_LABEL, MessageType.Warning);
             }
-            EditorGUILayout.PropertyField(optimizeMesh, new GUIContent("Optimize Mesh", "The vertices and indices will be reorderer for better GPU performance."));
-			EditorGUILayout.PropertyField(scale, new GUIContent("Scale", "The scale of the mesh relative to the SVG Asset. Does not affect the quality of the mesh"));
-			EditorGUILayout.PropertyField(vpm, new GUIContent("Quality", "Larger number means better but more complex mesh, Vertex Per Meter represents number of vertices in the SVG Asset that correspond to one unit in world space."));
+            EditorGUILayout.PropertyField(optimizeMesh, OPTIMIZE_MESH_LABEL);
+            EditorGUILayout.PropertyField(scale, SCALE_LABEL);
+            EditorGUILayout.PropertyField(vpm, QUALITY_LABEL);
 
             if(format.enumValueIndex == (int)SVGAssetFormat.Opaque)
             {
-				EditorGUILayout.PropertyField(depthOffset, new GUIContent("Depth Offset", "The minimal z-offset in WorldSpace for Opaque Rendering."));
-				EditorGUILayout.PropertyField(compressDepth, new GUIContent("Compress Depth", "Compresses the overlapping objects to reduce z-offset requirements."));			
+                EditorGUILayout.PropertyField(depthOffset, DEPTH_OFFSET_LABEL);
+                EditorGUILayout.PropertyField(compressDepth, COMPRESS_DEPTH_LABEL);
             }
 
 
-			EditorGUILayout.PropertyField(customPivotPoint, new GUIContent("Custom Pivot", "Choose the predefined pivot point or the custom pivot point."));
+            EditorGUILayout.PropertyField(customPivotPoint, CUSTOM_PIVOT_LABEL);
             EditorGUILayout.BeginHorizontal();
             if(customPivotPoint.boolValue)
             { 
 				EditorGUILayout.BeginHorizontal();
-				EditorGUILayout.PropertyField(pivotPoint, new GUIContent("Pivot", "The location of the SVG Asset center point in the original Rect, specified in percents."));				
+				EditorGUILayout.PropertyField(pivotPoint, PIVOT_LABEL);
 				EditorGUILayout.EndHorizontal();
             } else {
                 Vector2 pivotPointVector = pivotPoint.vector2Value;
                 int selectedIndex = GetPivotPointIndex(pivotPointVector);
-				selectedIndex = EditorGUILayout.Popup(new GUIContent("Pivot", "The location of the SVG Asset center point in the original Rect, specified in percents."), selectedIndex, anchorPositionContent);
+                selectedIndex = EditorGUILayout.Popup(PIVOT_LABEL, selectedIndex, anchorPositionContent);
                 pivotPoint.vector2Value = GetPivotPoint(selectedIndex);
             }
 
@@ -429,28 +493,31 @@ namespace SVGImporter
             }
             
             EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.PropertyField(generateCollider, new GUIContent("Generate Collider", "Automatically generates polygon colliders."));
-			EditorGUILayout.PropertyField(keepSVGFile, new GUIContent("Keep SVG File", "Keep the SVG file in the final build. This increases the file size"));
+            EditorGUILayout.PropertyField(generateCollider, GENERATE_COLLIDER_LABEL);
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Normals & Tangents", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(generateNormals, new GUIContent("Normals", "Generate normals for lighting effects."));
-            if(!generateNormals.boolValue) 
-                EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.PropertyField(generateTangents, new GUIContent("Tangents", "Generate Tangents for advanced lighting effects."));
+            EditorGUILayout.PropertyField(generateNormals, GENERATE_NORMALS_LABEL);
+            if(!generateNormals.boolValue)  EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.PropertyField(generateTangents, GENERATE_TANGENTS_LABEL);
             if(!generateNormals.boolValue && generateTangents.boolValue)
             {
                 generateTangents.boolValue = false;
             }
-            if(!generateNormals.boolValue) 
-                EditorGUI.EndDisabledGroup();
+            if(!generateNormals.boolValue)  EditorGUI.EndDisabledGroup();
 
-			if(EditorGUI.EndChangeCheck())
-			{
-				valueChanged = true;
-            }
             EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("SVG Document", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(keepSVGFile, KEEP_SVG_FILE_LABEL);
+            EditorGUILayout.PropertyField(ignoreSVGCanvas, IGNORE_SVG_CANVAS_LABEL);
+            EditorGUILayout.Space();
+            
+            if(EditorGUI.EndChangeCheck())
+            {
+                valueChanged = true;
+            }
+
             GUILayout.BeginHorizontal();
 			if(GUILayout.Button(new GUIContent("Recover SVG File", "Save the original SVG Document to a specified directory.")))
             {            
@@ -482,6 +549,7 @@ namespace SVGImporter
             {
                 unappliedChanges = true;
                 serializedObject.ApplyModifiedProperties();
+                RepaintSVGEditorWindow();
             }
             GUILayout.EndHorizontal();
 
@@ -642,6 +710,25 @@ namespace SVGImporter
             EditorGUI.FocusTextInControl(null);
 
             UpdateInstances(this.serializedObject);
+            UpdateSVGEditorWindow();
+        }
+
+        private void UpdateSVGEditorWindow()
+        {
+            SVGEditorWindow svgEditorWindow = SVGEditorWindow.s_Instance;
+            if(svgEditorWindow != null)
+            {
+                svgEditorWindow.ManualUpdate();
+            }
+        }
+
+        private void RepaintSVGEditorWindow()
+        {
+            SVGEditorWindow svgEditorWindow = SVGEditorWindow.s_Instance;
+            if(svgEditorWindow != null)
+            {
+                svgEditorWindow.Repaint();
+            }
         }
 
         private string Format(long ts)
@@ -748,6 +835,7 @@ namespace SVGImporter
 			EditorGUI.FocusTextInControl(null);
 
             UpdateInstances(this.serializedObject);
+            UpdateSVGEditorWindow();
 		}
 
 		public void CreateSnapshot()

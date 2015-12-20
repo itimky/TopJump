@@ -30,6 +30,35 @@ namespace SVGImporter.Utils
             }
         }
 
+        public static void DebugPoints(List<List<Vector3>> path)
+        {
+            GameObject goRoot = new GameObject("Debug Points");
+            for(int i = 0; i < path.Count; i++)
+            {
+                GameObject go = new GameObject("Path");
+                go.transform.SetParent(goRoot.transform);
+                go.AddComponent<SVGDebugPoints>();
+                for(int j = 0; j < path[i].Count; j++)
+                {
+                    GameObject childGo = new GameObject("Point");
+                    childGo.transform.SetParent(go.transform);
+                    Vector3 position = path[i][j];
+                    position.y *= -1f;
+                    childGo.transform.localPosition = position;
+                }
+            }
+        }
+
+        public static void DebugPoints(List<Vector2> path)
+        {
+            DebugPoints(new List<List<Vector2>>(){path});
+        }
+
+        public static void DebugPoints(List<Vector3> path)
+        {
+            DebugPoints(new List<List<Vector3>>(){path});
+        }
+
         public static void DebugSegments(StrokeSegment[] segments)
         {
             GameObject goRoot = new GameObject("Debug Segments");

@@ -203,7 +203,8 @@ namespace SVGImporter.Rendering
 
     		if (alphaKeys != null) {
     			for (int i = 0; i < alphaKeys.Length; i++) {
-                    _hash += "A"+(Mathf.RoundToInt(alphaKeys [i].time * 999)).ToString("000") + alphaKeys [i].alpha.ToString("000");
+//                    Debug.Log(alphaKeys[i]);
+                    _hash += "A"+(Mathf.RoundToInt(alphaKeys [i].time * 999)).ToString("000") + (Mathf.RoundToInt(alphaKeys [i].alpha * 999)).ToString("000");
     			}
     		}		
     	}
