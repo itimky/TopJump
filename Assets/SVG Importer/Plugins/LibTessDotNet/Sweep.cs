@@ -1,5 +1,5 @@
 ﻿/*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 ** Copyright (C) 2011 Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -9,10 +9,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-**
+** 
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software.
+** included in all copies or substantial portions of the Software. 
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -20,7 +20,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-**
+** 
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -58,11 +58,11 @@ namespace SVGImporter.LibTessDotNet
         /// <summary>
         /// Both edges must be directed from right to left (this is the canonical
         /// direction for the upper edge of each region).
-        ///
+        /// 
         /// The strategy is to evaluate a "t" value for each edge at the
         /// current sweep line position, given by tess->event. The calculations
         /// are designed to be very stable, but of course they are not perfect.
-        ///
+        /// 
         /// Special case: if both edge destinations are at the sweep event,
         /// we sort the edges by slope (they would otherwise compare equally).
         /// </summary>
@@ -387,7 +387,7 @@ namespace SVGImporter.LibTessDotNet
         /// Check the upper and lower edge of "regUp", to make sure that the
         /// eUp->Org is above eLo, or eLo->Org is below eUp (depending on which
         /// origin is leftmost).
-        ///
+        /// 
         /// The main purpose is to splice right-going edges with the same
         /// dest vertex and nearly identical slopes (ie. we can't distinguish
         /// the slopes numerically).  However the splicing can also help us
@@ -397,7 +397,7 @@ namespace SVGImporter.LibTessDotNet
         /// a splice operation like this one).  This can change the result of
         /// our test so that now eUp->Org is incident to eLo, or barely below it.
         /// We must correct this condition to maintain the dictionary invariants.
-        ///
+        /// 
         /// One possibility is to check these edges for intersection again
         /// (ie. CheckForIntersect).  This is what we do if possible.  However
         /// CheckForIntersect requires that tess->event lies between eUp and eLo,
@@ -448,12 +448,12 @@ namespace SVGImporter.LibTessDotNet
             }
             return true;
         }
-
+        
         /// <summary>
         /// Check the upper and lower edge of "regUp", to make sure that the
         /// eUp->Dst is above eLo, or eLo->Dst is below eUp (depending on which
         /// destination is rightmost).
-        ///
+        /// 
         /// Theoretically, this should always be true.  However, splitting an edge
         /// into two pieces can change the results of previous tests.  For example,
         /// suppose at one point we checked eUp and eLo, and decided that eUp->Dst
@@ -463,7 +463,7 @@ namespace SVGImporter.LibTessDotNet
         /// We must correct this condition to maintain the dictionary invariants
         /// (otherwise new edges might get inserted in the wrong place in the
         /// dictionary, and bad stuff will happen).
-        ///
+        /// 
         /// We fix the problem by just splicing the offending vertex into the
         /// other edge.
         /// </summary>
@@ -507,7 +507,7 @@ namespace SVGImporter.LibTessDotNet
         /// Check the upper and lower edges of the given region to see if
         /// they intersect.  If so, create the intersection and add it
         /// to the data structures.
-        ///
+        /// 
         /// Returns TRUE if adding the new intersection resulted in a recursive
         /// call to AddRightEdges(); in this case all "dirty" regions have been
         /// checked for intersections, and possibly regUp has been deleted.
@@ -770,7 +770,7 @@ namespace SVGImporter.LibTessDotNet
         /// to the unprocessed portion of the mesh.  Since there are no right-going
         /// edges, two regions (one above vEvent and one below) are being merged
         /// into one.  "regUp" is the upper of these two regions.
-        ///
+        /// 
         /// There are two reasons for doing this (adding a right-going edge):
         ///  - if the two regions being merged are "inside", we must add an edge
         ///    to keep them separated (the combined region would not be monotone).
@@ -778,13 +778,13 @@ namespace SVGImporter.LibTessDotNet
         ///    so that we can merge vEvent with features that we have not seen yet.
         ///    For example, maybe there is a vertical edge which passes just to
         ///    the right of vEvent; we would like to splice vEvent into this edge.
-        ///
+        /// 
         /// However, we don't want to connect vEvent to just any vertex.  We don''t
         /// want the new edge to cross any other edges; otherwise we will create
         /// intersection vertices even when the input data had no self-intersections.
         /// (This is a bad thing; if the user's input data has no intersections,
         /// we don't want to generate any false intersections ourselves.)
-        ///
+        /// 
         /// Our eventual goal is to connect vEvent to the leftmost unprocessed
         /// vertex of the combined region (the union of regUp and regLo).
         /// But because of unseen vertices with all right-going edges, and also
@@ -891,10 +891,10 @@ namespace SVGImporter.LibTessDotNet
         /// to the processed portion of the mesh.  Let R be the active region
         /// containing vEvent, and let U and L be the upper and lower edge
         /// chains of R.  There are two possibilities:
-        ///
+        /// 
         /// - the normal case: split R into two regions, by connecting vEvent to
         ///   the rightmost vertex of U or L lying to the left of the sweep line
-        ///
+        /// 
         /// - the degenerate case: if vEvent is close enough to U or L, we
         ///   merge vEvent into that edge chain.  The subcases are:
         ///     - merging with the rightmost vertex of U or L
@@ -1005,7 +1005,7 @@ namespace SVGImporter.LibTessDotNet
         /// <summary>
         /// Make the sentinel coordinates big enough that they will never be
         /// merged with real input features.
-        ///
+        /// 
         /// We add two sentinel edges above and below all other edges,
         /// to avoid special cases at the top and bottom.
         /// </summary>
@@ -1127,7 +1127,7 @@ namespace SVGImporter.LibTessDotNet
             }
             // Make sure there is enough space for sentinels.
             vertexCount += 8;
-
+    
             _pq = new PriorityQueue<MeshUtils.Vertex>(vertexCount, Geom.VertLeq);
 
             vHead = _mesh._vHead;
@@ -1156,7 +1156,7 @@ namespace SVGImporter.LibTessDotNet
         /// and in CheckForLeftSplice(), where we splice already-processed
         /// edges to ensure that our dictionary invariants are not violated
         /// by numerical errors.
-        ///
+        /// 
         /// In both these cases it is *very* dangerous to delete the offending
         /// edge at the time, since one of the routines further up the stack
         /// will sometimes be keeping a pointer to that edge.
@@ -1193,7 +1193,7 @@ namespace SVGImporter.LibTessDotNet
             // Each vertex defines an event for our sweep line. Start by inserting
             // all the vertices in a priority queue. Events are processed in
             // lexicographic order, ie.
-            //
+            // 
             // e1 < e2  iff  e1.x < e2.x || (e1.x == e2.x && e1.y < e2.y)
             RemoveDegenerateEdges();
             InitPriorityQ();

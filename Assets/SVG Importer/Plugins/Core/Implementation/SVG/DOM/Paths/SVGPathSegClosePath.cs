@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     public class SVGPathSegClosePath : SVGPathSeg
     {
@@ -23,7 +23,7 @@ namespace SVGImporter.Rendering
                 _currentPoint = _previousPoint;
             } else {
                 _currentPoint = value;
-            }
+            } 
             */
         }
     }

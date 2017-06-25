@@ -21,13 +21,22 @@ namespace SVGImporter
         public float frameIndex;
         float lastFrameIndex;
 
-        protected SVGRenderer svgRenderer;
-        protected SVGImage svgImage;
-
-        protected virtual void Awake()
+        protected SVGRenderer _svgRenderer;
+        public SVGRenderer svgRenderer
         {
-            svgRenderer = GetComponent<SVGRenderer>();
-            svgImage = GetComponent<SVGImage>();
+            get {
+                if(_svgRenderer == null) _svgRenderer = GetComponent<SVGRenderer>();
+                return _svgRenderer;
+            }
+        }
+
+        protected SVGImage _svgImage;
+        public SVGImage svgImage
+        {
+            get {
+                if(_svgImage == null) _svgImage = GetComponent<SVGImage>();
+                return _svgImage;
+            }
         }
 
         protected virtual void OnEnable()
@@ -57,7 +66,7 @@ namespace SVGImporter
             }
         }
 
-        void LateUpdate()
+    	void LateUpdate()
         {
             if(frameIndex != lastFrameIndex)
             {

@@ -13,185 +13,185 @@ using System.Reflection;
 
 namespace SVGImporter
 {
-    public class SVGAssetSnapshot
-    {
-        public SVGAssetFormat format;
+	public class SVGAssetSnapshot
+	{
+		public SVGAssetFormat format;
         public SVGUseGradients useGradients;
         public bool antialiasing;
-        public float antialiasingWidth;
-        public SVGMeshCompression meshCompression;
-        public float scale;
-        public float vpm;
-        public float depthOffset;
-        public bool compressDepth;
-        public bool customPivotPoint;
-        public Vector2 pivotPoint;
+		public SVGMeshCompression meshCompression;
+		public float scale;
+		public float vpm;
+		public float depthOffset;
+		public bool compressDepth;
+		public bool customPivotPoint;
+		public Vector2 pivotPoint;
         public Vector4 border;
         public bool sliceMesh;
         public bool generateCollider;
-        public bool keepSVGFile;
+		public bool keepSVGFile;
+		public bool useLayers;
         public bool ignoreSVGCanvas;
         public bool optimizeMesh;
         public bool generateNormals;
         public bool generateTangents;
 
-        public SVGAssetSnapshot(){}
+		public SVGAssetSnapshot(){}
+		
+		public SVGAssetSnapshot(SVGAsset svgAsset)
+		{
+			Apply(svgAsset);
+		}
 
-        public SVGAssetSnapshot(SVGAsset svgAsset)
-        {
-            Apply(svgAsset);
-        }
+		public SVGAssetSnapshot(SVGAssetSnapshot snapshot)
+		{
+			Apply(snapshot);
+		}
 
-        public SVGAssetSnapshot(SVGAssetSnapshot snapshot)
-        {
-            Apply(snapshot);
-        }
+		public SVGAssetSnapshot(SerializedObject serializedObject)
+		{
+			Apply(serializedObject);
+		}
 
-        public SVGAssetSnapshot(SerializedObject serializedObject)
-        {
-            Apply(serializedObject);
-        }
-
-        public SVGAssetSnapshot Clone()
-        {
-            SVGAssetSnapshot snapshot = new SVGAssetSnapshot();
-            snapshot.format = this.format;
+		public SVGAssetSnapshot Clone()
+		{
+			SVGAssetSnapshot snapshot = new SVGAssetSnapshot();
+			snapshot.format = this.format;
             snapshot.useGradients = this.useGradients;
             snapshot.antialiasing = this.antialiasing;
-            snapshot.antialiasingWidth = this.antialiasingWidth;
-            snapshot.meshCompression = this.meshCompression;
-            snapshot.scale = this.scale;
-            snapshot.vpm = this.vpm;
-            snapshot.depthOffset = this.depthOffset;
-            snapshot.compressDepth = this.compressDepth;
-            snapshot.customPivotPoint = this.customPivotPoint;
-            snapshot.pivotPoint = this.pivotPoint;
+			snapshot.meshCompression = this.meshCompression;
+			snapshot.scale = this.scale;
+			snapshot.vpm = this.vpm;
+			snapshot.depthOffset = this.depthOffset;
+			snapshot.compressDepth = this.compressDepth;
+			snapshot.customPivotPoint = this.customPivotPoint;
+			snapshot.pivotPoint = this.pivotPoint;
             snapshot.border = this.border;
             snapshot.sliceMesh = this.sliceMesh;
             snapshot.generateCollider = this.generateCollider;
-            snapshot.keepSVGFile = this.keepSVGFile;
+			snapshot.keepSVGFile = this.keepSVGFile;
+			snapshot.useLayers = this.useLayers;
             snapshot.ignoreSVGCanvas = this.ignoreSVGCanvas;
             snapshot.optimizeMesh = this.optimizeMesh;
             snapshot.generateNormals = this.generateNormals;
             snapshot.generateTangents = this.generateTangents;
-            return snapshot;
-        }
+			return snapshot;
+		}
 
-        public void Apply(SVGAsset svgAsset)
-        {
-            this.format = svgAsset.format;
+		public void Apply(SVGAsset svgAsset)
+		{
+			this.format = svgAsset.format;
             this.useGradients = svgAsset.useGradients;
             this.antialiasing = svgAsset.antialiasing;
-            this.antialiasingWidth = svgAsset.antialiasingWidth;
-            this.meshCompression = svgAsset.meshCompression;
-            this.scale = svgAsset.scale;
-            this.vpm = svgAsset.vpm;
-            this.depthOffset = svgAsset.depthOffset;
-            this.compressDepth = svgAsset.compressDepth;
-            this.customPivotPoint = svgAsset.customPivotPoint;
-            this.pivotPoint = svgAsset.pivotPoint;
+			this.meshCompression = svgAsset.meshCompression;
+			this.scale = svgAsset.scale;
+			this.vpm = svgAsset.vpm;
+			this.depthOffset = svgAsset.depthOffset;
+			this.compressDepth = svgAsset.compressDepth;
+			this.customPivotPoint = svgAsset.customPivotPoint;
+			this.pivotPoint = svgAsset.pivotPoint;
             this.border = svgAsset.border;
             this.sliceMesh = svgAsset.sliceMesh;
             this.generateCollider = svgAsset.generateCollider;
-            this.keepSVGFile = svgAsset.keepSVGFile;
+			this.keepSVGFile = svgAsset.keepSVGFile;
+			this.useLayers = svgAsset.useLayers;
             this.ignoreSVGCanvas = svgAsset.ignoreSVGCanvas;
             this.optimizeMesh = svgAsset.optimizeMesh;
             this.generateNormals = svgAsset.generateNormals;
             this.generateTangents = svgAsset.generateTangents;
-        }
+		}
 
-        public void Apply(SVGAssetSnapshot snapshot)
-        {
-            this.format = snapshot.format;
+		public void Apply(SVGAssetSnapshot snapshot)
+		{
+			this.format = snapshot.format;
             this.useGradients = snapshot.useGradients;
             this.antialiasing = snapshot.antialiasing;
-            this.antialiasingWidth = snapshot.antialiasingWidth;
-            this.meshCompression = snapshot.meshCompression;
-            this.scale = snapshot.scale;
-            this.vpm = snapshot.vpm;
-            this.depthOffset = snapshot.depthOffset;
-            this.compressDepth = snapshot.compressDepth;
-            this.customPivotPoint = snapshot.customPivotPoint;
-            this.pivotPoint = snapshot.pivotPoint;
+			this.meshCompression = snapshot.meshCompression;
+			this.scale = snapshot.scale;
+			this.vpm = snapshot.vpm;
+			this.depthOffset = snapshot.depthOffset;
+			this.compressDepth = snapshot.compressDepth;
+			this.customPivotPoint = snapshot.customPivotPoint;
+			this.pivotPoint = snapshot.pivotPoint;
             this.border = snapshot.border;
             this.sliceMesh = snapshot.sliceMesh;
             this.generateCollider = snapshot.generateCollider;
-            this.keepSVGFile = snapshot.keepSVGFile;
+			this.keepSVGFile = snapshot.keepSVGFile;
+			this.useLayers = snapshot.useLayers;
             this.ignoreSVGCanvas = snapshot.ignoreSVGCanvas;
             this.optimizeMesh = snapshot.optimizeMesh;
             this.generateNormals = snapshot.generateNormals;
             this.generateTangents = snapshot.generateTangents;
-        }
-
-        public void Apply(SerializedObject serializedObject)
-        {
-            this.format = (SVGAssetFormat)serializedObject.FindProperty("_format").enumValueIndex;
+		}
+		
+		public void Apply(SerializedObject serializedObject)
+		{
+			this.format = (SVGAssetFormat)serializedObject.FindProperty("_format").enumValueIndex;
             this.useGradients = (SVGUseGradients)serializedObject.FindProperty("_useGradients").enumValueIndex;
             this.antialiasing = serializedObject.FindProperty("_antialiasing").boolValue;
-            this.antialiasingWidth = serializedObject.FindProperty("_antialiasingWidth").floatValue;
-            this.meshCompression = (SVGMeshCompression)serializedObject.FindProperty("_meshCompression").enumValueIndex;
-            this.scale = serializedObject.FindProperty("_scale").floatValue;
-            this.vpm = serializedObject.FindProperty("_vpm").floatValue;
-            this.depthOffset = serializedObject.FindProperty("_depthOffset").floatValue;
-            this.compressDepth = serializedObject.FindProperty("_compressDepth").boolValue;
-            this.customPivotPoint = serializedObject.FindProperty("_customPivotPoint").boolValue;
-            this.pivotPoint = serializedObject.FindProperty("_pivotPoint").vector2Value;
+			this.meshCompression = (SVGMeshCompression)serializedObject.FindProperty("_meshCompression").enumValueIndex;
+			this.scale = serializedObject.FindProperty("_scale").floatValue;
+			this.vpm = serializedObject.FindProperty("_vpm").floatValue;
+			this.depthOffset = serializedObject.FindProperty("_depthOffset").floatValue;
+			this.compressDepth = serializedObject.FindProperty("_compressDepth").boolValue;
+			this.customPivotPoint = serializedObject.FindProperty("_customPivotPoint").boolValue;
+			this.pivotPoint = serializedObject.FindProperty("_pivotPoint").vector2Value;
             this.border = serializedObject.FindProperty("_border").vector4Value;
             this.sliceMesh = serializedObject.FindProperty("_sliceMesh").boolValue;
             this.generateCollider = serializedObject.FindProperty("_generateCollider").boolValue;
-            this.keepSVGFile = serializedObject.FindProperty("_keepSVGFile").boolValue;
+			this.keepSVGFile = serializedObject.FindProperty("_keepSVGFile").boolValue;
+			this.useLayers = serializedObject.FindProperty("_useLayers").boolValue;
             this.ignoreSVGCanvas = serializedObject.FindProperty("_ignoreSVGCanvas").boolValue;
             this.optimizeMesh = serializedObject.FindProperty("_optimizeMesh").boolValue;
             this.generateNormals = serializedObject.FindProperty("_generateNormals").boolValue;
             this.generateTangents = serializedObject.FindProperty("_generateTangents").boolValue;
-        }
+		}
 
-        public void ModifySerializedObject(SerializedObject serializedObject)
-        {
-            serializedObject.FindProperty("_format").enumValueIndex = (int)this.format;
+		public void ModifySerializedObject(SerializedObject serializedObject)
+		{
+			serializedObject.FindProperty("_format").enumValueIndex = (int)this.format;
             serializedObject.FindProperty("_useGradients").enumValueIndex = (int)this.useGradients;
             serializedObject.FindProperty("_antialiasing").boolValue = this.antialiasing;
-            serializedObject.FindProperty("_antialiasingWidth").floatValue = this.antialiasingWidth;
-            serializedObject.FindProperty("_meshCompression").enumValueIndex = (int)this.meshCompression;
-            serializedObject.FindProperty("_scale").floatValue = this.scale;
-            serializedObject.FindProperty("_vpm").floatValue = this.vpm;
-            serializedObject.FindProperty("_depthOffset").floatValue = this.depthOffset;
-            serializedObject.FindProperty("_compressDepth").boolValue = this.compressDepth;
-            serializedObject.FindProperty("_customPivotPoint").boolValue = this.customPivotPoint;
-            serializedObject.FindProperty("_pivotPoint").vector2Value = this.pivotPoint;
+			serializedObject.FindProperty("_meshCompression").enumValueIndex = (int)this.meshCompression;
+			serializedObject.FindProperty("_scale").floatValue = this.scale;
+			serializedObject.FindProperty("_vpm").floatValue = this.vpm;
+			serializedObject.FindProperty("_depthOffset").floatValue = this.depthOffset;
+			serializedObject.FindProperty("_compressDepth").boolValue = this.compressDepth;
+			serializedObject.FindProperty("_customPivotPoint").boolValue = this.customPivotPoint;
+			serializedObject.FindProperty("_pivotPoint").vector2Value = this.pivotPoint;
             serializedObject.FindProperty("_border").vector4Value = this.border;
             serializedObject.FindProperty("_sliceMesh").boolValue = this.sliceMesh;
             serializedObject.FindProperty("_generateCollider").boolValue = this.generateCollider;
-            serializedObject.FindProperty("_keepSVGFile").boolValue = this.keepSVGFile;
+			serializedObject.FindProperty("_keepSVGFile").boolValue = this.keepSVGFile;
+			serializedObject.FindProperty("_useLayers").boolValue = this.useLayers;
             serializedObject.FindProperty("_ignoreSVGCanvas").boolValue = this.ignoreSVGCanvas;
             serializedObject.FindProperty("_optimizeMesh").boolValue = this.optimizeMesh;
             serializedObject.FindProperty("_generateNormals").boolValue = this.generateNormals;
             serializedObject.FindProperty("_generateTangents").boolValue = this.generateTangents;
-        }
+		}
 
-        public void ModifySVGAssetSnapshot(SVGAssetSnapshot snapshot)
-        {
-            snapshot.format = this.format;
+		public void ModifySVGAssetSnapshot(SVGAssetSnapshot snapshot)
+		{
+			snapshot.format = this.format;
             snapshot.useGradients = this.useGradients;
             snapshot.antialiasing = this.antialiasing;
-            snapshot.antialiasingWidth = this.antialiasingWidth;
-            snapshot.meshCompression = this.meshCompression;
-            snapshot.scale = this.scale;
-            snapshot.vpm = this.vpm;
-            snapshot.depthOffset = this.depthOffset;
-            snapshot.compressDepth = this.compressDepth;
-            snapshot.customPivotPoint = this.customPivotPoint;
-            snapshot.pivotPoint = this.pivotPoint;
+			snapshot.meshCompression = this.meshCompression;
+			snapshot.scale = this.scale;
+			snapshot.vpm = this.vpm;
+			snapshot.depthOffset = this.depthOffset;
+			snapshot.compressDepth = this.compressDepth;
+			snapshot.customPivotPoint = this.customPivotPoint;
+			snapshot.pivotPoint = this.pivotPoint;
             snapshot.border = this.border;
             snapshot.sliceMesh = this.sliceMesh;
             snapshot.generateCollider = this.generateCollider;
-            snapshot.keepSVGFile = this.keepSVGFile;
+			snapshot.keepSVGFile = this.keepSVGFile;
+			snapshot.useLayers = this.useLayers;
             snapshot.ignoreSVGCanvas = this.ignoreSVGCanvas;
             snapshot.optimizeMesh = this.optimizeMesh;
             snapshot.generateNormals = this.generateNormals;
             snapshot.generateTangents = this.generateTangents;
-        }
-    }
+		}
+	}
 
     [CanEditMultipleObjects]
     [CustomEditor(typeof(SVGAsset))]
@@ -230,7 +230,7 @@ namespace SVGImporter
                     output = EditorPrefs.GetString(SVGAsset_LastMeshSaveKey);
                     if(string.IsNullOrEmpty(output))
                         return null;
-
+                    
                     if(!Directory.Exists(output))
                         return null;
                 }
@@ -241,7 +241,7 @@ namespace SVGImporter
             }
         }
 
-        SVGAssetSnapshot[] svgAssetSnapshots;
+		SVGAssetSnapshot[] svgAssetSnapshots;
 
         SVGAsset asset;
         SVGAsset[] assets;
@@ -249,8 +249,7 @@ namespace SVGImporter
         SerializedProperty format;
         SerializedProperty useGradients;
         SerializedProperty antialiasing;
-        SerializedProperty antialiasingWidth;
-        SerializedProperty meshCompression;
+		SerializedProperty meshCompression;
         SerializedProperty scale;
         SerializedProperty vpm;
         SerializedProperty depthOffset;
@@ -259,7 +258,8 @@ namespace SVGImporter
         SerializedProperty pivotPoint;
         //SerializedProperty border;
         SerializedProperty generateCollider;
-        SerializedProperty keepSVGFile;
+		SerializedProperty keepSVGFile;
+		SerializedProperty useLayers;
         SerializedProperty ignoreSVGCanvas;
         SerializedProperty optimizeMesh;
         SerializedProperty generateNormals;
@@ -280,10 +280,10 @@ namespace SVGImporter
             "Bottom Right"
         };
 
-        public static GUIContent[] anchorPositionContent;
+		public static GUIContent[] anchorPositionContent;
 
         static SVGAsset CreateAsset()
-        {
+        {       
             SVGAsset tempAsset = SVGAsset.CreateInstance<SVGAsset>();
             return tempAsset;
         }
@@ -303,11 +303,11 @@ namespace SVGImporter
             Instance = this;
             asset = (SVGAsset)serializedObject.targetObject;
 
-            anchorPositionContent = new GUIContent[anchorPosition.Length];
-            for(int i = 0; i < anchorPosition.Length; i++)
-            {
-                anchorPositionContent[i] = new GUIContent(anchorPosition[i]);
-            }
+			anchorPositionContent = new GUIContent[anchorPosition.Length];
+			for(int i = 0; i < anchorPosition.Length; i++)
+			{
+				anchorPositionContent[i] = new GUIContent(anchorPosition[i]);
+			}
 
             if(serializedObject.isEditingMultipleObjects)
             {
@@ -334,8 +334,7 @@ namespace SVGImporter
             format = serializedObject.FindProperty("_format");
             useGradients = serializedObject.FindProperty("_useGradients");
             antialiasing = serializedObject.FindProperty("_antialiasing");
-            antialiasingWidth = serializedObject.FindProperty("_antialiasingWidth");
-            meshCompression = serializedObject.FindProperty("_meshCompression");
+			meshCompression = serializedObject.FindProperty("_meshCompression");
             scale = serializedObject.FindProperty("_scale");
             vpm = serializedObject.FindProperty("_vpm");
             depthOffset = serializedObject.FindProperty("_depthOffset");
@@ -344,7 +343,8 @@ namespace SVGImporter
             pivotPoint = serializedObject.FindProperty("_pivotPoint");
             //border = serializedObject.FindProperty("_border");
             generateCollider = serializedObject.FindProperty("_generateCollider");
-            keepSVGFile = serializedObject.FindProperty("_keepSVGFile");
+			keepSVGFile = serializedObject.FindProperty("_keepSVGFile");
+			useLayers = serializedObject.FindProperty("_useLayers");
             ignoreSVGCanvas = serializedObject.FindProperty("_ignoreSVGCanvas");
             optimizeMesh = serializedObject.FindProperty("_optimizeMesh");
             generateNormals = serializedObject.FindProperty("_generateNormals");
@@ -418,7 +418,7 @@ namespace SVGImporter
         public static GUIContent FORMAT_LABEL = new GUIContent("Format", "The rendering format of the SVG Asset.");
         public static GUIContent USE_GRADIENTS_LABEL = new GUIContent("Gradients", "Simplify shaders and mesh for specific use case");
         public static GUIContent ANTIALIASING_LABEL = new GUIContent("Antialiasing", "Use mesh antialiasing for smooth edges, does increase mesh complexity");
-        public static GUIContent ANTIALIASING_WIDTH_LABEL = new GUIContent("Width", "Width of the antialiasing");
+		public static GUIContent ANTIALIASING_WIDTH_LABEL = new GUIContent("Antialiasing Width", "Increase or decrease the antialiasing width per pixel");
         public static GUIContent MESH_COMPRESSION_LABEL = new GUIContent("Mesh Compression", "Reduce file size of the mesh, but might introduce irregularities and visual artefacts.");
         public static string MESH_COMPRESSION_HELPBOX_LABEL = "Mesh compression can introduce unwanted visual artefacts.\nThe higher the compression, the higher the risk.";
         public static GUIContent OPTIMIZE_MESH_LABEL = new GUIContent("Optimize Mesh", "The vertices and indices will be reorderer for better GPU performance.");
@@ -430,31 +430,25 @@ namespace SVGImporter
         public static GUIContent PIVOT_LABEL = new GUIContent("Pivot", "The location of the SVG Asset center point in the original Rect, specified in percents.");
         public static GUIContent GENERATE_COLLIDER_LABEL = new GUIContent("Generate Collider", "Automatically generates polygon colliders.");
         public static GUIContent KEEP_SVG_FILE_LABEL = new GUIContent("Keep SVG File", "Keep the SVG file in the final build. This increases the file size.");
+		public static GUIContent USE_LAYERS_LABEL = new GUIContent("Use Layers", "Store individual SVG Layers for further modification. This discards stored Mesh.");
         public static GUIContent IGNORE_SVG_CANVAS_LABEL = new GUIContent("Ignore SVG Canvas", "Trim the document canvas to object bounding box.");
         public static GUIContent GENERATE_NORMALS_LABEL = new GUIContent("Normals", "Generate normals for lighting effects.");
         public static GUIContent GENERATE_TANGENTS_LABEL = new GUIContent("Tangents", "Generate Tangents for advanced lighting effects.");
 
         void OnFilesValid()
         {
-            bool valueChanged = false;
+			bool valueChanged = false;
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.LabelField("Rendering", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(format, FORMAT_LABEL);
             EditorGUILayout.PropertyField(useGradients, USE_GRADIENTS_LABEL);
-            EditorGUILayout.PropertyField(antialiasing, ANTIALIASING_LABEL);
-            bool useAntialiasing = antialiasing.boolValue || antialiasing.hasMultipleDifferentValues;
-            if(useAntialiasing)
-            {
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(antialiasingWidth, ANTIALIASING_WIDTH_LABEL);
-                EditorGUI.indentLevel--;
-            }
+            EditorGUILayout.PropertyField(antialiasing, ANTIALIASING_LABEL);            
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Meshes", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(meshCompression, MESH_COMPRESSION_LABEL);
+			EditorGUILayout.PropertyField(meshCompression, MESH_COMPRESSION_LABEL);
             if(((SVGMeshCompression)meshCompression.enumValueIndex) != SVGMeshCompression.Off)
             {
                 EditorGUILayout.HelpBox(MESH_COMPRESSION_HELPBOX_LABEL, MessageType.Warning);
@@ -473,10 +467,10 @@ namespace SVGImporter
             EditorGUILayout.PropertyField(customPivotPoint, CUSTOM_PIVOT_LABEL);
             EditorGUILayout.BeginHorizontal();
             if(customPivotPoint.boolValue)
-            {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(pivotPoint, PIVOT_LABEL);
-                EditorGUILayout.EndHorizontal();
+            { 
+				EditorGUILayout.BeginHorizontal();
+				EditorGUILayout.PropertyField(pivotPoint, PIVOT_LABEL);
+				EditorGUILayout.EndHorizontal();
             } else {
                 Vector2 pivotPointVector = pivotPoint.vector2Value;
                 int selectedIndex = GetPivotPointIndex(pivotPointVector);
@@ -491,7 +485,7 @@ namespace SVGImporter
                     SVGEditorWindow.GetWindow();
                 }
             }
-
+            
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(generateCollider, GENERATE_COLLIDER_LABEL);
             EditorGUILayout.Space();
@@ -510,17 +504,18 @@ namespace SVGImporter
 
             EditorGUILayout.LabelField("SVG Document", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(keepSVGFile, KEEP_SVG_FILE_LABEL);
+			EditorGUILayout.PropertyField(useLayers, USE_LAYERS_LABEL);
             EditorGUILayout.PropertyField(ignoreSVGCanvas, IGNORE_SVG_CANVAS_LABEL);
             EditorGUILayout.Space();
-
+            
             if(EditorGUI.EndChangeCheck())
             {
                 valueChanged = true;
             }
 
             GUILayout.BeginHorizontal();
-            if(GUILayout.Button(new GUIContent("Recover SVG File", "Save the original SVG Document to a specified directory.")))
-            {
+			if(GUILayout.Button(new GUIContent("Recover SVG File", "Save the original SVG Document to a specified directory.")))
+            {            
                 if(serializedObject.isEditingMultipleObjects)
                 {
                     for(int i = 0; i < assets.Length; i++)
@@ -532,8 +527,8 @@ namespace SVGImporter
                 }
             }
 
-            if(GUILayout.Button(new GUIContent("Save Mesh File", "Save the mesh asset to a specified directory.")))
-            {
+			if(GUILayout.Button(new GUIContent("Save Mesh File", "Save the mesh asset to a specified directory.")))
+            {            
                 if(serializedObject.isEditingMultipleObjects)
                 {
                     for(int i = 0; i < assets.Length; i++)
@@ -545,7 +540,7 @@ namespace SVGImporter
                 }
             }
 
-            if(valueChanged)
+			if(valueChanged)
             {
                 unappliedChanges = true;
                 serializedObject.ApplyModifiedProperties();
@@ -553,17 +548,17 @@ namespace SVGImporter
             }
             GUILayout.EndHorizontal();
 
-            EditorGUILayout.Space();
+			EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUI.enabled = unappliedChanges && !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode;
 
-            if(GUILayout.Button(new GUIContent("Revert", "Revert all changes.")))
+			if(GUILayout.Button(new GUIContent("Revert", "Revert all changes.")))
             {
-                RevertChanges();
+				RevertChanges();
             }
 
-            if (GUILayout.Button(new GUIContent("Apply", "Apply all changes.")))
+			if (GUILayout.Button(new GUIContent("Apply", "Apply all changes.")))
             {
                 serializedObject.ApplyModifiedProperties();
                 ApplyChanges();
@@ -625,7 +620,7 @@ namespace SVGImporter
             string lastPath = lastSVGRecoveryPath;
             if(string.IsNullOrEmpty(lastPath))
             {
-                lastPath = assetPath;
+                lastPath = assetPath;           
             } else {
                 lastPath += "/";
             }
@@ -644,7 +639,7 @@ namespace SVGImporter
             string lastPath = lastMeshSavePath;
             if(string.IsNullOrEmpty(lastPath))
             {
-                lastPath = assetPath;
+                lastPath = assetPath;           
             } else {
                 lastPath += "/";
             }
@@ -763,7 +758,7 @@ namespace SVGImporter
             Texture image = this.m_PreviewUtility.EndPreview();
             GUI.DrawTexture(rect, image, ScaleMode.StretchToFill, false);
         }
-
+        
         public override void OnPreviewSettings()
         {
             if (!ShaderUtil.hardwareSupportsRectRenderTexture)
@@ -774,9 +769,9 @@ namespace SVGImporter
             this.Init();
         }
 
-        void DoRenderPreview()
-        {
-            SVGEditorWindow.DoRenderPreview(target as SVGAsset, m_PreviewUtility);
+		void DoRenderPreview()
+        {            
+			SVGEditorWindow.DoRenderPreview(target as SVGAsset, m_PreviewUtility);
         }
 
         public override Texture2D RenderStaticPreview(string assetPath, UnityEngine.Object[] subAssets, int width, int height)
@@ -787,7 +782,6 @@ namespace SVGImporter
             }
             if(width <= 20 || height <= 20)
             {
-                Debug.Log("RenderStaticPreview");
                 return SVGImporterEditor.settings.defaultSVGIcon;
             } else {
                 this.Init();
@@ -798,7 +792,7 @@ namespace SVGImporter
         }
 
         public override string GetInfoString()
-        {
+        {        
             string editorInfo = "";
 
             if(serializedObject.isEditingMultipleObjects)
@@ -817,46 +811,54 @@ namespace SVGImporter
             return editorInfo;
         }
 
-        public void RevertChanges()
-        {
-            for(int i = 0; i < svgAssetSnapshots.Length; i++)
-            {
-                SerializedObject serializedObject = new SerializedObject(targets[i]);
-                svgAssetSnapshots[i].ModifySerializedObject(serializedObject);
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-            }
+		public void RevertChanges()
+		{
+			for(int i = 0; i < svgAssetSnapshots.Length; i++)
+			{
+				SerializedObject serializedObject = new SerializedObject(targets[i]);
+				svgAssetSnapshots[i].ModifySerializedObject(serializedObject);
+				serializedObject.ApplyModifiedProperties();
+				serializedObject.Update();
+			}
 
-            this.serializedObject.SetIsDifferentCacheDirty();
-            this.serializedObject.Update();
-            unappliedChanges = false;
+			this.serializedObject.SetIsDifferentCacheDirty();
+			this.serializedObject.Update();
+			unappliedChanges = false;
 
-            GUI.FocusControl(null);
-            EditorGUI.FocusTextInControl(null);
+			GUI.FocusControl(null);
+			EditorGUI.FocusTextInControl(null);
 
             UpdateInstances(this.serializedObject);
             UpdateSVGEditorWindow();
-        }
+		}
 
-        public void CreateSnapshot()
-        {
-            if(serializedObject.isEditingMultipleObjects)
-            {
-                int targetLength = serializedObject.targetObjects.Length;
-                svgAssetSnapshots = new SVGAssetSnapshot[targetLength];
-                for(int i = 0; i < targetLength; i++)
-                {
-                    svgAssetSnapshots[i] = new SVGAssetSnapshot((SVGAsset)targets[i]);
-                }
-            } else {
-                svgAssetSnapshots = new SVGAssetSnapshot[]{ new SVGAssetSnapshot(serializedObject) };
-            }
-        }
+		public void CreateSnapshot()
+		{			
+			if(serializedObject.isEditingMultipleObjects)
+			{
+				int targetLength = serializedObject.targetObjects.Length;
+				svgAssetSnapshots = new SVGAssetSnapshot[targetLength];
+				for(int i = 0; i < targetLength; i++)
+				{
+					svgAssetSnapshots[i] = new SVGAssetSnapshot((SVGAsset)targets[i]);
+				}
+			} else {
+				svgAssetSnapshots = new SVGAssetSnapshot[]{ new SVGAssetSnapshot(serializedObject) };
+			}
+		}
 
         protected string GetEditorInfo(SVGAsset asset)
         {
             PropertyInfo _editor_Info = typeof(SVGAsset).GetProperty("_editor_Info", BindingFlags.NonPublic | BindingFlags.Instance);
-            return (string)_editor_Info.GetValue(asset, new object[0]);
+			string output = (string)_editor_Info.GetValue(asset, new object[0]);
+
+			var fileInfo = new System.IO.FileInfo(UnityEditor.AssetDatabase.GetAssetPath(asset));
+			if(fileInfo != null)
+			{
+				output += ", FileSize: "+string.Format(new SVGImporter.Utils.FileSizeFormatProvider(), "{0:fs}", fileInfo.Length);
+			}
+
+			return output;
         }
 
         protected SVGError[] GetEditorErrors(SVGAsset asset)
@@ -867,7 +869,7 @@ namespace SVGImporter
 
 
         public static void UpdateInstances(SerializedObject serializedObject)
-        {
+        {            
             if(serializedObject == null)
                 return;
 
@@ -878,8 +880,8 @@ namespace SVGImporter
                 {
                     svgAssets[i] = serializedObject.targetObjects[i] as SVGAsset;
                 }
-
-                UpdateInstances(svgAssets);
+                
+				UpdateInstances(svgAssets);
             }
         }
 
@@ -909,6 +911,25 @@ namespace SVGImporter
                     }
                 }
             }
+
+			SVGRenderer[] svgRenderers = Resources.FindObjectsOfTypeAll<SVGRenderer>();
+			if(svgRenderers != null && svgRenderers.Length > 0)
+			{
+				for(int i = 0; i < svgRenderers.Length; i++)
+				{
+					if(AssetDatabase.Contains(svgRenderers[i]))
+						continue;
+					
+					for(int j = 0; j < svgAssets.Length; j++)
+					{
+						if(svgAssets[j] == null)
+							continue;
+						
+						if(svgRenderers[i] == null || svgRenderers[i].vectorGraphics != svgAssets[j]) continue;
+						svgRenderers[i].UpdateRenderer();
+					}
+				}
+			}
         }
     }
 }

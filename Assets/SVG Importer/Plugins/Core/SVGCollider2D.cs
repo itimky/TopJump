@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter
+namespace SVGImporter 
 {
     using Rendering;
     using Utils;
@@ -15,7 +15,7 @@ namespace SVGImporter
     [RequireComponent(typeof(SVGRenderer))]
     [RequireComponent(typeof(PolygonCollider2D))]
     [AddComponentMenu("Physics 2D/SVG Collider 2D", 20)]
-    public class SVGCollider2D : MonoBehaviour
+    public class SVGCollider2D : MonoBehaviour 
     {
         [Range(0f, 1f)]
         [SerializeField]

@@ -85,21 +85,16 @@ namespace SVGImporter.Rendering
 
         public static SVGMatrix GetRootViewBoxTransform(AttributeList attributeList, ref Rect viewport)
         {
-            SVGMatrix matrix = new SVGMatrix();
-
-            float x = 0.0f;
-            float y = 0.0f;
-            float w = 0.0f;
-            float h = 0.0f;
+            SVGMatrix matrix = SVGMatrix.identity;
 
             string attrXString = attributeList.GetValue("x");
             string attrYString = attributeList.GetValue("y");
             string attrWidthString = attributeList.GetValue("width");
             string attrHeightString = attributeList.GetValue("height");
-
-            SVGLength   attrX = new SVGLength(SVGLengthType.PX, 0f), attrY = new SVGLength(SVGLengthType.PX, 0f),
+            
+            SVGLength   attrX = new SVGLength(SVGLengthType.PX, 0f), attrY = new SVGLength(SVGLengthType.PX, 0f), 
             attrWidth = new SVGLength(SVGLengthType.PX, 1f), attrHeight = new SVGLength(SVGLengthType.PX, 1f);
-
+            
             if(!string.IsNullOrEmpty(attrXString))
             {
                 attrX = new SVGLength(attrXString);
@@ -116,7 +111,7 @@ namespace SVGImporter.Rendering
             {
                 attrHeight = new SVGLength(attrHeightString);
             }
-
+            
             string viewBox = attributeList.GetValue("viewBox");
             if (!string.IsNullOrEmpty(viewBox))
             {
@@ -150,25 +145,25 @@ namespace SVGImporter.Rendering
                     }
                 }
 
-                viewport = new Rect(attrX.value, attrY.value, attrWidth.value, attrHeight.value);
+                viewport = new Rect(attrX.value, attrY.value, attrWidth.value, attrHeight.value);                
 
                 if(string.IsNullOrEmpty(attrXString))
-                {
+                {        
                     viewport.x = attrX.value;
                 }
 
                 if(string.IsNullOrEmpty(attrYString))
-                {
+                {        
                     viewport.y = attrY.value;
                 }
 
                 if(string.IsNullOrEmpty(attrWidthString))
-                {
+                {        
                     viewport.width = attrWidth.value;
                 }
 
                 if(string.IsNullOrEmpty(attrHeightString))
-                {
+                {        
                     viewport.height = attrHeight.value;
                 }
 
@@ -181,13 +176,13 @@ namespace SVGImporter.Rendering
 
         public static SVGMatrix GetViewBoxTransform(AttributeList attributeList, ref Rect viewport, bool negotiate = false)
         {
-            SVGMatrix matrix = new SVGMatrix();
-
+            SVGMatrix matrix = SVGMatrix.identity;
+            
             float x = 0.0f;
             float y = 0.0f;
             float w = 0.0f;
             float h = 0.0f;
-
+            
             string preserveAspectRatio = attributeList.GetValue("preserveAspectRatio");
             string viewBox = attributeList.GetValue("viewBox");
             if (!string.IsNullOrEmpty(viewBox))
@@ -201,40 +196,40 @@ namespace SVGImporter.Rendering
                         new SVGLength(viewBoxValues[2]).value,
                         new SVGLength(viewBoxValues[3]).value
                         );
-
+                    
                     SVGViewport.Align align = SVGViewport.Align.xMidYMid;
                     SVGViewport.MeetOrSlice meetOrSlice = SVGViewport.MeetOrSlice.Meet;
-
+                    
                     if(!string.IsNullOrEmpty(preserveAspectRatio))
                     {
-                        string[] aspectRatioValues = SVGStringExtractor.ExtractStringArray(preserveAspectRatio);
+                        string[] aspectRatioValues = SVGStringExtractor.ExtractStringArray(preserveAspectRatio);                        
                         align = SVGViewport.GetAlignFromStrings(aspectRatioValues);
                         meetOrSlice = SVGViewport.GetMeetOrSliceFromStrings(aspectRatioValues);
                     }
-
+                    
                     Rect oldViewport = viewport;
                     viewport = SVGViewport.GetViewport(viewport, contentRect, align, meetOrSlice);
-
+                    
                     float sizeX = 0f, sizeY = 0f;
                     if(oldViewport.size.x != 0f)
                         sizeX = viewport.size.x / oldViewport.size.x;
                     if(oldViewport.size.y != 0f)
                         sizeY = viewport.size.y / oldViewport.size.y;
-
-                    matrix.ScaleNonUniform(sizeX, sizeY);
+                    
+                    matrix.Scale(sizeX, sizeY);
                     matrix = matrix.Translate(viewport.x - oldViewport.x, viewport.y - oldViewport.y);
                 }
             } else {
-                if(negotiate)
+                if(negotiate) 
                 {
                     string attrXString = attributeList.GetValue("x");
                     string attrYString = attributeList.GetValue("y");
                     string attrWidthString = attributeList.GetValue("width");
                     string attrHeightString = attributeList.GetValue("height");
-
-                    SVGLength   attrX = new SVGLength(SVGLengthType.PX, 0f), attrY = new SVGLength(SVGLengthType.PX, 0f),
+                    
+                    SVGLength   attrX = new SVGLength(SVGLengthType.PX, 0f), attrY = new SVGLength(SVGLengthType.PX, 0f), 
                     attrWidth = new SVGLength(SVGLengthType.PX, 1f), attrHeight = new SVGLength(SVGLengthType.PX, 1f);
-
+                    
                     if(!string.IsNullOrEmpty(attrXString))
                     {
                         attrX = new SVGLength(attrXString);
@@ -251,30 +246,30 @@ namespace SVGImporter.Rendering
                     {
                         attrHeight = new SVGLength(attrHeightString);
                     }
-
-
+                    
+                    
                     x = attrX.value;
                     y = attrY.value;
                     w = attrWidth.value;
                     h = attrHeight.value;
-
+                    
                     float x_ratio = 1f;
                     if(w != 0f)
                         x_ratio = attrWidth.value / w;
-
+                    
                     float y_ratio = 1f;
                     if(h != 0f)
                         y_ratio = attrHeight.value / h;
-
-                    matrix = matrix.ScaleNonUniform(x_ratio, y_ratio);
+                    
+                    matrix = matrix.Scale(x_ratio, y_ratio);
                     matrix = matrix.Translate(x, y);
                     viewport = new Rect(x, y, w, h);
-
+                    
                     //                Debug.Log(string.Format("x: {0}, y: {1}, width: {2}, height: {3}, attrWidth: {4}, attrHeight: {5}", x, y, w, h, attrWidth, attrHeight));
                 }
                 //                Debug.Log(string.Format("x: {0}, y: {1}, width: {2}, height: {3}, attrWidth: {4}, attrHeight: {5}", x, y, w, h, attrWidth, attrHeight));
             }
-
+            
             return matrix;
         }
     }

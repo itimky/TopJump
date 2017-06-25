@@ -18,26 +18,20 @@ namespace SVGImporter.Rendering
             get { return _listTransform.Count; }
         }
 
-        private SVGMatrix _totalMatrix = null;
-
         public SVGMatrix totalMatrix
         {
             get
             {
-                if (_totalMatrix == null)
+                if (_listTransform.Count == 0)
                 {
-                    if (_listTransform.Count == 0)
-                    {
-                        _totalMatrix = new SVGMatrix(1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
-                    } else
-                    {
-                        SVGMatrix matrix = _listTransform [0].matrix;
-                        for (int i = 1; i < _listTransform.Count; i++)
-                            matrix = matrix.Multiply(_listTransform [i].matrix);
-                        _totalMatrix = matrix;
-                    }
+                    return SVGMatrix.identity;
+                } else
+                {
+                    SVGMatrix matrix = _listTransform [0].matrix;
+                    for (int i = 1; i < _listTransform.Count; i++)
+                        matrix = matrix.Multiply(_listTransform [i].matrix);
+                    return matrix;
                 }
-                return _totalMatrix;
             }
         }
 
@@ -59,32 +53,27 @@ namespace SVGImporter.Rendering
         public void Clear()
         {
             _listTransform.Clear();
-            _totalMatrix = null;
         }
 
         public void AppendItem(SVGTransform newItem)
         {
             _listTransform.Add(newItem);
-            _totalMatrix = null;
         }
 
-
+        
         public void AppendItemAt(SVGTransform newItem, int index)
         {
             _listTransform.Insert(index, newItem);
-            _totalMatrix = null;
         }
 
         public void AppendItems(SVGTransformList newListItem)
         {
             _listTransform.AddRange(newListItem._listTransform);
-            _totalMatrix = null;
         }
 
         public void AppendItemsAt(SVGTransformList newListItem, int index)
         {
             _listTransform.InsertRange(index, newListItem._listTransform);
-            _totalMatrix = null;
         }
 
         public SVGTransform this [int index]

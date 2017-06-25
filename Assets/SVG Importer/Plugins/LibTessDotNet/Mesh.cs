@@ -1,5 +1,5 @@
 ﻿/*
-** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
+** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) 
 ** Copyright (C) 2011 Silicon Graphics, Inc.
 ** All Rights Reserved.
 **
@@ -9,10 +9,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 ** of the Software, and to permit persons to whom the Software is furnished to do so,
 ** subject to the following conditions:
-**
+** 
 ** The above copyright notice including the dates of first publication and either this
 ** permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
-** included in all copies or substantial portions of the Software.
+** included in all copies or substantial portions of the Software. 
 **
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 ** INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -20,7 +20,7 @@
 ** BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 ** OR OTHER DEALINGS IN THE SOFTWARE.
-**
+** 
 ** Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
 ** be used in advertising or otherwise to promote the sale, use or other dealings in
 ** this Software without prior written authorization from Silicon Graphics, Inc.
@@ -98,17 +98,17 @@ namespace SVGImporter.LibTessDotNet
         ///     eOrg->Onext = OLD( eDst->Onext )
         ///     eDst->Onext = OLD( eOrg->Onext )
         /// where OLD(...) means the value before the meshSplice operation.
-        ///
+        /// 
         /// This can have two effects on the vertex structure:
         ///  - if eOrg->Org != eDst->Org, the two vertices are merged together
         ///  - if eOrg->Org == eDst->Org, the origin is split into two vertices
         /// In both cases, eDst->Org is changed and eOrg->Org is untouched.
-        ///
+        /// 
         /// Similarly (and independently) for the face structure,
         ///  - if eOrg->Lface == eDst->Lface, one loop is split into two
         ///  - if eOrg->Lface != eDst->Lface, two distinct loops are joined into one
         /// In both cases, eDst->Lface is changed and eOrg->Lface is unaffected.
-        ///
+        /// 
         /// Some special cases:
         /// If eDst == eOrg, the operation has no effect.
         /// If eDst == eOrg->Lnext, the new face will have a single edge.
@@ -265,7 +265,7 @@ namespace SVGImporter.LibTessDotNet
         /// If eOrg->Lface == eDst->Lface, this splits one loop into two,
         /// and the newly created loop is eNew->Lface.  Otherwise, two disjoint
         /// loops are merged into one, and the loop eDst->Lface is destroyed.
-        ///
+        /// 
         /// If (eOrg == eDst), the new face will have only two edges.
         /// If (eOrg->Lnext == eDst), the old face is reduced to a single edge.
         /// If (eOrg->Lnext->Lnext == eDst), the old face is reduced to two edges.

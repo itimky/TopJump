@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter
+namespace SVGImporter 
 {
     using Rendering;
     using Utils;
@@ -25,7 +25,7 @@ namespace SVGImporter
         public float[] dashArray;
         public float dashOffset;
         public ClosePathRule closeLine = ClosePathRule.ALWAYS;
-
+        
         protected ISVGShape svgShape;
         protected ISVGRenderer svgRenderer;
 
@@ -36,7 +36,8 @@ namespace SVGImporter
             svgRenderer.UpdateRenderer();
         }
 
-        protected virtual void PrepareForRendering (Mesh sharedMesh, bool force) {
+        protected virtual void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) {
+            /*
             if(sharedMesh == null) return;
 
             SVGPath[] shape = svgShape.shape;
@@ -60,8 +61,8 @@ namespace SVGImporter
                     {
                         segments[j] = new StrokeSegment(shape[i].points[j], shape[i].points[j + 1]);
                     }
-
-                    meshes[i] = SVGLineUtils.StrokeMesh(segments, width, color, lineJoin, lineCap, mitterLimit, dashArray, dashOffset, closeLine, roundQuality);
+                    
+                    //meshes[i] = SVGLineUtils.StrokeMesh(segments, width, color, lineJoin, lineCap, mitterLimit, dashArray, dashOffset, closeLine, roundQuality);
                 }
 
                 CombineInstance[] combineInstances = new CombineInstance[meshes.Length];
@@ -72,6 +73,7 @@ namespace SVGImporter
 
                 sharedMesh.CombineMeshes(combineInstances, false, false);
             }
+            */
         }
 
         void Init()
@@ -87,7 +89,7 @@ namespace SVGImporter
 
         void Clear()
         {
-            if(svgRenderer != null)
+            if(svgRenderer != null) 
             {
                 svgRenderer.OnPrepareForRendering -= PrepareForRendering;
                 svgRenderer.RemoveModifier(this);

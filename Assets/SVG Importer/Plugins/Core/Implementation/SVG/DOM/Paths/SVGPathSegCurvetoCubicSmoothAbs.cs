@@ -17,7 +17,7 @@ namespace SVGImporter.Rendering
             if (segment != null)
                 _previousPoint = segment.currentPoint;
             _currentPoint = new Vector2(x, y);
-
+            
             SVGPathSegCurvetoCubic pSegment = segment as SVGPathSegCurvetoCubic;
             if (pSegment != null)
             {
@@ -26,7 +26,7 @@ namespace SVGImporter.Rendering
             {
                 _controlPoint1 = _previousPoint;
             }
-
+            
             _controlPoint2 = new Vector2(x2, y2);
         }
 

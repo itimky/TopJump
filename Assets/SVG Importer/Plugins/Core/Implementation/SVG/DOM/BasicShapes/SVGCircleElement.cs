@@ -6,13 +6,13 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Geometry;
     using Utils;
     using Document;
 
-    public class SVGCircleElement : SVGParentable, ISVGDrawable
+    public class SVGCircleElement : SVGParentable, ISVGDrawable, ISVGElement
     {
         private SVGLength _cx;
         private SVGLength _cy;
@@ -76,143 +76,74 @@ namespace SVGImporter.Rendering
             this.inheritTransformList = transformList;
         }
 
-        public static List<Vector2> GetPath(SVGCircleElement svgElement)
+        public List<List<Vector2>> GetPath()
         {
-            return GetPath(SVGMatrix.Identity(), svgElement);
+            List<Vector2> output = Circle(cx.value, cy.value, r.value, transformMatrix);
+            output.Add(output[0]);            
+            return new List<List<Vector2>>(){output};
         }
 
-        public static List<Vector2> GetPath(SVGMatrix matrix, SVGCircleElement svgElement)
+        public List<List<Vector2>> GetClipPath()
         {
-            List<Vector2> output = Circle(svgElement.cx.value, svgElement.cy.value, svgElement.r.value, matrix);
-            output.Add(output[0]);
-            return output;
-        }
-
-        public static List<List<Vector2>> GetClipPath(SVGMatrix matrix, SVGCircleElement svgElement)
-        {
-            List<Vector2> path = GetPath(matrix, svgElement);
-            if(path == null || path.Count == 0) return null;
-
+            List<List<Vector2>> path = GetPath();
+            if(path == null || path.Count == 0 || path[0] == null || path[0].Count == 0) return null;
+            
             List<List<Vector2>> clipPath = new List<List<Vector2>>();
-            if(svgElement.paintable.IsFill())
+            if(paintable.IsFill())
             {
-                clipPath.Add(path);
+                clipPath.Add(path[0]);
             }
-
-            if(svgElement.paintable.IsStroke())
+            
+            if(paintable.IsStroke())
             {
-                List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path)};
-                List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, svgElement.paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(svgElement.paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(svgElement.paintable.strokeLineCap), svgElement.paintable.miterLimit, svgElement.paintable.dashArray, svgElement.paintable.dashOffset, ClosePathRule.ALWAYS, SVGGraphics.roundQuality);
+                List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path[0])};
+                List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(paintable.strokeLineCap), paintable.miterLimit, paintable.dashArray, paintable.dashOffset, ClosePathRule.ALWAYS, SVGGraphics.roundQuality);
                 if(strokePath != null && strokePath.Count > 0) clipPath.AddRange(strokePath);
             }
-
+            
             return clipPath;
         }
 
         public void Render()
-        {
-            Create(this);
-        }
-
-        public static void Create(SVGCircleElement svgElement)
-        {
-            if(svgElement.paintable.visibility != SVGVisibility.Visible || svgElement.paintable.display == SVGDisplay.None)
-                return;
-
-            SVGGraphics.position_buffer = GetPath(svgElement.transformMatrix, svgElement);
-            if(svgElement.paintable.IsFill())
-                CreateFill(svgElement);
-            if(svgElement.paintable.IsStroke())
-                CreateStroke(svgElement);
-        }
-
-        static void CreateFill(SVGCircleElement svgElement)
-        {
-            string name = svgElement.attrList.GetValue("id");
-            if (string.IsNullOrEmpty(name))
-                name = "Circle Fill";
-
-            List<List<Vector2>> path;
-            if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
-            {
-                path = SVGGeom.ClipPolygon(new List<List<Vector2>>(){SVGGraphics.position_buffer}, svgElement.paintable.clipPathList);
-            } else {
-                path = new List<List<Vector2>>(){SVGGraphics.position_buffer};
-            }
-
-            Mesh antialiasingMesh;
-            Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
-            if(mesh == null) return;
-            mesh.name = name;
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
-            if(antialiasingMesh != null)
-            {
-                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
-                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
-                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
-            }
-        }
-
-        static void CreateStroke(SVGCircleElement svgElement)
-        {
-            string name = svgElement.attrList.GetValue("id");
-            if (string.IsNullOrEmpty(name))
-                name = "Circle Stroke ";
-
-            List<List<Vector2>> stroke = SVGSimplePath.CreateStroke(SVGGraphics.position_buffer, svgElement.paintable, ClosePathRule.ALWAYS);
-            if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
-            {
-                stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
-            }
-
-            Mesh antialiasingMesh;
-            Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;
-            mesh.name = name;
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
-            if(antialiasingMesh != null)
-            {
-                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
-                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
-                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
-            }
+        {   
+            SVGGraphics.Create(this, "Circle Element");
         }
 
         const float circleConstant = 0.551915024494f;
         public static List<Vector2> Circle(float x0, float y0, float radius, SVGMatrix matrix) {
             List<Vector2> output = new List<Vector2>();
-
+            
             x0 -= radius;
             y0 -= radius;
-
+            
             float handleDistance = circleConstant * radius;
             Vector2 handleRight = new Vector2(handleDistance, 0f);
             Vector2 handleLeft = new Vector2(-handleDistance, 0f);
             Vector2 handleUp = new Vector2(0f, -handleDistance);
             Vector2 handleDown = new Vector2(0f, handleDistance);
-
+            
             Vector2 topCenter = new Vector2(x0 + radius, y0);
             Vector2 left = new Vector2(x0, y0 + radius);
             Vector2 right = new Vector2(x0 + radius * 2f, y0 + radius );
             Vector2 bottomCenter = new Vector2(x0 + radius, y0 + radius * 2f);
-
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(topCenter),
-                                                    matrix.Transform(topCenter + handleRight),
+            
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(topCenter), 
+                                                    matrix.Transform(topCenter + handleRight), 
                                                     matrix.Transform(right + handleUp),
                                                     matrix.Transform(right)));
-
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(right),
-                                                    matrix.Transform(right + handleDown),
+            
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(right), 
+                                                    matrix.Transform(right + handleDown), 
                                                     matrix.Transform(bottomCenter + handleRight),
                                                     matrix.Transform(bottomCenter)));
-
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(bottomCenter),
-                                                    matrix.Transform(bottomCenter + handleLeft),
+            
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(bottomCenter), 
+                                                    matrix.Transform(bottomCenter + handleLeft), 
                                                     matrix.Transform(left + handleDown),
                                                     matrix.Transform(left)));
-
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(left),
-                                                    matrix.Transform(left + handleUp),
+            
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(left), 
+                                                    matrix.Transform(left + handleUp), 
                                                     matrix.Transform(topCenter + handleLeft),
                                                     matrix.Transform(topCenter)));
             return output;

@@ -10,17 +10,15 @@ namespace SVGImporter.Rendering
     using Document;
 
     [System.Serializable]
-    public class SVGMatrix
+    public struct SVGMatrix
     {
         public float a, b, c, d, e, f;
 
-        public static SVGMatrix Identity()
+        public static SVGMatrix identity
         {
-            return new SVGMatrix();
-        }
-
-        public SVGMatrix() : this(1, 0, 0, 1, 0, 0)
-        {
+            get {
+                return new SVGMatrix(1, 0, 0, 1, 0, 0);
+            }
         }
 
         public SVGMatrix(float a, float b, float c, float d, float e, float f)
@@ -95,6 +93,13 @@ namespace SVGImporter.Rendering
                                a * se + c * sf + e, b * se + d * sf + f);
         }
 
+        public static SVGMatrix operator*(SVGMatrix left, SVGMatrix right) 
+        {
+            return new SVGMatrix(left.a * right.a + left.c * right.b, left.b * right.a + left.d * right.b,
+                                 left.a * right.c + left.c * right.d, left.b * right.c + left.d * right.d,
+                                 left.a * right.e + left.c * right.f + left.e, left.b * right.e + left.d * right.f + left.f);
+        }
+
         public SVGMatrix Inverse()
         {
             double det = a * d - c * b;
@@ -114,14 +119,14 @@ namespace SVGImporter.Rendering
                                e, f);
         }
 
-        public SVGMatrix ScaleNonUniform(float scaleFactorX, float scaleFactorY)
+        public SVGMatrix Scale(float scaleFactorX, float scaleFactorY)
         {
             return new SVGMatrix(a * scaleFactorX, b * scaleFactorX,
                                c * scaleFactorY, d * scaleFactorY,
                                e, f);
         }
 
-        public SVGMatrix ScaleNonUniform(Vector2 scaleFactor)
+        public SVGMatrix Scale(Vector2 scaleFactor)
         {
             return new SVGMatrix(a * scaleFactor.x, b * scaleFactor.x,
                                  c * scaleFactor.y, d * scaleFactor.y,
@@ -141,8 +146,8 @@ namespace SVGImporter.Rendering
         public SVGMatrix Translate(float x, float y)
         {
             return new SVGMatrix(a, b,
-                               c, d,
-                               a * x + c * y + e, b * x + d * y + f);
+                                 c, d,
+                                 a * x + c * y + e, b * x + d * y + f);
         }
 
         public SVGMatrix Translate(Vector2 position)
@@ -176,6 +181,16 @@ namespace SVGImporter.Rendering
         public Vector3 Transform(Vector3 point)
         {
             return new Vector3(a * point.x + c * point.y + e, b * point.x + d * point.y + f, 0f);
+        }
+
+        public static SVGMatrix TRS(Vector2 position, float rotation , Vector2 scale)
+        {
+            const float a = 1, b = 0, c = 0, d = 1, e = 0, f = 0;
+            float ca = Mathf.Cos(rotation * Mathf.Deg2Rad);
+            float sa = Mathf.Sin(rotation * Mathf.Deg2Rad);
+            return new SVGMatrix((a * ca + c * sa) * scale.x, (b * ca + d * sa) * scale.x,
+                                 (c * ca - a * sa) * scale.y, (d * ca - b * sa) * scale.y,
+                                 a * position.x + c * position.y + e, b * position.x + d * position.y + f);
         }
 
         public Matrix4x4 ToMatrix4x4()

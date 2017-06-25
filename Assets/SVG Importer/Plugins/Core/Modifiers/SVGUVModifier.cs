@@ -6,97 +6,103 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter
+namespace SVGImporter 
 {
     using Rendering;
     using Utils;
 
     [ExecuteInEditMode]
     [RequireComponent(typeof(ISVGShape), typeof(ISVGRenderer))]
-    [AddComponentMenu("Rendering/SVG UV Modifier", 22)]
-    public class SVGUVModifier : MonoBehaviour, ISVGModify {
+    [AddComponentMenu("Rendering/SVG Modifiers/UV Modifier", 22)]
+    public class SVGUVModifier : SVGModifier {
 
-        public SVGTransform2D svgTransform;
-        public bool worldSpace = false;
-
-        protected ISVGShape svgShape;
-        protected ISVGRenderer svgRenderer;
-
-        protected SVGTransform2D tempTransform = new SVGTransform2D();
-        Matrix4x4 lastMatrix;
-
-        // This method is invoked by Unity when rendering to Camera
-        void OnWillRenderObject()
+        public enum TransformOrder
         {
-            if(svgRenderer == null || svgRenderer.lastFrameChanged == Time.frameCount) return;
-            if(svgTransform == null || lastMatrix == svgTransform.matrix) return;
-            svgRenderer.UpdateRenderer();
+            TRS,
+            TSR,
+            RTS,
+            RST,
+            STR,
+            SRT
         }
 
-        protected virtual void PrepareForRendering (Mesh sharedMesh, bool force) {
-            if(sharedMesh == null) return;
+        //public SVGTransform2D svgTransform;
+        public Vector2 position;
+        public float rotation;
+        public Vector2 scale = Vector2.one;
+        public bool preprocess = true;
+        public TransformOrder transformOrder = TransformOrder.TRS;
 
-            int vertexCount = sharedMesh.vertexCount;
-            tempTransform.SetTransform(svgTransform);
+        protected override void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) 
+        {
+            SVGMatrix T = SVGMatrix.identity.Translate(-position);
+            SVGMatrix R = SVGMatrix.identity.Rotate(rotation);
+            SVGMatrix S = SVGMatrix.identity.Scale(scale);
 
-            if(worldSpace)
+            SVGMatrix tempMatrix = SVGMatrix.identity;
+            if(preprocess)
             {
-                tempTransform = SVGTransform2D.DecomposeMatrix(transform.worldToLocalMatrix * svgTransform.matrix);
+                tempMatrix = tempMatrix.Translate(Vector2.one * 0.5f).Scale(0.25f, 0.25f);
             }
 
-            Quaternion rotation = Quaternion.Euler(0f, 0f, -tempTransform.rotation);
-            Vector2 scale = new Vector2((tempTransform.scale.x == 0f) ? 0f : 1f / tempTransform.scale.x,
-                                        (tempTransform.scale.y == 0f) ? 0f : 1f / tempTransform.scale.y);
-
-            Vector3[] vertices = sharedMesh.vertices;
-            Vector2[] uv = sharedMesh.uv;
-            if(uv == null || uv.Length != vertices.Length) uv = new Vector2[vertices.Length];
-
-            for (int i = 0; i < vertexCount; i++)
+            switch(transformOrder)
             {
-                uv[i].x = -vertices[i].x + tempTransform.position.x;
-                uv[i].y = -vertices[i].y + tempTransform.position.y;
-
-                uv[i] = rotation * uv[i];
-
-                uv[i].x *= scale.x;
-                uv[i].y *= scale.y;
-
-                uv[i].x += 0.5f;
-                uv[i].y += 0.5f;
+                case TransformOrder.TRS:
+                    tempMatrix *= S * R * T;
+                    break;
+                case TransformOrder.TSR:
+                    tempMatrix *= R * S * T;
+                break;
+                case TransformOrder.RTS:
+                    tempMatrix *= S * T * R;
+                break;
+                case TransformOrder.RST:
+                    tempMatrix *= T * S * R;
+                break;
+                case TransformOrder.STR:
+                    tempMatrix *= S * T * S;
+                break;
+                case TransformOrder.SRT:
+                    tempMatrix *= T * R * S;
+                break;
             }
 
-            sharedMesh.uv = uv;
-            lastMatrix = svgTransform.matrix;
-        }
-
-        void Init()
-        {
-            svgShape = GetComponent(typeof(ISVGShape)) as ISVGShape;
-            svgRenderer = GetComponent(typeof(ISVGRenderer)) as ISVGRenderer;
-            svgRenderer.AddModifier(this);
-            svgRenderer.OnPrepareForRendering += PrepareForRendering;
-        }
-
-        void Clear()
-        {
-            if(svgRenderer != null)
+            if(layers == null) return;
+            int totalLayers = layers.Length;
+            if(!useSelection)
             {
-                svgRenderer.OnPrepareForRendering -= PrepareForRendering;
-                svgRenderer.RemoveModifier(this);
-                svgRenderer = null;
+                for(int i = 0; i < totalLayers; i++)
+                {
+                    if(layers[i].shapes == null) continue;
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
+                    {
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
+                        {
+                            layers[i].shapes[j].fill.fillType = FILL_TYPE.TEXTURE;
+                            layers[i].shapes[j].fill.transform = tempMatrix;
+                        }
+                    }
+                }
+            } else {
+                for(int i = 0; i < totalLayers; i++)
+                {
+                    if(layers[i].shapes == null) continue;
+                    if(!layerSelection.Contains(i)) continue;
+
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
+                    {
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
+                        {
+                            layers[i].shapes[j].fill.fillType = FILL_TYPE.TEXTURE;
+                            layers[i].shapes[j].fill.transform = tempMatrix;
+                        }
+                    }
+                }
             }
-            svgShape = null;
-        }
-
-        void OnEnable()
-        {
-            Init();
-        }
-
-        void OnDisable()
-        {
-            Clear();
         }
     }
 }

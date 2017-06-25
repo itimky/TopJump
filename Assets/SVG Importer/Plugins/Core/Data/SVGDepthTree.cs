@@ -13,25 +13,25 @@ namespace SVGImporter.Data
 
     public class SVGDepthTree : System.Object {
 
-        protected QuadTree<SVGMesh> quadTree;
+        protected QuadTree<int> quadTree;
 
         public SVGDepthTree(SVGBounds bounds)
         {
-            quadTree = new QuadTree<SVGMesh>(new SVGBounds(bounds.center, bounds.size * 10f));
+            quadTree = new QuadTree<int>(new SVGBounds(bounds.center, bounds.size));
         }
 
         public SVGDepthTree(Rect bounds)
         {
-            quadTree = new QuadTree<SVGMesh>(new SVGBounds(bounds.center, bounds.size));
+            quadTree = new QuadTree<int>(new SVGBounds(bounds.center, bounds.size));
         }
 
-        public SVGMesh[] TestDepthAdd(SVGMesh node, SVGBounds bounds)
+        public int[] TestDepthAdd(int node, SVGBounds bounds)
         {
-            List<QuadTreeNode<SVGMesh>> overlapNodes = quadTree.Intersects(bounds);
-            SVGMesh[] output = null;
+            List<QuadTreeNode<int>> overlapNodes = quadTree.Intersects(bounds);
+            int[] output = null;
             if(overlapNodes != null && overlapNodes.Count > 0)
             {
-                output = new SVGMesh[overlapNodes.Count];
+                output = new int[overlapNodes.Count];
                 for(int i = 0 ; i < output.Length; i++)
                 {
                     output[i] = overlapNodes[i].data;

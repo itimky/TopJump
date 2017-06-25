@@ -10,50 +10,190 @@ namespace SVGImporter.Rendering
 {
     using Data;
     using Geometry;
+    using Utils;
 
     public class SVGGraphics
     {
-        public static SVGDepthTree depthTree;
         public static List<SVGPath> paths;
+        public static List<SVGLayer> layers;
 
-        public static void AddMesh(SVGMesh mesh)
+        public static void AddLayer(SVGLayer layer)
         {
-            meshes.Add(mesh);
+            layers.Add(layer);
         }
-
-        public static List<Vector2> position_buffer;
-        public static void DebugPositionBuffer()
-        {
-            if(position_buffer == null || position_buffer.Count == 0)
-                return;
-
-            string output = "";
-            for(int i = 0; i < position_buffer.Count; i++)
+        
+        public static void Create(ISVGElement svgElement, string defaultName = null, ClosePathRule closePathRule = ClosePathRule.ALWAYS)
+        {        
+            if(svgElement == null) return;
+            if(svgElement.paintable.visibility != SVGVisibility.Visible || svgElement.paintable.display == SVGDisplay.None) return;
+            
+            List<SVGShape> shapes = new List<SVGShape>();
+            List<List<Vector2>> inputPaths = svgElement.GetPath();
+            if(inputPaths.Count == 1)
             {
-                output += position_buffer[i].ToString()+", ";
+                if(svgElement.paintable.IsFill())
+                {
+                    List<List<Vector2>> path = inputPaths;
+                    if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
+                    {
+                        path = SVGGeom.ClipPolygon(new List<List<Vector2>>(){inputPaths[0]}, svgElement.paintable.clipPathList);
+                    }
+
+                    SVGShape[] addShapes = SVGGraphics.GetShapes(path, svgElement.paintable, svgElement.transformMatrix);
+                    if(addShapes != null && addShapes.Length > 0) shapes.AddRange(addShapes);
+                }
+                if(svgElement.paintable.IsStroke())
+                {
+                    List<List<Vector2>> path = SVGSimplePath.CreateStroke(inputPaths[0], svgElement.paintable, closePathRule);
+                    if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
+                    {
+                        path = SVGGeom.ClipPolygon(path, svgElement.paintable.clipPathList);
+                    }
+                    
+                    SVGShape[] addShapes = SVGGraphics.GetShapes(path, svgElement.paintable, svgElement.transformMatrix, true);
+                    if(addShapes != null && addShapes.Length > 0) shapes.AddRange(addShapes);
+                }
+            } else {
+                if(svgElement.paintable.IsFill())
+                {
+                    List<List<Vector2>> fillPaths = inputPaths;
+                    if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
+                    {
+                        fillPaths = SVGGeom.ClipPolygon(inputPaths, svgElement.paintable.clipPathList);
+                    } 
+
+                    SVGShape[] addShapes = SVGGraphics.GetShapes(fillPaths, svgElement.paintable, svgElement.transformMatrix);
+                    if(addShapes != null && addShapes.Length > 0) shapes.AddRange(addShapes);
+                }
+                if(svgElement.paintable.IsStroke())
+                {
+                    List<List<Vector2>> strokePath = SVGSimplePath.CreateStroke(inputPaths, svgElement.paintable, closePathRule);
+                    if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
+                    {
+                        strokePath = SVGGeom.ClipPolygon(strokePath, svgElement.paintable.clipPathList);
+                    }
+                    
+                    SVGShape[] addShapes = SVGGraphics.GetShapes(strokePath, svgElement.paintable, svgElement.transformMatrix, true);
+                    if(addShapes != null && addShapes.Length > 0) shapes.AddRange(addShapes);
+                }
             }
 
-            UnityEngine.Debug.Log(output);
-        }
-
-        protected static int _currentDepthOffset;
-        public static int currentDepthOffset {
-            get {
-                return _currentDepthOffset;
+            if(shapes.Count > 0)
+            {
+                string name = svgElement.attrList.GetValue("id");
+                if (string.IsNullOrEmpty(name)) name = defaultName;
+                SVGLayer layer = new SVGLayer();
+                layer.shapes = shapes.ToArray();
+                layer.name = name;
+                SVGGraphics.AddLayer(layer);
             }
         }
 
-        public static int IncreaseDepth()
+        public static void CorrectSVGLayers(List<SVGLayer> layers, Rect viewport, SVGAsset asset, out Vector2 offset)
         {
-            return _currentDepthOffset++;
+            offset = Vector2.zero;
+            if(layers == null) return;
+            int layersCount = layers.Count, layersShapesLength = 0, layersShapesVerticesLength = 0;
+            for(int i = 0; i < layersCount; i++)
+            {
+                CorrectSVGLayerShape(layers[i].shapes);
+            }
+
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minY = float.MaxValue;
+            float maxY = float.MinValue;
+
+            // calculate bounds
+            for(int i = 0; i < layersCount; i++)
+            {
+                if(layers[i].shapes == null) continue;
+                layersShapesLength = layers[i].shapes.Length;
+                for(int j = 0; j < layersShapesLength; j++)
+                {
+                    Vector2 min = layers[i].shapes[j].bounds.min;
+                    Vector2 max = layers[i].shapes[j].bounds.max;
+                    
+                    if(min.x < minX) minX = min.x;
+                    if(max.x > maxX) maxX = max.x;
+                    if(min.y < minY) minY = min.y;
+                    if(max.y > maxY) maxY = max.y;
+                }
+            }
+
+            Rect bounds = new Rect(minX, minY, maxX - minX, maxY - minY);
+            if(asset.ignoreSVGCanvas)
+            {
+                offset = new Vector2(bounds.min.x + bounds.size.x * asset.pivotPoint.x,
+                                     (bounds.max.y - bounds.size.y * asset.pivotPoint.y));
+            } else {
+                offset = new Vector2(viewport.min.x + viewport.size.x * asset.pivotPoint.x,
+                                     (viewport.max.y - viewport.size.y * asset.pivotPoint.y));
+            }
+
+            // update vertices
+            for(int i = 0; i < layersCount; i++)
+            {
+                if(layers[i].shapes == null) continue;
+                layersShapesLength = layers[i].shapes.Length;
+                for(int j = 0; j < layersShapesLength; j++)
+                {
+                    if(layers[i].shapes[j].vertices == null) continue;
+                    layersShapesVerticesLength = layers[i].shapes[j].vertices.Length;
+                    for( int k = 0; k < layersShapesVerticesLength; k++)
+                    {
+                        layers[i].shapes[j].vertices[k] -= offset;
+                    }
+                    layers[i].shapes[j].bounds.center -= offset;
+
+                    if(layers[i].shapes[j].fill != null)
+                    {
+                        layers[i].shapes[j].fill.transform = layers[i].shapes[j].fill.transform.Translate(offset);
+                    }
+                }
+            }
         }
 
-        public static void ClearDepthOffset()
+        protected static void CorrectSVGLayerShape(SVGShape[] shapes)
         {
-            _currentDepthOffset = 0;
+
+            for(int i = 0; i < shapes.Length; i++)
+            {
+                int vertexCount = shapes[i].vertexCount;
+                if(vertexCount == 0) continue;
+                if(shapes[i].fill != null)
+                {
+                    shapes[i].fill.transform = shapes[i].fill.transform.Scale(1f, -1f);
+                }
+
+                for(int j = 0; j < vertexCount; j++)
+                {
+                    shapes[i].vertices[j].y *= -1f;
+                }
+
+                shapes[i].bounds.center = new Vector2(shapes[i].bounds.center.x, shapes[i].bounds.center.y * -1f);
+            }
         }
 
-        public static List<SVGMesh> meshes;
+        public static SVGShape[] GetShapes(List<List<Vector2>> inputShapes, SVGPaintable paintable, SVGMatrix matrix, bool isStroke = false)
+        {
+            SVGShape[] shapes = null;;
+            SVGShape shape;
+            SVGShape antialiasingShape;
+
+            if(SVGSimplePath.CreatePolygon(inputShapes, paintable, matrix, out shape, out antialiasingShape, isStroke, _antialiasing))
+            {
+                if(_antialiasing)
+                {
+                    shapes = new SVGShape[]{shape, antialiasingShape};
+                } else {
+                    shapes = new SVGShape[]{shape};
+                }
+            }
+
+            return shapes;
+        }
+
         protected static float _vpm;
         public static float vpm
         {
@@ -70,32 +210,28 @@ namespace SVGImporter.Rendering
             }
         }
 
-        private float _vertexPerMeter = 1000f;
-        public float vertexPerMeter
+        private static float _vertexPerMeter = 1000f;
+        public static float vertexPerMeter
         {
-            get {
+            get {           
                 return _vertexPerMeter;
+            }
+        }
+
+        private static bool _antialiasing = false;
+        public static bool antialiasing
+        {
+            get {           
+                return _antialiasing;
             }
         }
 
         public static void Clear()
         {
-            ClearDepthOffset();
-            if(position_buffer != null)
+            if(layers != null)
             {
-                position_buffer.Clear();
-                position_buffer = null;
-            }
-            if(meshes != null)
-            {
-                meshes.Clear();
-                meshes = null;
-            }
-
-            if(depthTree != null)
-            {
-                depthTree.Clear();
-                depthTree = null;
+                layers.Clear();
+                layers = null;
             }
 
             if(paths != null)
@@ -107,10 +243,8 @@ namespace SVGImporter.Rendering
 
         public static void Init()
         {
-            if(position_buffer == null)
-                position_buffer = new List<Vector2>();
-            if(meshes == null)
-                meshes = new List<SVGMesh>();
+            if(layers == null)
+                layers = new List<SVGLayer>();
             if(paths == null)
                 paths = new List<SVGPath>();
         }
@@ -128,15 +262,15 @@ namespace SVGImporter.Rendering
             get { return this._strokeLineJoin; }
         }
 
-        public SVGGraphics(float vertexPerMeter = 1000f)
+        public SVGGraphics(float vertexPerMeter = 1000f, bool antialiasing = false)
         {
             _vpm = 1f;
             if(vertexPerMeter > 0f)
-            {
+			{
                 _vpm = 1000f / vertexPerMeter;
-            } else {
-                _vpm = 1000f;
-            }
+			} else {
+				_vpm = 1000f;
+			}
 
             if(_vpm != 0f)
             {
@@ -145,7 +279,8 @@ namespace SVGImporter.Rendering
                 _roundQuality = 0f;
             }
 
-            this._vertexPerMeter = vertexPerMeter;
+            _vertexPerMeter = vertexPerMeter;
+            _antialiasing = antialiasing;
         }
 
         public void SetStrokeLineCap(SVGStrokeLineCapMethod strokeLineCap)

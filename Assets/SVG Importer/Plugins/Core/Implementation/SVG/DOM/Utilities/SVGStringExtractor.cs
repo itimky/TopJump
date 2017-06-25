@@ -11,7 +11,7 @@ namespace SVGImporter.Utils
     using Rendering;
 
     public static class SVGStringExtractor
-    {
+    {        
         public static string pathCommands = "ZzMmLlCcSsQqTtAaHhVv";
 
         //--------------------------------------------------
@@ -75,8 +75,27 @@ namespace SVGImporter.Utils
                 }
             }
 
-            //inputText = inputText.Replace("-", " -");
-            return inputText.Split(splitSpaceComma, StringSplitOptions.RemoveEmptyEntries);
+            char[] splitDecimalPoint = new char[]{'.'};
+            List<string> output = new List<string>(inputText.Split(splitSpaceComma, StringSplitOptions.RemoveEmptyEntries));
+            for(int i = 0; i < output.Count; i++)
+            {             
+                if(output[i][0] == splitDecimalPoint[0])
+                {
+                    output[i] = output[i].Insert(0, "0");
+                }
+                string[] temp = output[i].Split(splitDecimalPoint, StringSplitOptions.RemoveEmptyEntries);
+                int tempLength = temp.Length;
+
+                if(tempLength > 2)
+                {
+                    output[i] = temp[0] +"."+ temp[1];
+                    for(int j = 2; j < tempLength; j++)
+                    {
+                        output.Insert(++i, "0."+temp[j]);
+                    }
+                }
+            }
+            return output.ToArray();
         }
         //--------------------------------------------------
         //Extract for Systax : M100 100 C200 100,...

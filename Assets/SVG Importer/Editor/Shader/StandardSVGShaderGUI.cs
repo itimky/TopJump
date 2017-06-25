@@ -11,7 +11,7 @@ namespace UnityEditor
             Metallic,
             Dielectric
         }
-
+        
         public enum BlendMode
         {
             Opaque,
@@ -19,13 +19,13 @@ namespace UnityEditor
             Fade,       // Old school alpha-blending mode, fresnel does not affect amount of transparency
             Transparent // Physically plausible transparency mode, implemented as alpha pre-multiply
         }
-
+        
         private static class Styles
         {
             public static GUIStyle optionsButton = "PaneOptions";
             public static GUIContent uvSetLabel = new GUIContent("UV Set");
             public static GUIContent[] uvSetOptions = new GUIContent[] { new GUIContent("UV channel 0"), new GUIContent("UV channel 1") };
-
+            
             public static string emptyTootip = "";
             public static GUIContent albedoText = new GUIContent("Albedo", "Albedo (RGB) and Transparency (A)");
             public static GUIContent alphaCutoffText = new GUIContent("Alpha Cutoff", "Threshold for alpha cutoff");
@@ -39,7 +39,7 @@ namespace UnityEditor
             public static GUIContent detailMaskText = new GUIContent("Detail Mask", "Mask for Secondary Maps (A)");
             public static GUIContent detailAlbedoText = new GUIContent("Detail Albedo x2", "Albedo (RGB) multiplied by 2");
             public static GUIContent detailNormalMapText = new GUIContent("Normal Map", "Normal Map");
-
+            
             public static string whiteSpaceString = " ";
             public static string primaryMapsText = "Main Maps";
             public static string secondaryMapsText = "Secondary Maps";
@@ -49,7 +49,7 @@ namespace UnityEditor
             public static readonly string[] blendNames = Enum.GetNames(typeof(BlendMode));
             public static GUIContent vcLabel = new GUIContent("Vertex Color", "Vertex Color Intensity");
         }
-
+        
         MaterialProperty blendMode = null;
         MaterialProperty albedoMap = null;
         MaterialProperty albedoColor = null;
@@ -74,12 +74,12 @@ namespace UnityEditor
         MaterialProperty detailNormalMapScale = null;
         MaterialProperty detailNormalMap = null;
         MaterialProperty uvSetSecondary = null;
-
+        
         MaterialEditor m_MaterialEditor;
         WorkflowMode m_WorkflowMode = WorkflowMode.Specular;
-
+        
         bool m_FirstTimeApply = true;
-
+        
         public void FindProperties(MaterialProperty[] props)
         {
             blendMode = FindProperty("_Mode", props);
@@ -113,15 +113,15 @@ namespace UnityEditor
             detailNormalMap = FindProperty("_DetailNormalMap", props);
             uvSetSecondary = FindProperty("_UVSec", props);
         }
-
+        
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
             FindProperties(props); // MaterialProperties can be animated so we do not cache them but fetch them every event to ensure animated values are updated correctly
             m_MaterialEditor = materialEditor;
             Material material = materialEditor.target as Material;
-
+            
             ShaderPropertiesGUI(material);
-
+            
             // Make sure that needed keywords are set up if we're switching some existing
             // material to a standard shader.
             if (m_FirstTimeApply)
@@ -130,17 +130,17 @@ namespace UnityEditor
                 m_FirstTimeApply = false;
             }
         }
-
+        
         public void ShaderPropertiesGUI(Material material)
         {
             // Use default labelWidth
             EditorGUIUtility.labelWidth = 0f;
-
+            
             // Detect any changes to the material
             EditorGUI.BeginChangeCheck();
             {
                 BlendModePopup();
-
+                
                 // Primary properties
                 GUILayout.Label(Styles.primaryMapsText, EditorStyles.boldLabel);
                 DoAlbedoArea(material);
@@ -154,9 +154,9 @@ namespace UnityEditor
                 m_MaterialEditor.TextureScaleOffsetProperty(albedoMap);
                 if (EditorGUI.EndChangeCheck())
                     emissionMap.textureScaleAndOffset = albedoMap.textureScaleAndOffset; // Apply the main texture scale and offset to the emission texture as well, for Enlighten's sake
-
+                
                 EditorGUILayout.Space();
-
+                
                 // Secondary properties
                 GUILayout.Label(Styles.secondaryMapsText, EditorStyles.boldLabel);
                 m_MaterialEditor.TexturePropertySingleLine(Styles.detailAlbedoText, detailAlbedoMap);
@@ -170,7 +170,7 @@ namespace UnityEditor
                     MaterialChanged((Material)obj, m_WorkflowMode);
             }
         }
-
+        
         internal void DetermineWorkflow(MaterialProperty[] props)
         {
             if (FindProperty("_SpecGlossMap", props, false) != null && FindProperty("_SpecColor", props, false) != null)
@@ -180,12 +180,12 @@ namespace UnityEditor
             else
                 m_WorkflowMode = WorkflowMode.Dielectric;
         }
-
+        
         void BlendModePopup()
         {
             EditorGUI.showMixedValue = blendMode.hasMixedValue;
             var mode = (BlendMode)blendMode.floatValue;
-
+            
             EditorGUI.BeginChangeCheck();
             mode = (BlendMode)EditorGUILayout.Popup(Styles.renderingMode, (int)mode, Styles.blendNames);
             if (EditorGUI.EndChangeCheck())
@@ -193,10 +193,10 @@ namespace UnityEditor
                 m_MaterialEditor.RegisterPropertyChangeUndo("Rendering Mode");
                 blendMode.floatValue = (float)mode;
             }
-
+            
             EditorGUI.showMixedValue = false;
         }
-
+        
         void DoAlbedoArea(Material material)
         {
             m_MaterialEditor.TexturePropertySingleLine(Styles.albedoText, albedoMap, albedoColor);
@@ -205,37 +205,37 @@ namespace UnityEditor
                 m_MaterialEditor.ShaderProperty(alphaCutoff, Styles.alphaCutoffText.text, MaterialEditor.kMiniTextureFieldLabelIndentLevel + 1);
             }
         }
-
+        
         void DoEmissionArea(Material material)
         {
             bool showEmissionColorAndGIControls = emissionScaleUI.floatValue > 0f;
             bool hadEmissionTexture = emissionMap.textureValue != null;
-
+            
             // Do controls
             m_MaterialEditor.TexturePropertySingleLine(Styles.emissionText, emissionMap, showEmissionColorAndGIControls ? emissionColorUI : null, emissionScaleUI);
-
+            
             // Set default emissionScaleUI if texture was assigned
             if (emissionMap.textureValue != null && !hadEmissionTexture && emissionScaleUI.floatValue <= 0f)
                 emissionScaleUI.floatValue = 1.0f;
-
+            
             // Dynamic Lightmapping mode
             if (showEmissionColorAndGIControls)
             {
                 bool shouldEmissionBeEnabled = ShouldEmissionBeEnabled(EvalFinalEmissionColor(material));
                 EditorGUI.BeginDisabledGroup(!shouldEmissionBeEnabled);
-
+                
                 m_MaterialEditor.LightmapEmissionProperty(MaterialEditor.kMiniTextureFieldLabelIndentLevel + 1);
-
+                
                 EditorGUI.EndDisabledGroup();
             }
-
+            
             if (!HasValidEmissiveKeyword(material))
             {
                 EditorGUILayout.HelpBox(Styles.emissiveWarning.text, MessageType.Warning);
             }
-
+            
         }
-
+        
         void DoSpecularMetallicArea()
         {
             if (m_WorkflowMode == WorkflowMode.Specular)
@@ -244,7 +244,7 @@ namespace UnityEditor
                     m_MaterialEditor.TexturePropertyTwoLines(Styles.specularMapText, specularMap, specularColor, Styles.smoothnessText, smoothness);
                 else
                     m_MaterialEditor.TexturePropertySingleLine(Styles.specularMapText, specularMap);
-
+                
             }
             else if (m_WorkflowMode == WorkflowMode.Metallic)
             {
@@ -254,7 +254,7 @@ namespace UnityEditor
                     m_MaterialEditor.TexturePropertySingleLine(Styles.metallicMapText, metallicMap);
             }
         }
-
+        
         public static void SetupMaterialWithBlendMode(Material material, BlendMode blendMode)
         {
             switch (blendMode)
@@ -297,18 +297,18 @@ namespace UnityEditor
                     break;
             }
         }
-
+        
         // Calculate final HDR _EmissionColor (gamma space) from _EmissionColorUI (LDR, gamma) & _EmissionScaleUI (gamma)
         static Color EvalFinalEmissionColor(Material material)
         {
             return material.GetColor("_EmissionColorUI") * material.GetFloat("_EmissionScaleUI");
         }
-
+        
         static bool ShouldEmissionBeEnabled(Color color)
         {
             return color.grayscale > (0.1f / 255.0f);
         }
-
+        
         static void SetMaterialKeywords(Material material, WorkflowMode workflowMode)
         {
             // Note: keywords must be based on Material value not on MaterialProperty due to multi-edit & material animation
@@ -320,10 +320,10 @@ namespace UnityEditor
                 SetKeyword(material, "_METALLICGLOSSMAP", material.GetTexture("_MetallicGlossMap"));
             SetKeyword(material, "_PARALLAXMAP", material.GetTexture("_ParallaxMap"));
             SetKeyword(material, "_DETAIL_MULX2", material.GetTexture("_DetailAlbedoMap") || material.GetTexture("_DetailNormalMap"));
-
+            
             bool shouldEmissionBeEnabled = ShouldEmissionBeEnabled(material.GetColor("_EmissionColor"));
             SetKeyword(material, "_EMISSION", shouldEmissionBeEnabled);
-
+            
             // Setup lightmap emissive flags
             MaterialGlobalIlluminationFlags flags = material.globalIlluminationFlags;
             if ((flags & (MaterialGlobalIlluminationFlags.BakedEmissive | MaterialGlobalIlluminationFlags.RealtimeEmissive)) != 0)
@@ -331,13 +331,13 @@ namespace UnityEditor
                 flags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
                 if (!shouldEmissionBeEnabled)
                     flags |= MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-
+                
                 material.globalIlluminationFlags = flags;
             }
-
+            
             SetKeyword(material, "_VERTEXCOLOR", true);
         }
-
+        
         bool HasValidEmissiveKeyword(Material material)
         {
             // Material animation might be out of sync with the material keyword.
@@ -349,23 +349,23 @@ namespace UnityEditor
             else
                 return true;
         }
-
+        
         static void MaterialChanged(Material material, WorkflowMode workflowMode)
         {
             // Clamp EmissionScale to always positive
             if (material.GetFloat("_EmissionScaleUI") < 0.0f)
                 material.SetFloat("_EmissionScaleUI", 0.0f);
-
+            
             // Apply combined emission value
             Color emissionColorOut = EvalFinalEmissionColor(material);
             material.SetColor("_EmissionColor", emissionColorOut);
-
+            
             // Handle Blending modes
             SetupMaterialWithBlendMode(material, (BlendMode)material.GetFloat("_Mode"));
-
+            
             SetMaterialKeywords(material, workflowMode);
         }
-
+        
         static void SetKeyword(Material m, string keyword, bool state)
         {
             if (state)

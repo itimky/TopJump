@@ -6,8 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering
-{
+namespace SVGImporter.Rendering 
+{    
     using Utils;
     using Document;
 
@@ -85,7 +85,7 @@ namespace SVGImporter.Rendering
 
     public enum SVGPaintMethod
     {
-        SolidGradientFill,
+        SolidFill,
         LinearGradientFill,
         RadialGradientFill,
         ConicalGradientFill,
@@ -158,7 +158,7 @@ namespace SVGImporter.Rendering
         }
 
         public SVGFill svgFill;
-
+        
         public SVGColor? fillColor
         {
             get { return this._fillColor; }
@@ -336,16 +336,14 @@ namespace SVGImporter.Rendering
                 this._visibility = inheritPaintable.visibility;
                 this._display = inheritPaintable.display;
                 this._clipRule = inheritPaintable.clipRule;
-                this._viewport = inheritPaintable._viewport;
+                this._viewport = inheritPaintable._viewport;           
                 this._fillRule = inheritPaintable._fillRule;
                 this._cssStyle = inheritPaintable._cssStyle;
-                this._clipPathList = CloneClipPathList(inheritPaintable._clipPathList);
+                this._clipPathList = CloneClipPathList(inheritPaintable._clipPathList);                
                 this._linearGradList = inheritPaintable._linearGradList;
                 this._radialGradList = inheritPaintable._radialGradList;
                 this._conicalGradList = inheritPaintable._conicalGradList;
             }
-
-            Initialize(node.attributes);
 
             if(inheritPaintable != null)
             {
@@ -378,18 +376,22 @@ namespace SVGImporter.Rendering
 
                 if (isStrokeWidth == false)
                     this._strokeWidth.NewValueSpecifiedUnits(inheritPaintable.strokeWidth);
+            }
 
+            Initialize(node.attributes);
+            ReadCSS(node);
+
+            if(inheritPaintable != null)
+            {
                 _opacity *= inheritPaintable._opacity;
                 _fillOpacity *= inheritPaintable._fillOpacity;
                 _strokeOpacity *= inheritPaintable._strokeOpacity;
             }
-
-            ReadCSS(node);
         }
 
         //style="fill: #ffffff; stroke:#000000; stroke-width:0.172"
         private void Initialize(AttributeList attrList)
-        {
+        {         
             ReadStyle(attrList.Get);
             ReadStyle(attrList.GetValue("style"));
         }
@@ -444,7 +446,7 @@ namespace SVGImporter.Rendering
                     Node clipPathNode = SVGParser._defs[clipPathURL];
                     if(clipPathNode != null)
                     {
-                        SVGMatrix svgMatrix = new SVGMatrix();
+                        SVGMatrix svgMatrix = SVGMatrix.identity;
 
                         string clipPathUnitsString = clipPathNode.attributes.GetValue("clipPathUnits");
                         switch(clipPathUnitsString.ToLower())
@@ -476,7 +478,7 @@ namespace SVGImporter.Rendering
                             currentClipPathList = SVGGeom.MergePolygon(currentClipPathList);
                         }
 
-                        if(_clipPathList.Count > 0)
+                        if(_clipPathList != null && _clipPathList.Count > 0)
                         {
                             _clipPathList = SVGGeom.ClipPolygon(_clipPathList, currentClipPathList);
                         } else {
@@ -484,42 +486,43 @@ namespace SVGImporter.Rendering
                         }
                     }
                 }
-            }
+            } 
         }
-
+        
         private List<List<Vector2>> GetClipPath(Node node, SVGMatrix svgMatrix)
         {
             SVGTransformList transformList = new SVGTransformList();
+            transformList.AppendItem(new SVGTransform(svgMatrix));
 
             switch (node.name)
             {
                 case SVGNodeName.Rect:
                 {
-                    return SVGRectElement.GetClipPath(svgMatrix, new SVGRectElement(node, transformList));
+                    return new SVGRectElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Line:
                 {
-                    return SVGLineElement.GetClipPath(svgMatrix, new SVGLineElement(node, transformList));
+                    return new SVGLineElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Circle:
                 {
-                    return SVGCircleElement.GetClipPath(svgMatrix, new SVGCircleElement(node, transformList));
+                    return new SVGCircleElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Ellipse:
                 {
-                    return SVGEllipseElement.GetClipPath(svgMatrix, new SVGEllipseElement(node, transformList));
+                    return new SVGEllipseElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.PolyLine:
                 {
-                    return SVGPolylineElement.GetClipPath(svgMatrix, new SVGPolylineElement(node, transformList));
+                    return new SVGPolylineElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Polygon:
                 {
-                    return SVGPolygonElement.GetClipPath(svgMatrix, new SVGPolygonElement(node, transformList));
+                    return new SVGPolygonElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Path:
                 {
-                    return SVGPathElement.GetClipPath(svgMatrix, new SVGPathElement(node, transformList));
+                    return new SVGPathElement(node, transformList).GetClipPath();
                 }
                 case SVGNodeName.Use:
                 {
@@ -528,7 +531,7 @@ namespace SVGImporter.Rendering
                     {
                         if (xlink [0] == '#')
                             xlink = xlink.Remove(0, 1);
-
+                        
                         if (SVGParser._defs.ContainsKey(xlink))
                         {
                             Node definitionNode = SVGParser._defs [xlink];
@@ -657,7 +660,7 @@ namespace SVGImporter.Rendering
                     break;
                 case "scroll":
                     _overflow = SVGOverflow.scroll;
-                    break;
+                    break;                
             }
         }
 
@@ -670,7 +673,7 @@ namespace SVGImporter.Rendering
                     break;
                 case "evenodd":
                     _clipRule = SVGClipRule.evenodd;
-                    break;
+                    break;                            
             }
         }
 
@@ -820,7 +823,7 @@ namespace SVGImporter.Rendering
             if (string.IsNullOrEmpty(this._gradientID))
             {
                 return false;
-            }
+            }            
             return _conicalGradList.ContainsKey(this._gradientID);
         }
 
@@ -876,7 +879,7 @@ namespace SVGImporter.Rendering
             }
             if (IsSolidFill())
             {
-                return SVGPaintMethod.SolidGradientFill;
+                return SVGPaintMethod.SolidFill;
             }
             if (IsStroke())
             {
@@ -905,7 +908,7 @@ namespace SVGImporter.Rendering
                 _radialGradList.Add(radialGradElement.id, radialGradElement);
             }
         }
-
+        
         public void AppendConicalGradient(SVGConicalGradientElement conicalGradElement)
         {
             if(_conicalGradList.ContainsKey(conicalGradElement.id))
@@ -916,28 +919,28 @@ namespace SVGImporter.Rendering
             }
         }
 
-        public SVGLinearGradientBrush GetLinearGradientBrush(Rect bounds, SVGMatrix matrix)
+        public SVGLinearGradientBrush GetLinearGradientBrush(Rect bounds, SVGMatrix matrix, Rect viewport)
         {
             if(!_linearGradList.ContainsKey(this._gradientID))
                 return null;
 
-            return new SVGLinearGradientBrush(_linearGradList[this._gradientID], bounds, matrix);
+            return new SVGLinearGradientBrush(_linearGradList[this._gradientID], bounds, matrix, viewport);
         }
 
-        public SVGRadialGradientBrush GetRadialGradientBrush(Rect bounds, SVGMatrix matrix)
+        public SVGRadialGradientBrush GetRadialGradientBrush(Rect bounds, SVGMatrix matrix, Rect viewport)
         {
             if(!_radialGradList.ContainsKey(this._gradientID))
                 return null;
-
-            return new SVGRadialGradientBrush(_radialGradList[this._gradientID], bounds, matrix);
+            
+            return new SVGRadialGradientBrush(_radialGradList[this._gradientID], bounds, matrix, viewport);
         }
 
-        public SVGConicalGradientBrush GetConicalGradientBrush(Rect bounds, SVGMatrix matrix)
+        public SVGConicalGradientBrush GetConicalGradientBrush(Rect bounds, SVGMatrix matrix, Rect viewport)
         {
             if(!_conicalGradList.ContainsKey(this._gradientID))
                 return null;
-
-            return new SVGConicalGradientBrush(_conicalGradList[this._gradientID], bounds, matrix);
+            
+            return new SVGConicalGradientBrush(_conicalGradList[this._gradientID], bounds, matrix, viewport);
         }
     }
 }

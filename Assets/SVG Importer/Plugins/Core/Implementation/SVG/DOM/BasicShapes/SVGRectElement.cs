@@ -6,13 +6,13 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Geometry;
     using Utils;
     using Document;
 
-    public class SVGRectElement : SVGParentable, ISVGDrawable
+    public class SVGRectElement : SVGParentable, ISVGDrawable, ISVGElement
     {
         private SVGLength _x;
         private SVGLength _y;
@@ -106,144 +106,76 @@ namespace SVGImporter.Rendering
             this.inheritTransformList = transformList;
         }
 
-        public static List<Vector2> GetPath(SVGRectElement svgElement)
-        {
-            return GetPath(SVGMatrix.Identity(), svgElement);
-        }
-
-        public static List<Vector2> GetPath(SVGMatrix matrix, SVGRectElement svgElement)
+        public List<List<Vector2>> GetPath()
         {
             List<Vector2> output = new List<Vector2>();
 
-            float width = svgElement.width.value, height = svgElement.height.value;
-            float x = svgElement.x.value, y = svgElement.y.value, rx = svgElement.rx.value, ry = svgElement.ry.value;
-
-            Vector2 p1 = new Vector2(x, y),
-            p2 = new Vector2(x + width, y),
-            p3 = new Vector2(x + width, y + height),
-            p4 = new Vector2(x, y + height);
-
-            if(rx == 0.0f && ry == 0.0f) {
+            float widthValue = width.value, heightValue = height.value;
+            float xValue = x.value, yValue = y.value, rxValue = rx.value, ryValue = ry.value;
+            
+            Vector2 p1 = new Vector2(xValue, yValue),
+            p2 = new Vector2(xValue + widthValue, yValue),
+            p3 = new Vector2(xValue + widthValue, yValue + heightValue),
+            p4 = new Vector2(xValue, yValue + heightValue);
+            
+            if(rxValue == 0.0f && ryValue == 0.0f) {
                 output = new List<Vector2>(new Vector2[]{
-                    matrix.Transform(p1),
-                    matrix.Transform(p2),
-                    matrix.Transform(p3),
-                    matrix.Transform(p4)
+                    transformMatrix.Transform(p1),
+                    transformMatrix.Transform(p2),
+                    transformMatrix.Transform(p3),
+                    transformMatrix.Transform(p4)
                 });
             } else {
-                float t_rx = (rx == 0.0f) ? ry : rx;
-                float t_ry = (ry == 0.0f) ? rx : ry;
-
-                t_rx = (t_rx > (width * 0.5f - 2f)) ? (width * 0.5f - 2f) : t_rx;
-                t_ry = (t_ry > (height * 0.5f - 2f)) ? (height * 0.5f - 2f) : t_ry;
-
-                float angle = svgElement.transformAngle;
-
-                Vector2 t_p1 = matrix.Transform(new Vector2(p1.x + t_rx, p1.y));
-                Vector2 t_p2 = matrix.Transform(new Vector2(p2.x - t_rx, p2.y));
-                Vector2 t_p3 = matrix.Transform(new Vector2(p2.x, p2.y + t_ry));
-                Vector2 t_p4 = matrix.Transform(new Vector2(p3.x, p3.y - t_ry));
-
-                Vector2 t_p5 = matrix.Transform(new Vector2(p3.x - t_rx, p3.y));
-                Vector2 t_p6 = matrix.Transform(new Vector2(p4.x + t_rx, p4.y));
-                Vector2 t_p7 = matrix.Transform(new Vector2(p4.x, p4.y - t_ry));
-                Vector2 t_p8 = matrix.Transform(new Vector2(p1.x, p1.y + t_ry));
-
+                float t_rx = (rxValue == 0.0f) ? ryValue : rxValue;
+                float t_ry = (ryValue == 0.0f) ? rxValue : ryValue;
+                
+                t_rx = (t_rx > (widthValue * 0.5f - 2f)) ? (widthValue * 0.5f - 2f) : t_rx;
+                t_ry = (t_ry > (heightValue * 0.5f - 2f)) ? (heightValue * 0.5f - 2f) : t_ry;
+                
+                float angle = transformAngle;
+                
+                Vector2 t_p1 = transformMatrix.Transform(new Vector2(p1.x + t_rx, p1.y));
+                Vector2 t_p2 = transformMatrix.Transform(new Vector2(p2.x - t_rx, p2.y));
+                Vector2 t_p3 = transformMatrix.Transform(new Vector2(p2.x, p2.y + t_ry));
+                Vector2 t_p4 = transformMatrix.Transform(new Vector2(p3.x, p3.y - t_ry));
+                
+                Vector2 t_p5 = transformMatrix.Transform(new Vector2(p3.x - t_rx, p3.y));
+                Vector2 t_p6 = transformMatrix.Transform(new Vector2(p4.x + t_rx, p4.y));
+                Vector2 t_p7 = transformMatrix.Transform(new Vector2(p4.x, p4.y - t_ry));
+                Vector2 t_p8 = transformMatrix.Transform(new Vector2(p1.x, p1.y + t_ry));
+                
                 output = SVGGeomUtils.RoundedRect(t_p1, t_p2, t_p3, t_p4, t_p5, t_p6, t_p7, t_p8, t_rx, t_ry, angle);
             }
-
+            
             output.Add(output[0]);
 
-            return output;
+            return new List<List<Vector2>>(){output};
         }
-
-        public static List<List<Vector2>> GetClipPath(SVGMatrix matrix, SVGRectElement svgElement)
+        
+        public List<List<Vector2>> GetClipPath()
         {
-            List<Vector2> path = GetPath(matrix, svgElement);
-            if(path == null || path.Count == 0) return null;
-
+            List<List<Vector2>> path = GetPath();
+            if(path == null || path.Count == 0 || path[0] == null || path[0].Count == 0) return null;
+            
             List<List<Vector2>> clipPath = new List<List<Vector2>>();
-            if(svgElement.paintable.IsFill())
+            if(paintable.IsFill())
             {
-                clipPath.Add(path);
+                clipPath.Add(path[0]);
             }
-
-            if(svgElement.paintable.IsStroke())
+            
+            if(paintable.IsStroke())
             {
-                List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path)};
-                List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, svgElement.paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(svgElement.paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(svgElement.paintable.strokeLineCap), svgElement.paintable.miterLimit, svgElement.paintable.dashArray, svgElement.paintable.dashOffset, ClosePathRule.ALWAYS, SVGGraphics.roundQuality);
+                List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path[0])};
+                List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(paintable.strokeLineCap), paintable.miterLimit, paintable.dashArray, paintable.dashOffset, ClosePathRule.ALWAYS, SVGGraphics.roundQuality);
                 if(strokePath != null && strokePath.Count > 0) clipPath.AddRange(strokePath);
             }
-
+            
             return clipPath;
         }
-
+        
         public void Render()
         {
-            Create(this);
-        }
-
-        public static void Create(SVGRectElement svgElement)
-        {
-            if(svgElement.paintable.visibility != SVGVisibility.Visible || svgElement.paintable.display == SVGDisplay.None)
-                return;
-
-            SVGGraphics.position_buffer = GetPath(svgElement.transformMatrix, svgElement);
-
-            if(svgElement.paintable.IsFill())
-                CreateFill(svgElement);
-            if(svgElement.paintable.IsStroke())
-                CreateStroke(svgElement);
-        }
-
-        static void CreateFill(SVGRectElement svgElement)
-        {
-            string name = svgElement.attrList.GetValue("id");
-            if (string.IsNullOrEmpty(name)) name = "Rectangle Fill";
-
-            List<List<Vector2>> path;
-            if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
-            {
-                path = SVGGeom.ClipPolygon(new List<List<Vector2>>(){SVGGraphics.position_buffer}, svgElement.paintable.clipPathList);
-            } else {
-                path = new List<List<Vector2>>(){SVGGraphics.position_buffer};
-            }
-
-            Mesh antialiasingMesh;
-            Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
-            if(mesh == null) return;
-            mesh.name = name;
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
-            if(antialiasingMesh != null)
-            {
-                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
-                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
-                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
-            }
-        }
-
-        static void CreateStroke(SVGRectElement svgElement)
-        {
-            string name = svgElement.attrList.GetValue("id");
-            if (string.IsNullOrEmpty(name)) name = "Rectangle Stroke ";
-
-            List<List<Vector2>> stroke = SVGSimplePath.CreateStroke(SVGGraphics.position_buffer, svgElement.paintable, ClosePathRule.ALWAYS);
-            if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
-            {
-                stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
-            }
-
-            Mesh antialiasingMesh;
-            Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;
-            mesh.name = name;
-            SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
-            if(antialiasingMesh != null)
-            {
-                SVGFill svgFill = svgElement.paintable.svgFill.Clone();
-                svgFill.blend = FILL_BLEND.ALPHA_BLENDED;
-                SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
-            }
+            SVGGraphics.Create(this, "Rectangle Element");
         }
     }
 }

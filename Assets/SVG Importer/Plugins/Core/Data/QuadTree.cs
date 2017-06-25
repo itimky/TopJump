@@ -220,7 +220,7 @@ namespace SVGImporter.Data
 
                                 bottomLeft._depth = _depth + 1;
                                 bottomLeft.Add(node);
-
+                                        
                             } else
                             {
                                 if (bottomRight == null)
@@ -265,7 +265,7 @@ namespace SVGImporter.Data
                         quadTree._root = parent;
                         parent._depth = _depth - 1;
                         parent.Add(node);
-                    }
+                    } 
 
                     if (outsideRight)
                     {
@@ -276,7 +276,7 @@ namespace SVGImporter.Data
                         parent._depth = _depth - 1;
                         parent.Add(node);
                     }
-                }
+                } 
                 if (outsideBottom)
                 {
                     if (outsideLeft)
@@ -292,7 +292,7 @@ namespace SVGImporter.Data
                     if (outsideRight)
                     {
                         parent = new QuadTreeCell<T>(new SVGBounds(this.bounds.minX, this.bounds.minY - this.bounds.size.y, this.bounds.maxX + this.bounds.size.x, this.bounds.maxY), null, this.quadTree, maxCapacity);
-                        if (!isCellEmpty)
+                        if (!isCellEmpty)    
                             parent.topLeft = this;
                         quadTree._root = parent;
                         parent._depth = _depth - 1;
@@ -315,13 +315,13 @@ namespace SVGImporter.Data
             if (nodes != null && nodes.Count > 0)
             {
                 output = new List<QuadTreeNode<T>>();
-
+                        
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     if (nodes [i].bounds.Contains(point))
                         output.Add(nodes [i]);
                 }
-
+                        
                 if (output.Count == 0)
                     output = null;
             }
@@ -377,23 +377,23 @@ namespace SVGImporter.Data
         {
             if (!this.bounds.Intersects(bounds))
                 return null;
-
+                    
             List<QuadTreeNode<T>> output = null;
-
+                    
             if (nodes != null && nodes.Count > 0)
             {
                 output = new List<QuadTreeNode<T>>();
-
+                        
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     if (bounds.Contains(nodes [i].bounds))
                         output.Add(nodes [i]);
                 }
-
+                        
                 if (output.Count == 0)
                     output = null;
             }
-
+                    
             if (topLeft != null)
             {
                 List<QuadTreeNode<T>> cellOutput = topLeft.Contains(bounds);
@@ -404,7 +404,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (topRight != null)
             {
                 List<QuadTreeNode<T>> cellOutput = topRight.Contains(bounds);
@@ -415,7 +415,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (bottomLeft != null)
             {
                 List<QuadTreeNode<T>> cellOutput = bottomLeft.Contains(bounds);
@@ -426,7 +426,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (bottomRight != null)
             {
                 List<QuadTreeNode<T>> cellOutput = bottomRight.Contains(bounds);
@@ -437,7 +437,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             return output;
         }
 
@@ -445,9 +445,9 @@ namespace SVGImporter.Data
         {
             if (!this.bounds.Intersects(bounds))
                 return null;
-
+                    
             List<QuadTreeNode<T>> output = null;
-
+                    
             if (nodes != null && nodes.Count > 0)
             {
                 output = new List<QuadTreeNode<T>>();
@@ -461,7 +461,7 @@ namespace SVGImporter.Data
                 if (output.Count == 0)
                     output = null;
             }
-
+                    
             if (topLeft != null)
             {
                 List<QuadTreeNode<T>> cellOutput = topLeft.Intersects(bounds);
@@ -472,7 +472,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (topRight != null)
             {
                 List<QuadTreeNode<T>> cellOutput = topRight.Intersects(bounds);
@@ -483,7 +483,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (bottomLeft != null)
             {
                 List<QuadTreeNode<T>> cellOutput = bottomLeft.Intersects(bounds);
@@ -494,7 +494,7 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             if (bottomRight != null)
             {
                 List<QuadTreeNode<T>> cellOutput = bottomRight.Intersects(bounds);
@@ -505,9 +505,9 @@ namespace SVGImporter.Data
                     output.AddRange(cellOutput);
                 }
             }
-
+                    
             return output;
-        }
+        }   
 
         // todo
         public List<QuadTreeNode<T>> NearestNeighbour(Vector2 point)
@@ -522,7 +522,7 @@ namespace SVGImporter.Data
                 nodes.Clear();
                 nodes = null;
             }
-
+                            
             if (topLeft != null)
             {
                 topLeft.Clear();
@@ -573,7 +573,7 @@ namespace SVGImporter.Data
                 }
             }
         }
-
+                
         public bool isCellEmpty
         {
             get
@@ -609,7 +609,7 @@ namespace SVGImporter.Data
             _root = new QuadTreeCell<T>(bounds, null, this, _originalMaxCapacity);
             _root._depth = 0;
         }
-
+                
         public QuadTree(SVGBounds bounds, int maxCapacity)
         {
             _originalBounds = bounds;

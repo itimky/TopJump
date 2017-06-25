@@ -26,6 +26,7 @@ namespace SVGImporter
         protected SerializedProperty m_VectorGraphics;
         protected SerializedProperty m_PreserveAspect;
         protected SerializedProperty m_UsePivot;
+        protected SerializedProperty m_RaycastTarget;
 
         protected GUIContent m_VectorContent;
 
@@ -42,7 +43,8 @@ namespace SVGImporter
             m_Type = serializedObject.FindProperty("m_Type");
             m_Color = serializedObject.FindProperty("m_Color");
             m_Material = serializedObject.FindProperty("m_Material");
-
+            m_RaycastTarget = serializedObject.FindProperty("m_RaycastTarget");
+            
             m_ShowNativeSize = new AnimBool(false);
             m_ShowNativeSize.valueChanged.AddListener(Repaint);
 
@@ -57,14 +59,14 @@ namespace SVGImporter
             m_ShowType.valueChanged.AddListener(Repaint);
 
             var typeEnum = (SVGImage.Type)m_Type.enumValueIndex;
-
+            
             m_ShowSlicedOrTiled = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == SVGImage.Type.Sliced);
             m_ShowSliced = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == SVGImage.Type.Sliced);
             m_ShowSlicedOrTiled.valueChanged.AddListener(Repaint);
             m_ShowSliced.valueChanged.AddListener(Repaint);
 
             SetShowNativeSize(true);
-        }
+        }       
 
         protected virtual void OnDisable()
         {
@@ -105,6 +107,7 @@ namespace SVGImporter
             }
             EditorGUILayout.EndFadeGroup();
             NativeSizeButtonGUI();
+            RaycastControlsGUI();
 
             if(EditorGUI.EndChangeCheck())
                 changed = true;
@@ -115,7 +118,7 @@ namespace SVGImporter
                 image.SetAllDirty();
             }
         }
-
+        
         protected bool VectorGUI()
         {
             bool changed = false;
@@ -170,7 +173,7 @@ namespace SVGImporter
                     }
                     EditorGUILayout.EndHorizontal();
                 } else {
-                    #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
+                    #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_5_0 || UNITY_5_1
                     int vertexCount = newVectorGraphics.uiVertexCount;
                     int percent = Mathf.RoundToInt(((float)vertexCount / 65534f) * 100f);
                     if(vertexCount > 128)
@@ -178,13 +181,13 @@ namespace SVGImporter
                         GUIContent infoContent = new GUIContent("Asset takes "+percent+"% of this Canvas, "+vertexCount+" vertices"+
                             "\nUI Canvas has limit of 65,534 vertices in total.");
 
-                        EditorStyles s_Current = (EditorStyles)typeof(EditorStyles).GetField("s_Current", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                        GUIStyle helpBoxStyle = (GUIStyle)typeof(EditorStyles).GetField("m_HelpBox", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(s_Current);
-                        Rect helpRect = GUILayoutUtility.GetRect(infoContent, helpBoxStyle);
+						EditorStyles s_Current = (EditorStyles)typeof(EditorStyles).GetField("s_Current", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+						GUIStyle helpBoxStyle = (GUIStyle)typeof(EditorStyles).GetField("m_HelpBox", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(s_Current);
+						Rect helpRect = GUILayoutUtility.GetRect(infoContent, helpBoxStyle);
                         EditorGUI.ProgressBar(helpRect, percent * 0.01f, "");
                         EditorGUI.HelpBox(helpRect, infoContent.text, MessageType.Warning);
                     }
-                    #endif
+					#endif
                 }
             }
 
@@ -199,7 +202,7 @@ namespace SVGImporter
             ++EditorGUI.indentLevel;
             {
                 SVGImage.Type typeEnum = (SVGImage.Type)m_Type.enumValueIndex;
-
+                
                 bool showSlicedOrTiled = (!m_Type.hasMultipleDifferentValues && (typeEnum == SVGImage.Type.Sliced));
                 if (showSlicedOrTiled && targets.Length > 1)
                     showSlicedOrTiled = targets.Select(obj => obj as SVGImage).All(img => img.hasBorder);
@@ -231,7 +234,7 @@ namespace SVGImporter
             else
                 m_ShowNativeSize.target = show;
         }
-
+        
         protected void NativeSizeButtonGUI()
         {
             if (EditorGUILayout.BeginFadeGroup(m_ShowNativeSize.faded))
@@ -253,7 +256,7 @@ namespace SVGImporter
             }
             EditorGUILayout.EndFadeGroup();
         }
-
+        
         protected bool AppearanceControlsGUI()
         {
             EditorGUI.BeginChangeCheck();
@@ -273,6 +276,11 @@ namespace SVGImporter
             if(image.vectorGraphics != null)
                 return GetEditorInfo(image.vectorGraphics);
             return "";
+        }
+
+        protected void RaycastControlsGUI()
+        {
+            EditorGUILayout.PropertyField(m_RaycastTarget);
         }
     }
 }

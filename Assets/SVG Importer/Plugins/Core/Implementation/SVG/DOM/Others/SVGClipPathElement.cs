@@ -4,10 +4,10 @@
 
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Document;
-
+    
     public class SVGClipPathElement
     {
         private string _id;
@@ -26,7 +26,7 @@ namespace SVGImporter.Rendering
             _id = _attrList.GetValue("id");
             GetElementList();
         }
-
+        
         protected void GetElementList()
         {
             bool exitFlag = false;

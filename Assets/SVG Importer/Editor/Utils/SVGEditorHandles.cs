@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Reflection;
+using System.Linq;
 
 public class SVGEditorHandles {
 
@@ -11,9 +12,9 @@ public class SVGEditorHandles {
     public static Vector2 s_DragScreenOffset;
 
     public static int s_RectSelectionID = GUIUtility.GetControlID(FocusType.Keyboard);
-
+    
     public static Vector2 s_CurrentMousePosition;
-
+    
     public static Vector2 s_DragStartScreenPosition;
 
     public static bool s_OneClickDragStarted;
@@ -34,7 +35,7 @@ public class SVGEditorHandles {
         return result;
     }
 
-
+    
     //
     // Static Methods
     //
@@ -50,7 +51,7 @@ public class SVGEditorHandles {
         }
         return rect;
     }
-
+    
     public static void HandleSliderRectMouseDown(int id, Event evt, Rect pos)
     {
         GUIUtility.keyboardControl = id;
@@ -61,7 +62,7 @@ public class SVGEditorHandles {
         SVGEditorHandles.s_DragScreenOffset = SVGEditorHandles.s_CurrentMousePosition - b;
         EditorGUIUtility.SetWantsMouseJumping(1);
     }
-
+    
     public static Vector2 PivotSlider(Rect sprite, Vector2 pos, GUIStyle pivotDot, GUIStyle pivotDotActive)
     {
         int controlID = GUIUtility.GetControlID("Slider1D".GetHashCode(), FocusType.Keyboard);
@@ -117,7 +118,7 @@ public class SVGEditorHandles {
                 }
                 break;
             case EventType.Repaint:
-                EditorGUIUtility.AddCursorRect(position, MouseCursor.Arrow, controlID);
+				EditorGUIUtility.AddCursorRect(position, UnityEditor.MouseCursor.Arrow, controlID);
                 if (GUIUtility.hotControl == controlID)
                 {
                     pivotDotActive.Draw(position, GUIContent.none, controlID);
@@ -131,8 +132,8 @@ public class SVGEditorHandles {
         pos = new Vector2((pos.x - sprite.xMin) / sprite.width, (pos.y - sprite.yMin) / sprite.height);
         return pos;
     }
-
-    public static Vector2 PointSlider(Vector2 pos, MouseCursor cursor, GUIStyle dragDot, GUIStyle dragDotActive)
+    
+	public static Vector2 PointSlider(Vector2 pos, UnityEditor.MouseCursor cursor, GUIStyle dragDot, GUIStyle dragDotActive)
     {
         int controlID = GUIUtility.GetControlID("Slider1D".GetHashCode(), FocusType.Keyboard);
         Vector2 vector = Handles.matrix.MultiplyPoint(pos);
@@ -152,7 +153,7 @@ public class SVGEditorHandles {
         }
         return SVGEditorHandles.ScaleSlider(pos, cursor, rect);
     }
-
+    
     public static Rect RectCreator(float textureWidth, float textureHeight, GUIStyle rectStyle)
     {
         Event current = Event.current;
@@ -212,14 +213,14 @@ public class SVGEditorHandles {
         }
         return result;
     }
-
-    public static Vector2 ScaleSlider(Vector2 pos, MouseCursor cursor, Rect cursorRect)
+    
+	public static Vector2 ScaleSlider(Vector2 pos, UnityEditor.MouseCursor cursor, Rect cursorRect)
     {
         int controlID = GUIUtility.GetControlID("Slider1D".GetHashCode(), FocusType.Keyboard);
         return SVGEditorHandles.ScaleSlider(controlID, pos, cursor, cursorRect);
     }
-
-    public static Vector2 ScaleSlider(int id, Vector2 pos, MouseCursor cursor, Rect cursorRect)
+    
+	public static Vector2 ScaleSlider(int id, Vector2 pos, UnityEditor.MouseCursor cursor, Rect cursorRect)
     {
         Vector2 b = Handles.matrix.MultiplyPoint(pos);
         Event current = Event.current;
@@ -273,7 +274,7 @@ public class SVGEditorHandles {
         }
         return pos;
     }
-
+    
     public static Rect SliderRect(Rect pos)
     {
         int controlID = GUIUtility.GetControlID("SliderRect".GetHashCode(), FocusType.Keyboard);
@@ -326,13 +327,13 @@ public class SVGEditorHandles {
             {
                 Vector2 vector = Handles.inverseMatrix.MultiplyPoint(new Vector2(pos.xMin, pos.yMin));
                 Vector2 vector2 = Handles.inverseMatrix.MultiplyPoint(new Vector2(pos.xMax, pos.yMax));
-                EditorGUIUtility.AddCursorRect(new Rect(vector.x, vector.y, vector2.x - vector.x, vector2.y - vector.y), MouseCursor.Arrow, controlID);
+			EditorGUIUtility.AddCursorRect(new Rect(vector.x, vector.y, vector2.x - vector.x, vector2.y - vector.y), UnityEditor.MouseCursor.Arrow, controlID);
                 break;
             }
         }
         return pos;
     }
-
+    
     public static bool ValidRect(Vector2 startPoint, Vector2 endPoint)
     {
         return Mathf.Abs((endPoint - startPoint).x) > 5f && Mathf.Abs((endPoint - startPoint).y) > 5f;
@@ -340,15 +341,15 @@ public class SVGEditorHandles {
 
     public static void BeginLines(Color color)
     {
-        #if !UNITY_4_6
-        typeof(HandleUtility).GetMethod("ApplyWireMaterial", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
-        #endif
+#if !UNITY_4_6
+        typeof(HandleUtility).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).First(m => m.Name == "ApplyWireMaterial" && m.GetParameters().Length == 0).Invoke(null, null);
+#endif
         GL.PushMatrix();
         GL.MultMatrix(Handles.matrix);
         GL.Begin(1);
         GL.Color(color);
     }
-
+    
     public static Rect ClampedRect(Rect rect, Rect clamp, bool maintainSize)
     {
         Rect result = new Rect(rect);
@@ -400,7 +401,7 @@ public class SVGEditorHandles {
         result.height = Mathf.Abs(result.height);
         return result;
     }
-
+    
     public static void DrawBox(Rect position)
     {
         Vector3[] array = new Vector3[5];
@@ -414,19 +415,19 @@ public class SVGEditorHandles {
         DrawLine(array[2], array[3]);
         DrawLine(array[3], array[0]);
     }
-
+    
     public static void DrawLine(Vector3 p1, Vector3 p2)
     {
         GL.Vertex(p1);
         GL.Vertex(p2);
     }
-
+    
     public static void EndLines()
     {
         GL.End();
         GL.PopMatrix();
     }
-
+    
     public static Vector2 GetPivotValue(SpriteAlignment alignment, Vector2 customOffset)
     {
         switch (alignment)
@@ -455,12 +456,12 @@ public class SVGEditorHandles {
                 return Vector2.zero;
         }
     }
-
+    
     public static Rect RoundedRect(Rect rect)
     {
         return new Rect((float)Mathf.RoundToInt(rect.xMin), (float)Mathf.RoundToInt(rect.yMin), (float)Mathf.RoundToInt(rect.width), (float)Mathf.RoundToInt(rect.height));
     }
-
+    
     public static Rect RoundToInt(Rect r)
     {
         r.xMin = (float)Mathf.RoundToInt(r.xMin);
@@ -471,12 +472,12 @@ public class SVGEditorHandles {
     }
 
     public class Styles
-    {
+    {       
         static GUIContent TextContent(string content)
         {
             return (GUIContent)typeof(EditorGUIUtility).GetMethod("TextContent", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new []{content});
         }
-
+        
         public readonly GUIStyle dragdot = "U2D.dragDot";
         public readonly GUIStyle dragdotDimmed = "U2D.dragDotDimmed";
         public readonly GUIStyle dragdotactive = "U2D.dragDotActive";

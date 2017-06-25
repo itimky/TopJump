@@ -259,7 +259,7 @@ namespace SVGImporter.Utils
                         string[] values = colorStr.Split(',');
                         if(values != null && values.Length > 0)
                         {
-                            r = GetColorValue(values[0]);
+                            r = GetColorValue(values[0]);                        
                             if(values.Length > 1)
                             {
                                 g = GetColorValue(values[1]);

@@ -15,22 +15,29 @@ namespace SVGImporter
 {
     using Utils;
     using Rendering;
-
+    using Geometry;
+    
     [ExecuteInEditMode]
     [AddComponentMenu("Rendering/SVG Renderer", 20)]
-    public class SVGRenderer : UIBehaviour, ISVGShape, ISVGRenderer
+    public class SVGRenderer : UIBehaviour, ISVGShape, ISVGRenderer, ISVGReference
     {
+        public enum Type
+        {
+            Simple,
+            Sliced
+        }
+
         /// <summary>
         /// delegate which indicates that the source SVG graphics changed.
         /// </summary>
         public System.Action<SVGAsset> onVectorGraphicsChanged;
 
-        protected System.Action<Mesh, bool> _OnPrepareForRendering;
+        protected System.Action<SVGLayer[], SVGAsset, bool> _OnPrepareForRendering;
         /// <summary>
         /// delegate which indicates that the mesh has changed.
         /// You can use it as your custom mesh postprocessor.
         /// </summary>
-        public virtual System.Action<Mesh, bool> OnPrepareForRendering
+        public virtual System.Action<SVGLayer[], SVGAsset, bool> OnPrepareForRendering
         {
             get {
                 return _OnPrepareForRendering;
@@ -40,10 +47,22 @@ namespace SVGImporter
             }
         }
 
+        protected Type _lastType;
+        /// <summary>
+        /// Render type of the Image
+        /// </summary>
+        [FormerlySerializedAs("type")]
+        [SerializeField] private Type _type = Type.Simple;
+        public Type type { get { return _type; } set { _type = value; } }
+
         // Tracking of modified assets
         [FormerlySerializedAs("lastTimeModified")]
         [SerializeField]
         protected long _lastTimeModified;
+
+        // Tracking of modified assets
+        protected Rect _rectTransformRect;
+        protected Rect _lastRectTransformRect;
 
         // Tracking of mesh change
         protected int _lastFrameChanged;
@@ -69,13 +88,9 @@ namespace SVGImporter
                 return _vectorGraphics;
             }
             set {
-
-                if(_vectorGraphics != value)
-                {
-                    _vectorGraphics = value;
-                    if(!meshRenderer.isPartOfStaticBatch)
-                        PrepareForRendering(true);
-                }
+                _vectorGraphics = value;
+                if(!meshRenderer.isPartOfStaticBatch)
+                    PrepareForRendering(true);
             }
         }
 
@@ -85,6 +100,7 @@ namespace SVGImporter
         protected Color _color = Color.white;
         protected Color _lastColor = Color.white;
         protected Color32[] _cachedColors;
+        protected Vector3[] _cachedVertices;
 
         /// <summary>
         /// Rendering color for the SVG Asset..
@@ -98,7 +114,7 @@ namespace SVGImporter
                 _color = value;
             }
         }
-
+        
         [FormerlySerializedAs("opaqueMaterial")]
         [SerializeField]
         protected Material _opaqueMaterial;
@@ -145,9 +161,9 @@ namespace SVGImporter
         public MeshFilter meshFilter {
             get {
                 if(_meshFilter == null)
-                {
+                {   
                     _meshFilter = GetComponent<MeshFilter>();
-                    if(_meshFilter == null)
+                    if(_meshFilter == null) 
                     {
                         _meshFilter = gameObject.AddComponent<MeshFilter>();
                     }
@@ -171,12 +187,19 @@ namespace SVGImporter
             }
         }
 
+        public RectTransform rectTransform
+        {
+            get {
+                return transform as RectTransform;
+            }
+        }
+
+        // Cached SVG Layers
+        protected SVGLayer[] _layers;
         // Shared mesh for better gpu instancing
         protected Mesh _sharedMesh;
         // Instanced mesh for custom coloring
         protected Mesh _mesh;
-        // Shared Material for better batching
-        protected Material[] _sharedMaterials;
 
         // Unity default transparent sorting ID
         [FormerlySerializedAs("sortingLayerID")]
@@ -287,13 +310,19 @@ namespace SVGImporter
         // We have to clear editor data and load runtime data
         // Also it handles duplicating game objects
         protected override void Awake()
-        {
-            meshFilter.sharedMesh = null;
-            meshRenderer.sharedMaterials = new Material[0];
-
+        {            
             base.Awake();
-            Clear(true);
+            meshFilter.sharedMesh = null;
+            if(_vectorGraphics != null)
+            {
+                _vectorGraphics.AddReference(this);
+            }
+
+            Clear();
             PrepareForRendering(true);
+            #if UNITY_EDITOR
+            UpdateTimeStamp();
+            #endif
         }
 
         protected override void OnEnable()
@@ -306,73 +335,151 @@ namespace SVGImporter
         {
             PrepareForRendering(true);
         }
-
+        /*
+        protected override void OnDidApplyAnimationProperties()
+        {
+            Debug.Log("OnDidApplyAnimationProperties: "+Time.frameCount);
+        }
+        */
         // This is the main rendering method
         protected void PrepareForRendering(bool force = false)
-        {
+        {           
 #if UNITY_EDITOR
-            if(_lastSortingOrder != _sortingOrder){
+            if(_lastSortingOrder != _sortingOrder){ 
                 sortingOrder = _sortingOrder;
             }
-            if(_lastSortingLayerID != _sortingLayerID){
+            if(_lastSortingLayerID != _sortingLayerID){ 
                 sortingLayerID = _sortingLayerID;
             }
 #endif
             if(_vectorGraphics == null)
             {
-                _lastVectorGraphics = null;
+                if(_lastVectorGraphics != null)
+                {
+                    _lastVectorGraphics.RemoveReference(this);
+                    _lastVectorGraphics = null;
+                }
                 Clear();
             } else {
-                CacheDynamicMesh();
-
-                bool meshChanged = force;
+                bool meshChanged = force || _lastType != _type || meshFilter.sharedMesh == null;
                 bool colorChanged = force || _lastColor != _color;
                 bool materialChanged = force || _lastOpaqueMaterial != _opaqueMaterial || _lastTransparentMaterial != _transparentMaterial;
+#if UNITY_EDITOR
+                for(int i = 0; i < meshRenderer.sharedMaterials.Length; i++)
+                {
+                    if(meshRenderer.sharedMaterials[i] != null) continue;
+                    materialChanged = true;
+                    break;
+                }
+#endif
 
-                if(_sharedMesh == null || _lastVectorGraphics != _vectorGraphics)
+                if(_lastVectorGraphics != _vectorGraphics)
                 {
                     meshChanged = true;
                     colorChanged = true;
+
+                    if(_lastVectorGraphics != null)
+                    {
+                        _lastVectorGraphics.RemoveReference(this);
+                    }
+                    if(_vectorGraphics != null)
+                    {
+                        _vectorGraphics.AddReference(this);
+                    }
                 }
 
-                if(colorChanged && _color == Color.white){
-                    meshChanged = true;
-                }
-
-                if(meshChanged)
+                if(useLayers || !useSharedMesh)
                 {
-                    Clear();
-                    InitMesh();
-                    materialChanged = true;
-
-                    if(onVectorGraphicsChanged != null)
-                        onVectorGraphicsChanged(_vectorGraphics);
+                    if(_lastUseSharedMesh != false) meshChanged = true;
+                    if(!meshChanged)
+                    {
+                        if(_type == Type.Sliced && rectTransform != null)
+                        {
+                            _rectTransformRect = rectTransform.rect;
+                            if(_rectTransformRect != _lastRectTransformRect)
+                            {
+                                meshChanged = true;
+                                _lastRectTransformRect = _rectTransformRect;
+                            }
+                        }
+                    }
                 }
 
-                if(colorChanged)
+                if(useLayers)
                 {
-                    UpdateColors(force);
-                    materialChanged = true;
-                }
+                    if(_layers == null) _layers = _vectorGraphics.layersClone;                    
+                    if(meshChanged || colorChanged)
+                    {
+                        InitMesh();
+                        materialChanged = true;
+                        
+                        if(_type == Type.Sliced)
+                        {
+                            UpdateSlicedMesh();
+                        }
+                        
+                        UpdateColors(force);
+                        _lastFrameChanged = Time.frameCount;
+                        materialChanged = true;
+                        
+                        if(_OnPrepareForRendering != null)
+                            _OnPrepareForRendering(_layers, _vectorGraphics, force);
+                        
+                        GenerateMesh();
+                        
+                        if(meshFilter.sharedMesh != _mesh)
+                            meshFilter.sharedMesh = _mesh;
+                    }
+                } else {
+                    if(useSharedMesh)
+                    {
+                        _sharedMesh = _vectorGraphics.sharedMesh;
+                        meshFilter.sharedMesh = _sharedMesh;
+                    } else {
+                        // Cache Mesh
+                        if(meshChanged)
+                        {
+                            InitMesh();
+                            materialChanged = true;
+                            if(_type == Type.Sliced)
+                            {
+                                UpdateSlicedMesh();
+                            }
+                            
+                            if(onVectorGraphicsChanged != null)
+                                onVectorGraphicsChanged(_vectorGraphics);
+                        }
 
+                        if(meshChanged || colorChanged)
+                        {
+                            UpdateColors(force);
+                            _lastFrameChanged = Time.frameCount;
+                            materialChanged = true;
+                        }
+                        
+                        if(meshFilter.sharedMesh != _mesh)
+                            meshFilter.sharedMesh = _mesh;
+                    }
+                }
+                
                 if(materialChanged)
                 {
-                    InitMaterials();
                     UpdateMaterials();
-                }
-
-                if(meshChanged || colorChanged)
-                {
-                    _lastFrameChanged = Time.frameCount;
-                    if(OnPrepareForRendering != null)
-                        OnPrepareForRendering(this.meshFilter.sharedMesh, force);
                 }
 
                 _lastOpaqueMaterial = _opaqueMaterial;
                 _lastTransparentMaterial = _transparentMaterial;
                 _lastVectorGraphics = _vectorGraphics;
                 _lastColor = _color;
+                _lastType = _type;
+                _lastUseSharedMesh = useSharedMesh;
             }
+        }
+
+        protected void GenerateMesh()
+        {
+            Shader[] outputShaders;
+            SVGMesh.CombineMeshes(_layers, _mesh, out outputShaders, _vectorGraphics.useGradients, _vectorGraphics.format, _vectorGraphics.compressDepth, _vectorGraphics.antialiasing);
         }
 
         #if UNITY_EDITOR
@@ -381,7 +488,6 @@ namespace SVGImporter
         {
             if(!UnityEditor.EditorApplication.isPlaying)
             {
-                Clear();
                 PrepareForRendering(true);
             }
 
@@ -389,41 +495,9 @@ namespace SVGImporter
         }
         #endif
 
-        // Gradient shape texture is used for the shape of the gradient
-        void UpdateGradientShapeTexture(Material[] target)
+        #if UNITY_EDITOR
+        void UpdateTimeStamp()
         {
-            if(target == null || target.Length == 0)
-                return;
-
-            int targetLength = target.Length;
-            for(int i = 0; i < targetLength; i++)
-            {
-                if(target[i] == null)
-                    continue;
-
-                if(target[i].HasProperty("_GradientShape"))
-                    target[i].SetTexture("_GradientShape", SVGAtlas.gradientShapeTexture);
-            }
-        }
-
-        void ApplyMaterialGradient(Material source, Material target)
-        {
-            if(source == null || target == null) return;
-
-            if(source.HasProperty("_GradientShape") && target.HasProperty("_GradientShape"))
-                target.SetTexture("_GradientShape", source.GetTexture("_GradientShape"));
-
-            if(source.HasProperty("_GradientColor") && target.HasProperty("_GradientColor"))
-                target.SetTexture("_GradientColor", source.GetTexture("_GradientColor"));
-
-            if(source.HasProperty("_Params") && target.HasProperty("_Params"))
-                target.SetVector("_Params", source.GetVector("_Params"));
-        }
-
-        // This method is invoked by Unity when rendering to Camera
-        void OnWillRenderObject()
-        {
-#if UNITY_EDITOR
             if(!UnityEditor.EditorApplication.isPlaying)
             {
                 if(_vectorGraphics != null)
@@ -433,37 +507,57 @@ namespace SVGImporter
                     if(_lastTimeModified != assetTicks)
                     {
                         _lastTimeModified = assetTicks;
-                        Clear();
+                        //Clear();
                     }
                 }
             }
-#endif
+        }
+        #endif
+
+        // This method is invoked by Unity when rendering to Camera
+        void OnWillRenderObject()
+        {
+            #if UNITY_EDITOR
+            UpdateTimeStamp();
+            #endif
             if(!meshRenderer.isPartOfStaticBatch)
                 PrepareForRendering();
-        }
-
-        protected void CacheDynamicMesh()
-        {
-            if (_color != Color.white || _modifiers.Count > 0)
-            {
-                if(_mesh == null)
-                {
-                    _mesh = _vectorGraphics.mesh;
-                    #if UNITY_EDITOR
-                    SetHideFlags(_mesh, HideFlags.DontSave);
-                    #endif
-                }
-            }
         }
 
         protected Color32[] _finalColors;
         protected void UpdateColors(bool force = false)
         {
-            if(!(_sharedMesh == null))
+            if(_color == Color.white) return;
+            if(useLayers)
             {
-                if (_color != Color.white)
+                Color32 tempColor = _color;
+                bool alphaBlended = tempColor.a != (byte)255;
+                int totalLayers = _layers.Length, totalShapes;
+                int i, j;
+                for(i = 0; i < totalLayers; i++)
                 {
-                    if(_cachedColors == null)
+                    totalShapes = _layers[i].shapes.Length;
+                    for(j = 0; j < totalShapes; j++)
+                    {
+                        if(_layers[i].shapes[j].fill == null) continue;
+
+                        Color32 originalColor = _layers[i].shapes[j].fill.color;
+                        originalColor.r = (byte)((originalColor.r * tempColor.r) / 255);
+                        originalColor.g = (byte)((originalColor.g * tempColor.g) / 255);
+                        originalColor.b = (byte)((originalColor.b * tempColor.b) / 255);
+                        originalColor.a = (byte)((originalColor.a * tempColor.a) / 255);
+                        _layers[i].shapes[j].fill.color = originalColor;
+
+                        if(alphaBlended)
+                        {
+                            _layers[i].shapes[j].fill.blend = FILL_BLEND.ALPHA_BLENDED;
+                        }
+                    }
+                }
+            } else {
+                if(_sharedMesh != null)
+                {
+                    if(_cachedColors == null || _cachedColors.Length != _sharedMesh.vertexCount)
                     {
                         Color32[] originalColors = _sharedMesh.colors32;
                         if(originalColors == null || originalColors.Length == 0)
@@ -489,36 +583,223 @@ namespace SVGImporter
             }
         }
 
-        internal bool AtlasContainsMaterial(Material material)
+        /// <summary>
+        /// Whether the Image has a border to work with.
+        /// </summary>        
+        public bool hasBorder
         {
-#if UNITY_EDITOR
-            if(UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+            get
             {
-                return SVGAtlas.Instance.ContainsMaterial(material);
-            } else {
+                if (_vectorGraphics != null)
+                {
+                    return _vectorGraphics.border.sqrMagnitude > 0f;
+                }
                 return false;
             }
-#else
+        }
+
+        /// <summary>
+        /// Conversion ratio for UI Interpretation
+        /// </summary>
+        protected float pixelsPerUnit
+        {
+            get
+            {
+                float spritePixelsPerUnit = 100;
+                return spritePixelsPerUnit;
+            }
+        }
+
+        protected float InverseLerp(float from, float to, float value)
+        {
+            if (from < to)
+            {               
+                value -= from;
+                value /= to - from;
+                return value;
+            }
+            else
+            {
+                return 1f - (value - to) / (from - to);
+            }
+        }
+
+        protected float SafeDivide(float a, float b)
+        {
+            if(b == 0) return 0f;
+            return a / b;
+        }
+        
+        protected string BorderToString(Vector4 border)
+        {
+            return string.Format("left: {0}, bottom: {1}, right: {2}, top: {3}", border.x, border.y, border.z, border.w);
+        }
+
+        const float epsilon = 0.0000001f;
+        protected Vector3[] _finalVertices;
+        protected void UpdateSlicedMesh()
+        {
+            if(hasBorder && rectTransform != null)
+            {
+                Bounds bounds = _vectorGraphics.bounds;
+                Vector4 v = new Vector4(
+                    _rectTransformRect.x,
+                    _rectTransformRect.y,
+                    _rectTransformRect.width,
+                    _rectTransformRect.height
+                    );
+
+                // LEFT = X, BOTTOM = Y, RIGHT = Z, TOP = W
+                Vector4 border = _vectorGraphics.border;                
+                Vector4 borderCalc = new Vector4(border.x + epsilon, border.y + epsilon, 1f - border.z - epsilon, 1f - border.w - epsilon);
+                
+                Vector2 normalizedPosition;
+                
+                float rectSize = vectorGraphics.scale * 100f;
+                Vector2 size = new Vector2(bounds.size.x * rectSize, bounds.size.y * rectSize);
+                Vector4 transformRect = new Vector4(v.x, v.y, v.x + v.z, v.y + v.w);
+                Vector4 borderRect = new Vector4(size.x * border.x,
+                                                 size.y * border.y,
+                                                 size.x * border.z,
+                                                 size.y * border.w);
+                
+                Vector2 scale = new Vector2(SafeDivide(1f, (1f - (border.x + border.z))) * (v.z - (borderRect.x + borderRect.z)),
+                                            SafeDivide(1f, (1f - (border.y + border.w))) * (v.w - (borderRect.w + borderRect.y)));
+                
+                float minWidth = borderRect.x + borderRect.z;
+                if(minWidth != 0f)
+                {
+                    minWidth = Mathf.Clamp01(v.z / minWidth);
+                    if(minWidth != 1f)
+                    {
+                        scale.x = 0f;
+                        size.x *= minWidth;
+                        borderRect.x *= minWidth;
+                        borderRect.z *= minWidth;
+                    }
+                }
+                
+                float minHeight = borderRect.w + borderRect.y;
+                if(minHeight != 0f)
+                {
+                    minHeight = Mathf.Clamp01(v.w / minHeight);
+                    if(minHeight != 1f)
+                    {
+                        scale.y = 0f;
+                        size.y *= minHeight;
+                        borderRect.w *= minHeight;
+                        borderRect.y *= minHeight;
+                    }
+                    
+                }
+                
+                float borderTop = transformRect.w - borderRect.w;
+                float borderLeft = transformRect.x + borderRect.x;
+
+                if(useLayers)
+                {
+                    int totalLayers = _layers.Length, totalShapes, totalVertices;
+                    int i, j, k;
+                    for(i = 0; i < totalLayers; i++)
+                    {
+                        totalShapes = _layers[i].shapes.Length;
+                        for(j = 0; j < totalShapes; j++)
+                        {
+                            totalVertices = _layers[i].shapes[j].vertices.Length;
+                            for(k = 0; k < totalVertices; k++)
+                            {
+                                normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, _layers[i].shapes[j].vertices[k].x);
+                                normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, _layers[i].shapes[j].vertices[k].y);
+                                
+                                if(border.x != 0f && normalizedPosition.x <= borderCalc.x)
+                                {
+                                    _layers[i].shapes[j].vertices[k].x = transformRect.x + normalizedPosition.x * size.x;
+                                } else if(border.z != 0f && normalizedPosition.x >= borderCalc.z)
+                                {
+                                    _layers[i].shapes[j].vertices[k].x = transformRect.z - (1f - normalizedPosition.x) * size.x;
+                                } else {
+                                    _layers[i].shapes[j].vertices[k].x = borderLeft + (normalizedPosition.x - border.x) * scale.x;
+                                }
+                                
+                                if(border.w != 0f && normalizedPosition.y >= borderCalc.w)
+                                {
+                                    _layers[i].shapes[j].vertices[k].y = transformRect.w - (1f - normalizedPosition.y) * size.y;
+                                } else if(border.y != 0f && normalizedPosition.y <= borderCalc.y)
+                                {
+                                    _layers[i].shapes[j].vertices[k].y = transformRect.y + normalizedPosition.y * size.y;
+                                } else {
+                                    _layers[i].shapes[j].vertices[k].y = borderTop - (((1f - normalizedPosition.y) - border.w) * scale.y);
+                                }     
+                            }
+                        }
+                    }
+                } else {
+                    if(_cachedVertices == null)
+                    {
+                        if(_sharedMesh == null) _sharedMesh = _vectorGraphics.sharedMesh;
+                        Vector3[] originalVertices = _sharedMesh.vertices;
+                        if(originalVertices == null || originalVertices.Length == 0)
+                            return;
+                        
+                        _finalVertices = new Vector3[originalVertices.Length];
+                        _cachedVertices = (Vector3[])originalVertices.Clone();
+                    }
+
+                    int cachedVerticesLength = _cachedVertices.Length;
+                    for(int i = 0; i < cachedVerticesLength; i++)
+                    {
+                        normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, _cachedVertices[i].x);
+                        normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, _cachedVertices[i].y);
+                        
+                        if(border.x != 0f && normalizedPosition.x <= borderCalc.x)
+                        {
+                            _finalVertices[i].x = transformRect.x + normalizedPosition.x * size.x;
+                        } else if(border.z != 0f && normalizedPosition.x >= borderCalc.z)
+                        {
+                            _finalVertices[i].x = transformRect.z - (1f - normalizedPosition.x) * size.x;
+                        } else {
+                            _finalVertices[i].x = borderLeft + (normalizedPosition.x - border.x) * scale.x;
+                        }
+                        
+                        if(border.w != 0f && normalizedPosition.y >= borderCalc.w)
+                        {
+                            _finalVertices[i].y = transformRect.w - (1f - normalizedPosition.y) * size.y;
+                        } else if(border.y != 0f && normalizedPosition.y <= borderCalc.y)
+                        {
+                            _finalVertices[i].y = transformRect.y + normalizedPosition.y * size.y;
+                        } else {
+                            _finalVertices[i].y = borderTop - (((1f - normalizedPosition.y) - border.w) * scale.y);
+                        }                    
+                    }
+
+                    _mesh.vertices = _finalVertices;
+                    meshFilter.sharedMesh = _mesh;     
+                }
+            }
+        }
+
+        internal bool AtlasContainsMaterial(Material material)
+        {
             return SVGAtlas.Instance.ContainsMaterial(material);
-#endif
         }
 
         protected void SwapMaterials(bool transparent = true)
         {
-            if(_vectorGraphics == null || _sharedMesh == null || _sharedMaterials == null || _sharedMaterials.Length == 0)
+            if(_vectorGraphics == null)
             {
-                meshRenderer.sharedMaterials = new Material[]{};
+                CleanMaterials();
                 return;
             }
+            bool hasGradients = _vectorGraphics.hasGradients || _vectorGraphics.useGradients == SVGUseGradients.Always;
+            Material sharedOpaqueMaterial = SVGAtlas.Instance.GetOpaqueMaterial(hasGradients);
+            Material sharedTransparentMaterial = SVGAtlas.Instance.GetTransparentMaterial(_vectorGraphics.antialiasing, hasGradients);
 
-            int subMeshCount = _sharedMesh.subMeshCount;
-
-            if(_vectorGraphics.hasGradients)
+            int subMeshCount = 0;
+            if(useLayers)
             {
-                if(_transparentMaterial != null)
-                    ApplyMaterialGradient(_sharedMaterials[0], _transparentMaterial);
-                if(_opaqueMaterial != null)
-                    ApplyMaterialGradient(_sharedMaterials[0], _opaqueMaterial);
+                subMeshCount = _mesh.subMeshCount;
+            } else {
+                subMeshCount = _sharedMesh.subMeshCount;
             }
 
             if(_vectorGraphics.isOpaque)
@@ -529,39 +810,29 @@ namespace SVGImporter
                     {
                         SetSharedMaterials(subMeshCount, _transparentMaterial, _transparentMaterial);
                     } else {
-                        if(_sharedMaterials.Length > 1)
-                        {
-                            SetSharedMaterials(subMeshCount, _sharedMaterials[1], _sharedMaterials[1]);
-                        } else {
-                            SetSharedMaterials(subMeshCount, _sharedMaterials[0], _sharedMaterials[0]);
-                        }
+                        SetSharedMaterials(subMeshCount, sharedTransparentMaterial, sharedTransparentMaterial);
                     }
                 } else {
-                    if(_transparentMaterial == null && _opaqueMaterial == null)
+                    if(_opaqueMaterial == null && _transparentMaterial == null)
                     {
-                        meshRenderer.sharedMaterials = _sharedMaterials;
-                    } else if(_transparentMaterial != null && _opaqueMaterial != null)
+                        SetSharedMaterials(subMeshCount, sharedOpaqueMaterial, sharedTransparentMaterial);
+                    } else if(_opaqueMaterial != null && _transparentMaterial != null)
                     {
                         SetSharedMaterials(subMeshCount, _opaqueMaterial, _transparentMaterial);
                     } else if(_transparentMaterial != null)
                     {
-                        SetSharedMaterials(subMeshCount, _sharedMaterials[0], _transparentMaterial);
+                        SetSharedMaterials(subMeshCount, sharedOpaqueMaterial, _transparentMaterial);
                     } else if(_opaqueMaterial != null)
                     {
-                        if(_sharedMaterials.Length > 1)
-                        {
-                            SetSharedMaterials(subMeshCount, _opaqueMaterial, _sharedMaterials[1]);
-                        } else {
-                            SetSharedMaterials(subMeshCount, _opaqueMaterial, _opaqueMaterial);
-                        }
+                        SetSharedMaterials(subMeshCount, _opaqueMaterial, sharedTransparentMaterial);
                     }
                 }
             } else {
                 if(_transparentMaterial == null)
                 {
-                    meshRenderer.sharedMaterials = _sharedMaterials;
+                    SetSharedMaterials(subMeshCount, sharedTransparentMaterial, sharedTransparentMaterial);
                 } else {
-                    meshRenderer.sharedMaterial = _transparentMaterial;
+                    SetSharedMaterials(subMeshCount, _transparentMaterial, _transparentMaterial);
                 }
             }
         }
@@ -574,10 +845,13 @@ namespace SVGImporter
             } else {
                 meshRenderer.sharedMaterials = new Material[]{ firstMaterial, secondMaterial };
             }
+//            Debug.Log("SetSharedMaterials, subMeshCount: "+subMeshCount+", a: "+firstMaterial+", b: "+secondMaterial);
         }
 
         public void UpdateMaterials()
         {
+            if(_opaqueMaterial != null) SVGAtlas.Instance.UpdateMaterialProperties(_opaqueMaterial);
+            if(_transparentMaterial != null) SVGAtlas.Instance.UpdateMaterialProperties(_transparentMaterial);
             SwapMaterials(_color.a != 1);
         }
 
@@ -587,7 +861,6 @@ namespace SVGImporter
         /// <param name="force">Force re-updating the whole object</param>
         public void SetAllDirty()
         {
-            //Debug.Log("UpdateMesh: "+name+" instance: "+GetInstanceID());
 #if UNITY_EDITOR
             if(!UnityEditor.EditorApplication.isPlaying)
             {
@@ -601,7 +874,7 @@ namespace SVGImporter
                 PrepareForRendering(true);
 #endif
         }
-
+        
         #if UNITY_EDITOR
         void OnDrawGizmosSelected()
         {
@@ -616,11 +889,20 @@ namespace SVGImporter
             }
         }
         #endif
-
+        
         protected override void OnDisable()
         {
             EnableMeshRenderer(false);
             base.OnDisable();
+        }
+
+        protected override void OnDestroy()
+        {
+            if(_vectorGraphics != null)
+            {
+                _vectorGraphics.RemoveReference(this);
+            }           
+            base.OnDestroy();
         }
 
         void EnableMeshRenderer(bool value)
@@ -639,75 +921,67 @@ namespace SVGImporter
 #endif
         }
 
-        void InitMesh()
+        bool useLayers
         {
-            if(_vectorGraphics == null)
-            {
-                CleanMesh();
-            }
-            // Set mesh for rendering
-            if(_vectorGraphics != null)
-            {
-                #if UNITY_EDITOR
-                if(!UnityEditor.EditorApplication.isPlaying)
-                {
-                    if(_sharedMesh == null)
-                    {
-                        _sharedMesh = _vectorGraphics.mesh;
-                        SetHideFlags(_sharedMesh, HideFlags.DontSave);
-                    }
-                } else {
-                    if(_sharedMesh != _vectorGraphics.sharedMesh)
-                        _sharedMesh = _vectorGraphics.sharedMesh;
-                }
-                #else
-                if(_sharedMesh != _vectorGraphics.sharedMesh)
-                    _sharedMesh = _vectorGraphics.sharedMesh;
-                #endif
-
-                if(_color == Color.white && _modifiers.Count == 0)
-                {
-                    if(meshFilter.sharedMesh != _sharedMesh)
-                        meshFilter.sharedMesh = _sharedMesh;
-                } else {
-                    CacheDynamicMesh();
-                    if(meshFilter.sharedMesh != _mesh)
-                        meshFilter.sharedMesh = _mesh;
-                }
-            } else {
-                Clear();
-                _lastVectorGraphics = null;
+            get {
+                return _vectorGraphics.useLayers;
             }
         }
 
-        void InitMaterials()
+        protected bool _lastUseSharedMesh;
+        bool useSharedMesh
         {
+            get {
+                return !useLayers && _color == Color.white && _type == Type.Simple;
+            }
+        }
+
+        // Mesh has changed
+        void InitMesh()
+        {
+//            Debug.Log("InitMesh");
             if(_vectorGraphics == null)
             {
-                CleanMaterials();
+                _lastVectorGraphics = null;
+                Clear();
             } else {
-                #if UNITY_EDITOR
-                if(!UnityEditor.EditorApplication.isPlaying)
+                if(useLayers)
                 {
-                    if(_sharedMaterials == null)
+                    _layers = _vectorGraphics.layersClone;
+
+                    if(_mesh == null)
                     {
-                        _sharedMaterials = _vectorGraphics.materials;
-                        SetHideFlags(_sharedMaterials, HideFlags.DontSave);
-                        if(_vectorGraphics.hasGradients)
-                        {
-                            UpdateGradientShapeTexture(_sharedMaterials);
-                        }
+                        _mesh = new Mesh();
+                        _mesh.hideFlags = HideFlags.DontSave;
+                    } else {
+                        _mesh.Clear();
                     }
+
+                    _mesh.name = _vectorGraphics.name + " Instance "+_mesh.GetInstanceID();
+                    meshFilter.sharedMesh = _mesh;
                 } else {
-                    if(_sharedMaterials == null)
+                    CleanMesh();
+                    if(_sharedMesh != _vectorGraphics.sharedMesh)
+                        _sharedMesh = _vectorGraphics.sharedMesh;
+                    if(useSharedMesh)
                     {
-                        _sharedMaterials = _vectorGraphics.sharedMaterials;
+                        if(meshFilter.sharedMesh != _sharedMesh)
+                            meshFilter.sharedMesh = _sharedMesh;
+                    } else {
+                        if(_mesh == null)
+                        {
+                            _mesh = new Mesh();
+                            _mesh.hideFlags = HideFlags.DontSave;
+                        } else {
+                            _mesh.Clear();
+                        }
+
+                        SVGMeshUtils.Fill(_vectorGraphics.sharedMesh, _mesh);
+                        _mesh.name += " Instance "+_mesh.GetInstanceID();
+                        if(meshFilter.sharedMesh != _mesh) 
+                            meshFilter.sharedMesh = _mesh;
                     }
                 }
-                #else
-                if(_sharedMaterials != _vectorGraphics.sharedMaterials)
-                    _sharedMaterials = _vectorGraphics.sharedMaterials;
-                #endif
             }
         }
 
@@ -741,99 +1015,36 @@ namespace SVGImporter
             }
         }
 
-        protected void Clear(bool force = false)
+        protected void Clear()
         {
-            bool clearAll = true;
-#if UNITY_EDITOR
-            if(!force)
-            {
-                if(UnityEditor.EditorApplication.isPlaying && meshRenderer.isPartOfStaticBatch){ clearAll = false; }
-            }
-#else
-            if(!meshRenderer.isPartOfStaticBatch){ clearAll = false; }
-#endif
-            if(clearAll)
-            {
-                ClearMeshFilter();
-                ClearMeshRenderer();
-                CleanMesh();
-                CleanMaterials();
-            }
-
-            if(_mesh != null)
-            {
-                DestroyObjectInternal(_mesh);
-                _mesh = null;
-            }
-
-            if(_cachedColors != null)
-            {
-                _cachedColors = null;
-            }
+            CleanMaterials();
+            CleanMesh();
+            CleanLayers();
+            CleanCache();
         }
-
-        void CleanMesh()
-        {
-            #if UNITY_EDITOR
-            if(!UnityEditor.EditorApplication.isPlaying)
-            {
-                DestroyObjectInternal(_sharedMesh);
-                _sharedMesh = null;
-            }
-            #endif
-            if(_mesh != null)
-            {
-                DestroyObjectInternal(_mesh);
-                _mesh = null;
-            }
-        }
-
+        
         void CleanMaterials()
         {
-            #if UNITY_EDITOR
-            if(!UnityEditor.EditorApplication.isPlaying)
-            {
-                DestroyArray<Material>(_sharedMaterials);
-            }
-            #endif
-            if(_sharedMaterials != null)
-                _sharedMaterials = null;
+//            Debug.Log("CleanMaterials");
+            meshRenderer.sharedMaterials = new Material[0];
+        }
+        
+        void CleanMesh()
+        {
+            if(_mesh != null) _mesh.Clear();            
         }
 
-        void ClearMeshFilter()
+        void CleanLayers()
         {
-            #if UNITY_EDITOR
-            if(!UnityEditor.EditorApplication.isPlaying)
-            {
-                if(meshFilter != null)
-                {
-                    DestroyObjectInternal(meshFilter.sharedMesh);
-                    meshFilter.sharedMesh = null;
-                }
-            }
-            #else
-            if(meshFilter != null)
-                meshFilter.sharedMesh = null;
-            #endif
+            if(_layers != null) _layers = null;
         }
 
-        void ClearMeshRenderer()
+        void CleanCache()
         {
-            //Debug.Log("ClearMeshRenderer");
-            #if UNITY_EDITOR
-            if(!UnityEditor.EditorApplication.isPlaying)
-            {
-                if(meshRenderer != null)
-                {
-                    meshRenderer.sharedMaterials = new Material[]{};
-                }
-            }
-            #else
-            if(meshRenderer != null)
-            {
-                meshRenderer.sharedMaterials = new Material[]{};
-            }
-            #endif
+            if(_cachedColors != null) _cachedColors = null;
+            if(_finalColors != null) _finalColors = null;
+            if(_cachedVertices != null) _cachedVertices = null;
+            if(_finalVertices != null) _finalVertices = null;
         }
 
         void DestroyArray<T>(T[] array) where T : UnityEngine.Object
@@ -852,7 +1063,7 @@ namespace SVGImporter
         {
             if(obj == null)
                 return;
-
+            
             #if UNITY_EDITOR
             if(!UnityEditor.AssetDatabase.Contains(obj))
             {
@@ -867,22 +1078,5 @@ namespace SVGImporter
             Destroy(obj);
             #endif
         }
-
-        #if UNITY_EDITOR
-        void SetHideFlags(UnityEngine.Object target, HideFlags hideFlags)
-        {
-            if(target == null) return;
-            target.hideFlags = hideFlags;
-        }
-
-        void SetHideFlags(UnityEngine.Object[] target, HideFlags hideFlags)
-        {
-            if(target == null || target.Length == 0) return;
-            for(int i = 0; i < target.Length; i++)
-            {
-                target[i].hideFlags = hideFlags;
-            }
-        }
-        #endif
     }
 }

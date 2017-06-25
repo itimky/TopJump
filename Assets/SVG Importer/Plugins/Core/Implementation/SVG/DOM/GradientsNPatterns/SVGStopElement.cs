@@ -27,7 +27,7 @@ namespace SVGImporter.Rendering
 
         public SVGStopElement(AttributeList attrList)
         {
-            string colorString = attrList.GetValue("stop-color");
+            string colorString = attrList.GetValue("stop-color");        
             string offsetString = attrList.GetValue("offset");
             string stopOpacity =  attrList.GetValue("stop-opacity");
 

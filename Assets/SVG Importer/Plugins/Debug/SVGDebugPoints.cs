@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
+// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
 // This code can only be used under the standard Unity Asset Store End User License Agreement
 // A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System;
 
 namespace SVGImporter.Utils
-{
+{        
     public class SVGDebugPoints : MonoBehaviour
     {
 #if UNITY_EDITOR
@@ -34,7 +34,7 @@ namespace SVGImporter.Utils
                 Vector3 position = transform.GetChild(i).localPosition;
                 Gizmos.DrawSphere(position, UnityEditor.HandleUtility.GetHandleSize(position) * 0.1f);
             }
-
+            
             if(count > 1)
             {
                 Vector3 lastPosition = transform.GetChild(0).transform.localPosition;

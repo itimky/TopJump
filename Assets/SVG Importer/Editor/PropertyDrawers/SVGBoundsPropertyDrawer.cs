@@ -6,14 +6,14 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections;
 
-namespace SVGImporter
+namespace SVGImporter 
 {
     using Utils;
 
     [CustomPropertyDrawer(typeof(SVGBounds))]
     public class SVGBoundsPropertyDrawer : PropertyDrawer {
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             label = EditorGUI.BeginProperty(position, label, property);
             SerializedProperty center = property.FindPropertyRelative("_center");
@@ -33,7 +33,7 @@ namespace SVGImporter
             Vector2 centerValue = center.vector2Value;
             Vector2 sizeValue = size.vector2Value;
             Vector2 extentsValue = sizeValue * 0.5f;
-
+        
             if (EditorGUI.EndChangeCheck())
             {
                 property.FindPropertyRelative("_extents").vector2Value = extentsValue;

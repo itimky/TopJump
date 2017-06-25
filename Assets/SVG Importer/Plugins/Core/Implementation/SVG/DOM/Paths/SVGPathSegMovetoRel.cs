@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     public class SVGPathSegMovetoRel : SVGPathSeg
     {

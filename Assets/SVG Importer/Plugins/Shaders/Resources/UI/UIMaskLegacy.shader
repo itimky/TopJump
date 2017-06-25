@@ -4,7 +4,7 @@
 // This code can only be used under the standard Unity Asset Store End User License Agreement
 // A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 
-Shader "SVG Importer/UI/DefaultMaskLegacy" {
+Shader "SVG Importer/UI/UIMaskLegacy" {
 	
 	Properties {
 		_GradientColor ("Gradient Color (RGBA)", 2D) = "white" { }

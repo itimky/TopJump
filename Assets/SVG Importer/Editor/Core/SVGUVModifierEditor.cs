@@ -31,7 +31,7 @@ public class SVGUVModifierEditor : Editor {
     {
         uvModifier = (SVGUVModifier)target;
     }
-
+    
     public override void OnInspectorGUI()
     {
         _editMode = EditorGUILayout.Toggle(new GUIContent("Edit"), _editMode);
@@ -42,6 +42,7 @@ public class SVGUVModifierEditor : Editor {
         }
 
         base.OnInspectorGUI();
+		/*
         if(GUILayout.Button("Center"))
         {
             Undo.RecordObject(uvModifier, "Center UV Transform");
@@ -54,10 +55,12 @@ public class SVGUVModifierEditor : Editor {
             SceneView.RepaintAll();
             Repaint();
         }
+        */
     }
 
     void OnSceneGUI()
     {
+		/*
         if(uvModifier == null)
         {
             uvModifier = (SVGUVModifier)target;
@@ -74,13 +77,14 @@ public class SVGUVModifierEditor : Editor {
         }
 
         SVGTransform2D trs = new SVGTransform2D(uvModifier.svgTransform);
+
         if(_editMode)
         {
             if(!uvModifier.worldSpace)
             {
                 trs = SVGTransform2D.DecomposeMatrix(uvModifier.transform.localToWorldMatrix * uvModifier.svgTransform.matrix);
             }
-            SVGHandles.TransformHandle(trs);
+            SVGHandles.TransformHandle(trs);        
             if(!uvModifier.worldSpace)
             {
                 trs = SVGTransform2D.DecomposeMatrix(uvModifier.transform.worldToLocalMatrix * uvModifier.svgTransform.matrix);
@@ -94,14 +98,15 @@ public class SVGUVModifierEditor : Editor {
             EditorUtility.SetDirty(target);
             GUI.changed = true;
         }
-
+        
         if (Event.current.type == EventType.ExecuteCommand)
-        {
+        {            
             if (Event.current.commandName == "UndoRedoPerformed")
             {
                 Repaint();
                 SceneView.RepaintAll();
             }
         }
+        */
     }
 }

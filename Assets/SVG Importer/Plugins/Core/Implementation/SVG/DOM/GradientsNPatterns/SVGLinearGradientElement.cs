@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Document;
     using Utils;

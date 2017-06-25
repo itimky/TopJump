@@ -72,7 +72,7 @@ namespace SVGImporter.Document
                 return attrs;
             }
         }
-
+        
         public Dictionary<string,string> Set
         {
             set {

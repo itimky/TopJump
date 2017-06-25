@@ -19,7 +19,7 @@ namespace SVGImporter
 
     [ExecuteInEditMode]
     [AddComponentMenu("UI/SVG Image", 21)]
-    public class SVGImage : MaskableGraphic, ILayoutElement, ICanvasRaycastFilter
+    public class SVGImage : MaskableGraphic, ILayoutElement, ICanvasRaycastFilter, ISVGRenderer, ISVGReference
     {
         public enum Type
         {
@@ -59,24 +59,73 @@ namespace SVGImporter
         // Not serialized until we support read-enabled sprites better.
         private float m_EventAlphaThreshold = 1;
         public float eventAlphaThreshold { get { return m_EventAlphaThreshold; } set { m_EventAlphaThreshold = value; } }
-#if DEBUG_MATERIALS
-        public Material maskMaterialTest;
-        public Material defaultMaterialTest;
-        public Material currenttMaterialTest;
-        public Material renderMaterialTest;
-#endif
 
         protected Material _defaultMaterial;
 
-        protected SVGImage()
-        { }
+        protected List<ISVGModify> _modifiers = new List<ISVGModify>();
+        public List<ISVGModify> modifiers
+        {
+            get {
+                return _modifiers;
+            }
+        }
+
+        // Tracking of mesh change
+        protected int _lastFrameChanged;
+        public int lastFrameChanged
+        {
+            get {
+                return _lastFrameChanged;
+            }
+        }
+
+        public void AddModifier(ISVGModify modifier)
+        {
+            if(_modifiers.Contains(modifier)) return;
+            _modifiers.Add(modifier);
+        }
+        
+        public void RemoveModifier(ISVGModify modifier)
+        {
+            if(!_modifiers.Contains(modifier)) return;
+            _modifiers.Remove(modifier);
+        }
+
+        public void UpdateRenderer()
+        {
+            this.SetAllDirty();
+        }
+
+        protected System.Action<SVGLayer[], SVGAsset, bool> _OnPrepareForRendering;
+        /// <summary>
+        /// delegate which indicates that the mesh has changed.
+        /// You can use it as your custom mesh postprocessor.
+        /// </summary>
+        public virtual System.Action<SVGLayer[], SVGAsset, bool> OnPrepareForRendering
+        {
+            get {
+                return _OnPrepareForRendering;
+            }
+            set {
+                _OnPrepareForRendering = value;
+            }
+        }
+
+        bool useLayers
+        {
+            get {
+                return _vectorGraphics.useLayers;
+            }
+        }
 
         protected override void Awake()
         {
-#if UNITY_EDITOR
             Clear();
-#endif
             UpdateMaterial();
+            if(_vectorGraphics != null)
+            {
+                _vectorGraphics.AddReference(this);
+            }
             base.Awake();
         }
 #if UNITY_EDITOR
@@ -93,24 +142,34 @@ namespace SVGImporter
             Clear();
             UpdateMaterial();
         }
-#endif
+#endif        
+        protected override void OnDestroy()
+        {
+            if(_vectorGraphics != null)
+            {
+                _vectorGraphics.RemoveReference(this);
+            }
+            base.OnDestroy();
+        }
 
         /// <summary>
         /// Whether the Image has a border to work with.
-        /// </summary>
-
+        /// </summary>        
         public bool hasBorder
         {
             get
             {
-                if (vectorGraphics != null)
+                if (_vectorGraphics != null)
                 {
-                    return vectorGraphics.border.sqrMagnitude > 0f;
+                    return _vectorGraphics.border.sqrMagnitude > 0f;
                 }
                 return false;
             }
         }
 
+        /// <summary>
+        /// Conversion ratio for UI Interpretation
+        /// </summary>
         public float pixelsPerUnit
         {
             get
@@ -133,7 +192,7 @@ namespace SVGImporter
         private Vector4 GetDrawingDimensions(bool shouldPreserveAspect)
         {
             Vector2 size = sharedMesh == null ? Vector2.zero : (Vector2)sharedMesh.bounds.size;
-
+            
             Rect r = GetPixelAdjustedRect();
             // Debug.Log(string.Format("r:{2}, size:{0}, padding:{1}", size, padding, r));
 
@@ -141,7 +200,7 @@ namespace SVGImporter
             {
                 var spriteRatio = size.x / size.y;
                 var rectRatio = r.width / r.height;
-
+                
                 if (spriteRatio > rectRatio)
                 {
                     var oldHeight = r.height;
@@ -177,33 +236,6 @@ namespace SVGImporter
                 SetAllDirty();
             }
         }
-#if DEBUG_MATERIALS
-        public override Material materialForRendering
-        {
-            get
-            {
-                renderMaterialTest = base.materialForRendering;
-                return renderMaterialTest;
-            }
-        }
-
-        public override Material material
-        {
-            get
-            {
-                currenttMaterialTest = base.material;
-                maskMaterialTest = this.m_MaskMaterial;
-                //DebugMaterial(currenttMaterialTest);
-                return currenttMaterialTest;
-            }
-            set
-            {
-                base.material = value;
-            }
-        }
-
-#endif
-
 
         public override Material defaultMaterial
         {
@@ -217,7 +249,7 @@ namespace SVGImporter
         protected float InverseLerp(float from, float to, float value)
         {
             if (from < to)
-            {
+            {               
                 value -= from;
                 value /= to - from;
                 return value;
@@ -228,11 +260,16 @@ namespace SVGImporter
             }
         }
 
+        protected float Lerp(float from, float to, float value)
+        {
+            return from + value * (to-from);
+        }
+
         public virtual void CalculateLayoutInputHorizontal() { }
         public virtual void CalculateLayoutInputVertical() { }
-
+        
         public virtual float minWidth { get { return 0; } }
-
+        
         public virtual float preferredWidth
         {
             get
@@ -243,11 +280,11 @@ namespace SVGImporter
                 return bounds.size.x / pixelsPerUnit;
             }
         }
-
+        
         public virtual float flexibleWidth { get { return -1; } }
-
+        
         public virtual float minHeight { get { return 0; } }
-
+        
         public virtual float preferredHeight
         {
             get
@@ -258,11 +295,11 @@ namespace SVGImporter
                 return bounds.size.y / pixelsPerUnit;
             }
         }
-
+        
         public virtual float flexibleHeight { get { return -1; } }
-
+        
         public virtual int layoutPriority { get { return 0; } }
-
+        
         public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
         {
             if (m_EventAlphaThreshold >= 1)
@@ -273,7 +310,7 @@ namespace SVGImporter
 
             return true;
         }
-
+        
         private Vector2 MapCoordinate(Vector2 local, Rect rect)
         {
             Bounds bounds = sharedMesh.bounds;
@@ -284,133 +321,109 @@ namespace SVGImporter
         {
             if (this.IsActive())
             {
-                UpdateGradientShape(m_Material);
+                SVGAtlas.Instance.UpdateMaterialProperties(m_Material);
             }
 
             base.SetMaterialDirty();
+        }  
+
+        protected float SafeDivide(float a, float b)
+        {
+            if(b == 0) return 0f;
+            return a / b;
         }
 
-        protected void UpdateGradientShape(Material material)
+        protected string BorderToString(Vector4 border)
         {
-            if(material != null)
-            {
-                if(material.HasProperty("_GradientShape"))
-                {
-                    material.SetTexture("_GradientShape", SVGAtlas.gradientShapeTexture);
-                }
-            }
+            return string.Format("left: {0}, bottom: {1}, right: {2}, top: {3}", border.x, border.y, border.z, border.w);
         }
 
         const float epsilon = 0.0000001f;
-#if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-        UIVertex[] tempVBO;
+
+        int tempVBOLength;
+        UIVertex[] vertexStream;
+        Vector3[] vertices;
+        int[] triangles;
+        Vector2[] uv;
+        Vector2[] uv2;
+        Vector2[] uv3;
+        Color32[] colors;
+        Vector3[] normals;
+#if UNITY_4_5 || UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_5_0 || UNITY_5_1
         protected override void OnFillVBO(List<UIVertex> vbo)
         {
             if (sharedMesh == null) { base.OnFillVBO(vbo); return; }
-            Bounds bounds = sharedMesh.bounds;
-            if(m_UsePivot)
+
+            Mesh legacyUIMesh = _vectorGraphics.sharedLegacyUIMesh;
+            tempVBOLength = legacyUIMesh.vertexCount;
+            Vector3[] legacyVertices = legacyUIMesh.vertices;
+            Color32[] legacyColors = legacyUIMesh.colors32;
+
+            if(vertices == null || vertices.Length != tempVBOLength) vertices = new Vector3[tempVBOLength];
+            for(int i = 0; i < tempVBOLength; i++)
             {
-                bounds.center += new Vector3((-0.5f + _vectorGraphics.pivotPoint.x) * bounds.size.x, (0.5f - _vectorGraphics.pivotPoint.y) * bounds.size.y, 0f);
+                vertices[i] = legacyVertices[i];
             }
-
-            UIVertex[] sharedUIMesh = _vectorGraphics.sharedUIMesh;
-            int tempVBOLength = sharedUIMesh.Length;
-            if(tempVBO == null || tempVBO.Length != tempVBOLength)
-                tempVBO = new UIVertex[tempVBOLength];
-
-            if(m_Type == Type.Simple)
+            if(colors == null || colors.Length != tempVBOLength) colors = new Color32[tempVBOLength];
+            for(int i = 0; i < tempVBOLength; i++)
             {
-                Vector4 v = GetDrawingDimensions(preserveAspect);
+                colors[i] = legacyColors[i];
+            }
+            if(_vectorGraphics.hasGradients)
+            {
+                Vector2[] legacyUV0 = legacyUIMesh.uv;
+                Vector2[] legacyUV1 = legacyUIMesh.uv2;
+                if(uv == null || uv.Length != tempVBOLength) uv = new Vector2[tempVBOLength];
                 for(int i = 0; i < tempVBOLength; i++)
                 {
-                    tempVBO[i].position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, sharedUIMesh[i].position.x) * v.z;
-                    tempVBO[i].position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, sharedUIMesh[i].position.y) * v.w;
-                    tempVBO[i].color = sharedUIMesh[i].color * color;
+                    uv[i] = legacyUV0[i];
                 }
-
-                if(_vectorGraphics.hasGradients)
-                {
-                    for(int i = 0; i < tempVBOLength; i++)
-                    {
-                        tempVBO[i].uv0 = sharedUIMesh[i].uv0;
-                        tempVBO[i].uv1 = sharedUIMesh[i].uv1;
-                    }
-                }
-            } else {
-
-                Vector4 v = GetDrawingDimensions(false);
-                Vector2 normalizedPosition;
-
-                // LEFT, BOTTOM, RIGHT, TOP
-                Vector4 border = _vectorGraphics.border;
-
-                Vector4 borderCalc = new Vector4(border.x + epsilon, border.y + epsilon, 1f - border.z - epsilon, 1f - border.w - epsilon);
-
-                float left = v.x;
-                float top = v.y;
-                float right = v.x + v.z;
-                float bottom = v.y + v.w;
-                float size = canvas.referencePixelsPerUnit * vectorGraphics.scale * 100f;
-
-                float minWidth = (border.x + border.z) * size;
-                float minHeight = (border.y + border.w) * size;
-                float scaleX = 0f; if(minWidth != 0f) scaleX = Mathf.Clamp01(v.z / minWidth);
-                float scaleY = 0f; if(minHeight != 0f) scaleY = Mathf.Clamp01(v.w / minHeight);
-
+                if(uv2 == null || uv2.Length != tempVBOLength) uv2 = new Vector2[tempVBOLength];
                 for(int i = 0; i < tempVBOLength; i++)
                 {
-                    normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, sharedUIMesh[i].position.x);
-                    normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, sharedUIMesh[i].position.y);
-
-                    if(normalizedPosition.x <= borderCalc.x && border.x != 0f)
-                    {
-                        tempVBO[i].position.x = left + normalizedPosition.x * size * scaleX;
-                    } else if(normalizedPosition.x >= borderCalc.z && border.z != 0f)
-                    {
-                        tempVBO[i].position.x = right - (1f - normalizedPosition.x) * size * scaleX;
-                    } else {
-                        tempVBO[i].position.x = v.x + normalizedPosition.x * v.z;
-                    }
-
-                    if(normalizedPosition.y >= borderCalc.w && border.w != 0f)
-                    {
-                        tempVBO[i].position.y = bottom - (1f - normalizedPosition.y) * size * scaleY;
-                    } else if(normalizedPosition.y <= borderCalc.y && border.y != 0f)
-                    {
-                        tempVBO[i].position.y = top + normalizedPosition.y * size * scaleY;
-                    } else {
-                        tempVBO[i].position.y = v.y + normalizedPosition.y * v.w;
-                    }
-
-                    tempVBO[i].color = sharedUIMesh[i].color * color;
-                }
-
-                if(_vectorGraphics.hasGradients)
-                {
-                    for(int i = 0; i < tempVBOLength; i++)
-                    {
-                        tempVBO[i].uv0 = sharedUIMesh[i].uv0;
-                        tempVBO[i].uv1 = sharedUIMesh[i].uv1;
-                    }
+                    uv2[i] = legacyUV1[i];
                 }
             }
-
-            vbo.AddRange(tempVBO);
-        }
-#else
-
-        #if UNITY_5_2_0 || UNITY_5_2_1
+            if(_vectorGraphics.generateNormals)
+            {
+                Vector3[] legacyNormals = legacyUIMesh.normals;
+                if(normals == null || normals.Length != tempVBOLength) normals = new Vector3[tempVBOLength];
+                for(int i = 0; i < tempVBOLength; i++)
+                {
+                    normals[i] = legacyNormals[i];
+                }
+            }
+#elif UNITY_5_2_0 || UNITY_5_2_1
         protected override void OnPopulateMesh(Mesh toFill)
         {
             if (sharedMesh == null) { base.OnPopulateMesh(toFill); return; }
-            using (VertexHelper vh = new VertexHelper())
-            {
-        #else
+            VertexHelper vh = new VertexHelper();
+            Mesh mesh = sharedMesh;
+            tempVBOLength = mesh.vertexCount;
+                
+            vertices = mesh.vertices;
+            triangles = mesh.triangles;
+            uv = mesh.uv;
+            uv2 = mesh.uv2;
+            colors = mesh.colors32;
+            normals = mesh.normals;
+#else
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             if (sharedMesh == null) { base.OnPopulateMesh(vh); return; }
             vh.Clear();
-        #endif
+            Mesh mesh = sharedMesh;
+            tempVBOLength = mesh.vertexCount;
+
+            vertices = mesh.vertices;
+            triangles = mesh.triangles;
+            uv = mesh.uv;
+            uv2 = mesh.uv2;
+            colors = mesh.colors32;
+            normals = mesh.normals;
+
+#endif            
+            if(vertexStream == null || vertexStream.Length != tempVBOLength) vertexStream = new UIVertex[tempVBOLength];
 
             Bounds bounds = sharedMesh.bounds;
             if(m_UsePivot)
@@ -418,236 +431,196 @@ namespace SVGImporter
                 bounds.center += new Vector3((-0.5f + _vectorGraphics.pivotPoint.x) * bounds.size.x, (0.5f - _vectorGraphics.pivotPoint.y) * bounds.size.y, 0f);
             }
 
-            Mesh mesh = sharedMesh;
-            Vector3[] vertices = mesh.vertices;
-            int[] triangles = mesh.triangles;
-            Vector2[] uv = mesh.uv;
-            Vector2[] uv2 = mesh.uv2;
-            Color32[] colors = mesh.colors32;
-            Vector3[] normals = mesh.normals;
-            Vector4[] tangents = mesh.tangents;
-
-            int tempVBOLength = mesh.vertexCount;
-            UIVertex vertex = new UIVertex();
-
             if(m_Type == Type.Simple)
             {
                 Vector4 v = GetDrawingDimensions(preserveAspect);
-
+                
                 for(int i = 0; i < tempVBOLength; i++)
                 {
-                    vertex.position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x) * v.z;
-                    vertex.position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y) * v.w;
-                    vertex.color = colors[i] * color;
-                    if(uv != null && i < uv.Length) { vertex.uv0 = uv[i]; }
-                    if(uv2 != null && i < uv2.Length) { vertex.uv1 = uv2[i]; }
-                    if(normals != null && i < normals.Length) { vertex.normal = normals[i]; }
-                    if(tangents != null && i < tangents.Length) { vertex.tangent = tangents[i]; }
-
-                    vh.AddVert(vertex);
+                    vertexStream[i].position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x) * v.z;
+                    vertexStream[i].position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y) * v.w;
+                    vertexStream[i].color = colors[i] * color;                    
                 }
             } else {
-
                 Vector4 v = GetDrawingDimensions(false);
-                Vector2 normalizedPosition;
-
-                // LEFT, BOTTOM, RIGHT, TOP
-                Vector4 border = _vectorGraphics.border;
-
+                
+                // LEFT = X, BOTTOM = Y, RIGHT = Z, TOP = W
+                Vector4 border = _vectorGraphics.border;                
                 Vector4 borderCalc = new Vector4(border.x + epsilon, border.y + epsilon, 1f - border.z - epsilon, 1f - border.w - epsilon);
-
-                float left = v.x;
-                float top = v.y;
-                float right = v.x + v.z;
-                float bottom = v.y + v.w;
-                float size = canvas.referencePixelsPerUnit * vectorGraphics.scale * 100f;
-
-                float minWidth = (border.x + border.z) * size;
-                float minHeight = (border.y + border.w) * size;
-                float scaleX = 0f; if(minWidth != 0f) scaleX = Mathf.Clamp01(v.z / minWidth);
-                float scaleY = 0f; if(minHeight != 0f) scaleY = Mathf.Clamp01(v.w / minHeight);
-
+                
+                Vector2 normalizedPosition;
+                
+                float rectSize = canvas.referencePixelsPerUnit * vectorGraphics.scale * 100f;
+                Vector2 size = new Vector2(bounds.size.x * rectSize, bounds.size.y * rectSize);
+                Vector4 transformRect = new Vector4(v.x, v.y, v.x + v.z, v.y + v.w);
+                Vector4 borderRect = new Vector4(size.x * border.x,
+                                                 size.y * border.y,
+                                                 size.x * border.z,
+                                                 size.y * border.w);
+                
+                Vector2 scale = new Vector2(SafeDivide(1f, (1f - (border.x + border.z))) * (v.z - (borderRect.x + borderRect.z)),
+                                            SafeDivide(1f, (1f - (border.y + border.w))) * (v.w - (borderRect.w + borderRect.y)));
+                
+                float minWidth = borderRect.x + borderRect.z;
+                if(minWidth != 0f)
+                {
+                    minWidth = Mathf.Clamp01(v.z / minWidth);
+                    if(minWidth != 1f)
+                    {
+                        scale.x = 0f;
+                        size.x *= minWidth;
+                        borderRect.x *= minWidth;
+                        borderRect.z *= minWidth;
+                    }
+                }
+                
+                float minHeight = borderRect.w + borderRect.y;
+                if(minHeight != 0f)
+                {
+                    minHeight = Mathf.Clamp01(v.w / minHeight);
+                    if(minHeight != 1f)
+                    {
+                        scale.y = 0f;
+                        size.y *= minHeight;
+                        borderRect.w *= minHeight;
+                        borderRect.y *= minHeight;
+                    }
+                    
+                }
+                
+                float borderTop = transformRect.w - borderRect.w;
+                float borderLeft = transformRect.x + borderRect.x;
+                
                 for(int i = 0; i < tempVBOLength; i++)
                 {
+                    vertexStream[i].color = colors[i] * color;
+                    
                     normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x);
                     normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y);
-
-                    if(normalizedPosition.x <= borderCalc.x && border.x != 0f)
+                    
+                    if(border.x != 0f && normalizedPosition.x <= borderCalc.x)
                     {
-                        vertex.position.x = left + normalizedPosition.x * size * scaleX;
-                    } else if(normalizedPosition.x >= borderCalc.z && border.z != 0f)
+                        vertexStream[i].position.x = transformRect.x + normalizedPosition.x * size.x;
+                    } else if(border.z != 0f && normalizedPosition.x >= borderCalc.z)
                     {
-                        vertex.position.x = right - (1f - normalizedPosition.x) * size * scaleX;
+                        vertexStream[i].position.x = transformRect.z - (1f - normalizedPosition.x) * size.x;
                     } else {
-                        vertex.position.x = v.x + normalizedPosition.x * v.z;
+                        vertexStream[i].position.x = borderLeft + (normalizedPosition.x - border.x) * scale.x;
                     }
-
-                    if(normalizedPosition.y >= borderCalc.w && border.w != 0f)
+                    
+                    if(border.w != 0f && normalizedPosition.y >= borderCalc.w)
                     {
-                        vertex.position.y = bottom - (1f - normalizedPosition.y) * size * scaleY;
-                    } else if(normalizedPosition.y <= borderCalc.y && border.y != 0f)
+                        vertexStream[i].position.y = transformRect.w - (1f - normalizedPosition.y) * size.y;
+                    } else if(border.y != 0f && normalizedPosition.y <= borderCalc.y)
                     {
-                        vertex.position.y = top + normalizedPosition.y * size * scaleY;
+                        vertexStream[i].position.y = transformRect.y + normalizedPosition.y * size.y;
                     } else {
-                        vertex.position.y = v.y + normalizedPosition.y * v.w;
-                    }
-
-                    vertex.color = colors[i] * color;
-                    if(uv != null && i < uv.Length) { vertex.uv0 = uv[i]; }
-                    if(uv2 != null && i < uv2.Length) { vertex.uv1 = uv2[i]; }
-                    if(normals != null && i < normals.Length) { vertex.normal = normals[i]; }
-                    if(tangents != null && i < tangents.Length) { vertex.tangent = tangents[i]; }
-
-                    vh.AddVert(vertex);
+                        vertexStream[i].position.y = borderTop - (((1f - normalizedPosition.y) - border.w) * scale.y);
+                    }                    
                 }
             }
 
-            int triangleLength = triangles.Length;
-            for(int i = 0; i < triangleLength; i +=3 )
+            if(_vectorGraphics.hasGradients || _vectorGraphics.useGradients == SVGUseGradients.Always)
+            {
+                if(uv != null && uv2 != null && tempVBOLength == uv.Length && tempVBOLength == uv2.Length)
+                {
+                    for(int i = 0; i < tempVBOLength; i++)
+                    {
+                        vertexStream[i].uv0 = uv[i];
+                        vertexStream[i].uv1 = uv2[i];
+                    }
+                }                
+            }
+            if(_vectorGraphics.antialiasing)
+            {
+                if(_vectorGraphics.antialiasing)
+                {
+                    if(normals != null && tempVBOLength == normals.Length)
+                    {
+                        for(int i = 0; i < tempVBOLength; i++)
+                        {
+                            vertexStream[i].normal.x = normals[i].x;
+                            vertexStream[i].normal.y = normals[i].y;
+                        }
+                    } 
+                }
+            } else {
+                if(_vectorGraphics.generateNormals)
+                {
+                    if(normals != null && normals.Length == tempVBOLength)
+                    {
+                        for(int i = 0; i < tempVBOLength; i++)
+                        {
+                            vertexStream[i].normal = normals[i];
+                        }
+                    }
+                }
+            }
+            
+#if UNITY_4_5 || UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9|| UNITY_5_0 || UNITY_5_1
+            vbo.AddRange(vertexStream);
+#elif UNITY_5_2_0 || UNITY_5_2_1                            
+            for(int i = 0; i < vertexStream.Length; i++)
+            {
+                vh.AddVert(vertexStream[i]);
+            }
+
+            for(int i = 0; i < triangles.Length; i+=3)
             {
                 vh.AddTriangle(triangles[i], triangles[i + 1], triangles[i + 2]);
             }
 
-            #if UNITY_5_2_0 || UNITY_5_2_1
-                vh.FillMesh(toFill);
-            }
-            #endif
-        }
+            vh.FillMesh(toFill);
+#else
+            vh.AddUIVertexStream(new List<UIVertex>(vertexStream), new List<int>(triangles));
 #endif
+
+            _lastFrameChanged = Time.frameCount;
+        }
 
         protected void GetDefaultMaterial()
         {
             if(_lastVectorGraphics != _vectorGraphics)
             {
+                if(_lastVectorGraphics != null)
+                {
+                    _lastVectorGraphics.RemoveReference(this);
+                }
+                if(_vectorGraphics != null)
+                {
+                    _vectorGraphics.AddReference(this);
+                }
                 _lastVectorGraphics = _vectorGraphics;
                 Clear();
             }
-
+            
             if(_vectorGraphics != null)
             {
-                #if UNITY_EDITOR
                 if(_defaultMaterial == null)
                 {
-                    if(!UnityEditor.EditorApplication.isPlaying)
-                    {
-                        _defaultMaterial = _vectorGraphics.uiMaskMaterial;
-                        SetHideFlags(_defaultMaterial, HideFlags.DontSave);
-                    } else {
-                        #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-                        if(!this.m_IncludeForMasking)
-                        {
-                            _defaultMaterial = _vectorGraphics.sharedUIMaskMaterial;
-                        } else {
-                            _defaultMaterial = _vectorGraphics.uiMaskMaterial;
-                        }
-                        #else
-                        _defaultMaterial = _vectorGraphics.sharedUIMaskMaterial;
-                        #endif
-                    }
-                }
-                #else
-                if(_defaultMaterial == null)
-                {
-                    #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
+					#if UNITY_4_5 || UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_5_0 || UNITY_5_1
                     if(!this.m_IncludeForMasking)
                     {
-                        _defaultMaterial = _vectorGraphics.sharedUIMaskMaterial;
+                        _defaultMaterial = SVGAtlas.Instance.ui;
                     } else {
-                        _defaultMaterial = _vectorGraphics.uiMaskMaterial;
+                        _defaultMaterial = SVGAtlas.Instance.uiMask;
                     }
                     #else
-                    _defaultMaterial = _vectorGraphics.sharedUIMaskMaterial;
+                    _defaultMaterial = _vectorGraphics.sharedUIMaterial;
                     #endif
-                }
-                #endif
+                }                
             }
         }
-
+        
         protected void Clear()
-        {
-            #if UNITY_EDITOR
-            if(!UnityEditor.EditorApplication.isPlaying)
-            {
-                if(_defaultMaterial != null)
-                {
-                    #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-                    if (this.m_IncludeForMasking)
-                    {
-                        if(_defaultMaterial != m_MaskMaterial)
-                        {
-                            DestroyObjectInternal(m_MaskMaterial);
-                        }
-                    }
-                    #endif
-                    DestroyObjectInternal(_defaultMaterial);
-                }
-            }
-            #endif
+        {            
             _defaultMaterial = null;
-
-            #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-            tempVBO = null;
-            #endif
         }
 
         protected override void UpdateMaterial()
         {
             GetDefaultMaterial();
-            base.UpdateMaterial();
-        }
-
-        void DestroyObjectInternal(Object obj)
-        {
-            if(obj == null)
-                return;
-
-            #if UNITY_EDITOR
-            if(!UnityEditor.AssetDatabase.Contains(obj))
-            {
-                if(UnityEditor.EditorApplication.isPlaying)
-                {
-                    Destroy(obj);
-                } else {
-                    DestroyImmediate(obj);
-                }
-            }
-            #else
-            Destroy(obj);
-            #endif
-        }
-
-        void SetHideFlags(UnityEngine.Object target, HideFlags hideFlags)
-        {
-            if(target == null) return;
-            target.hideFlags = hideFlags;
-        }
-
-        void SetHideFlags(UnityEngine.Object[] target, HideFlags hideFlags)
-        {
-            if(target == null || target.Length == 0) return;
-            for(int i = 0; i < target.Length; i++)
-            {
-                target[i].hideFlags = hideFlags;
-            }
-        }
-
-        #if DEBUG_MATERIALS && UNITY_EDITOR
-        protected void DebugMaterial(Material material)
-        {
-            if(material == null)
-                return;
-            if(UnityEditor.Selection.activeGameObject == gameObject)
-            {
-                Debug.Log("defaultMaterial");
-                Debug.Log("Shader Name: "+material.shader.name);
-                Debug.Log("_StencilComp: "+material.GetFloat("_StencilComp"));
-                Debug.Log("_Stencil: "+material.GetFloat("_Stencil"));
-                Debug.Log("_StencilOp: "+material.GetFloat("_StencilOp"));
-                Debug.Log("_StencilWriteMask: "+material.GetFloat("_StencilWriteMask"));
-                Debug.Log("_StencilReadMask: "+material.GetFloat("_StencilReadMask"));
-                Debug.Log("_ColorMask: "+material.GetFloat("_ColorMask"));
-            }
-        }
-        #endif
+			base.UpdateMaterial();
+        }                    
     }
 }

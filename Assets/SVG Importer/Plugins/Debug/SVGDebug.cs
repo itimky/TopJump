@@ -8,9 +8,41 @@ using System.Collections.Generic;
 using System;
 
 namespace SVGImporter.Utils
-{
+{        
     public static class SVGDebug
     {
+#if UNITY_EDITOR
+        [UnityEditor.MenuItem("Window/SVG Importer/Debug/SVG Atlas", false, 10)]
+        private static void SelectSVGAtlas()
+        {
+            UnityEditor.Selection.activeGameObject = SVGAtlas.Instance.gameObject;
+        }
+#endif
+
+        public static void DebugArray(ICollection array)
+        {
+            if(array == null)
+            {
+                Debug.Log("Array is null!");
+                return;
+            }
+
+            IEnumerator enumerator = array.GetEnumerator();
+            int i = 0;
+            while(enumerator.MoveNext())
+            {
+                Debug.Log("i: "+i+", "+enumerator.Current);
+                i++;
+            }
+        }
+
+        public static void DebugPoint(Vector3 point)
+        {
+            GameObject goRoot = new GameObject("Debug Points");
+            goRoot.transform.position = point;
+            goRoot.AddComponent<SVGDebugPoints>();
+        }
+
         public static void DebugPoints(List<List<Vector2>> path)
         {
             GameObject goRoot = new GameObject("Debug Points");

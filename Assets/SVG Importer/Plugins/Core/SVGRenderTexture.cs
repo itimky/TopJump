@@ -45,7 +45,7 @@ namespace SVGImporter
         protected static SVGRenderer renderer
         {
             get
-            {
+            {                
                 if (_renderer == null)
                 {
                     GameObject go = new GameObject("editor SVG Renderer");
@@ -68,15 +68,15 @@ namespace SVGImporter
         }
 
         protected static RenderTexture GetRenderTexture(SVGAsset svgAsset, Rect textureSize)
-        {
+        {            
             float aspect = 1f;
             if (svgAsset != null)
                 aspect = svgAsset.bounds.size.x / svgAsset.bounds.size.y;
             int _previewResolution = Mathf.CeilToInt(textureSize.width);
-            RenderTexture rt = new RenderTexture(_previewResolution,
-                                                  Mathf.CeilToInt(_previewResolution / aspect),
-                                                  24,
-                                                  RenderTextureFormat.Default,
+            RenderTexture rt = new RenderTexture(_previewResolution, 
+                                                  Mathf.CeilToInt(_previewResolution / aspect), 
+                                                  24, 
+                                                  RenderTextureFormat.Default, 
                                                   RenderTextureReadWrite.Default);
             rt.antiAliasing = 8;
             rt.Create();
@@ -85,7 +85,7 @@ namespace SVGImporter
 
         // Call this function during Start or Awake only once
         public static RenderTexture RenderSVG(SVGAsset svgAsset, Rect textureSize)
-        {
+        {                        
             Bounds bounds = svgAsset.bounds;
 
             // Initialize
@@ -103,6 +103,7 @@ namespace SVGImporter
             RenderTexture rt = GetRenderTexture(svgAsset, textureSize);
             camera.targetTexture = rt;
             camera.Render();
+            camera.targetTexture = null;
             RemoveSVGRenderer();
             RemoveCamera();
 
@@ -110,6 +111,7 @@ namespace SVGImporter
         }
     }
 }
+        
 
 
-
+        

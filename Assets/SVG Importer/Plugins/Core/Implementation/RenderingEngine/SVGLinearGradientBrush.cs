@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Utils;
 
@@ -39,27 +39,26 @@ namespace SVGImporter.Rendering
             }
         }
 
+        protected SVGMatrix _gradientTransform;
         protected SVGMatrix _transform;
+        protected Rect _viewport;
 
         /*********************************************************************************/
         public SVGLinearGradientBrush(SVGLinearGradientElement linearGradElement)
         {
-            _fill.transform = new SVGMatrix();
+            _transform = SVGMatrix.identity;
             _linearGradElement = linearGradElement;
             Initialize();
             CreateFill();
         }
 
-        public SVGLinearGradientBrush(SVGLinearGradientElement linearGradElement, Rect bounds, SVGMatrix matrix)
+        public SVGLinearGradientBrush(SVGLinearGradientElement linearGradElement, Rect bounds, SVGMatrix matrix, Rect viewport)
         {
+            _viewport = viewport;
             _transform = matrix;
             _linearGradElement = linearGradElement;
             Initialize();
-            /*
-            SetGradientVector(bounds, matrix);
-            PreLocationProcess();
-            */
-            CreateFill();
+            CreateFill(bounds);
         }
 
         /*********************************************************************************/
@@ -82,7 +81,7 @@ namespace SVGImporter.Rendering
         }
 
         private void CreateFill()
-        {
+        {        
             if(_alphaBlended)
             {
                 _fill = new SVGFill(Color.white, FILL_BLEND.ALPHA_BLENDED, FILL_TYPE.GRADIENT, GRADIENT_TYPE.LINEAR);
@@ -90,14 +89,22 @@ namespace SVGImporter.Rendering
                 _fill = new SVGFill(Color.white, FILL_BLEND.OPAQUE, FILL_TYPE.GRADIENT, GRADIENT_TYPE.LINEAR);
             }
 
-            _fill.gradientTransform = _linearGradElement.gradientTransform.Consolidate().matrix;
+            _gradientTransform = _linearGradElement.gradientTransform.Consolidate().matrix;
+            _fill.gradientColors = SVGAssetImport.atlasData.AddGradient(ParseGradientColors());
+            _fill.viewport = _viewport;
+            /*
             _fill.transform = _transform;
-    //        _fill.bounds = bounds;
-            _fill.gradientColors = SVGAtlas.Instance.AddGradient(ParseGradientColors(), false);
             _fill.gradientStartX = _x1;
             _fill.gradientStartY = _y1;
             _fill.gradientEndX = _x2;
             _fill.gradientEndY = _y2;
+            */
+        }
+
+        private void CreateFill(Rect bounds)
+        {
+            CreateFill();
+            _fill.transform = SVGSimplePath.GetFillTransform(_fill, bounds, new SVGLength[]{_x1, _y1}, new SVGLength[]{_x2, _y2}, _transform, _gradientTransform);
         }
 
         public CCGradient ParseGradientColors()
@@ -115,14 +122,14 @@ namespace SVGImporter.Rendering
             Debug.Log("GradientColors, count: "+length+" Colors: "+debugColor);
             */
             float currentStopOffset = 0f;
-
+            
             for(int i = 0; i < length; i++)
             {
                 currentStopOffset = Mathf.Clamp01(_stopOffsetList[i] * 0.01f);
                 colorKeys[i] = new CCGradientColorKey(_stopColorList[i], currentStopOffset);
                 alphaKeys[i] = new CCGradientAlphaKey(_stopColorList[i].a, currentStopOffset);
             }
-
+            
             return new CCGradient(colorKeys, alphaKeys);
         }
 

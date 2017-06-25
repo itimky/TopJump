@@ -547,7 +547,7 @@ namespace SVGImporter.Document
         }
     }
 
-    internal sealed class SmallXmlParserException : SystemException
+    internal sealed class SmallXmlParserException : Exception
     {
         int line;
         int column;

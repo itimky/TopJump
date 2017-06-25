@@ -61,12 +61,12 @@ namespace SVGImporter.Document
             GetNodesInternal(this, nodes);
             return nodes;
         }
-
+        
         protected void GetNodesInternal(Node node, List<Node> nodes)
         {
             if (node == null)
                 return;
-
+            
             nodes.Add(node);
             int nodeChildrenCount = node.children.Count;
             for (int i = 0; i < nodeChildrenCount; i++)
@@ -110,7 +110,7 @@ namespace SVGImporter.Document
         private SmallXmlParser _parser = new SmallXmlParser();
         private int _currentDepth = 0;
         private Node _lastParent;
-
+    
         private static string STYLE_BLOCK;
 
         public SVGParser()
@@ -124,10 +124,22 @@ namespace SVGImporter.Document
                 _defs.Clear();
                 _defs = null;
             }
+            if(SVGAssetImport.errors != null)
+            {
+                SVGAssetImport.errors.Clear();
+                SVGAssetImport.errors = null;
+            }
         }
 
         public static void Init()
         {
+            if(SVGAssetImport.errors == null)
+            {
+                SVGAssetImport.errors = new List<SVGError>();
+            } else {
+                SVGAssetImport.errors.Clear();
+            }
+
             if (_defs == null)
             {
                 _defs = new Dictionary<string, Node>();
@@ -210,7 +222,7 @@ namespace SVGImporter.Document
                     _defs.Add(definitionID, node);
                 }
             }
-
+            
             switch (node.name)
             {
                 case SVGNodeName.LinearGradient:
@@ -218,7 +230,7 @@ namespace SVGImporter.Document
                 case SVGNodeName.ConicalGradient:
                 case SVGNodeName.Stop:
                     AddNode(node);
-                    return;
+                    return;                
                 case SVGNodeName.Defs:
                     DontPutInNodesAdd(node);
                     break;
@@ -239,7 +251,7 @@ namespace SVGImporter.Document
                     if(!SVGAssetImport.errors.Contains(SVGError.Image))
                         SVGAssetImport.errors.Add(SVGError.Image);
                     #endif
-                    break;
+                    break;                
                 case SVGNodeName.ClipPath:
                     DontPutInNodesAdd(node);
                     //                              Debug.LogError ("Unsupported Element type Clip Path");
@@ -263,8 +275,7 @@ namespace SVGImporter.Document
                     }
                     break;
             }
-
-        }
+        }    
 
         public void OnInlineElement(string name, AttributeList attrs)
         {
@@ -320,7 +331,7 @@ namespace SVGImporter.Document
                 case SVGNodeName.RadialGradient:
                 case SVGNodeName.ConicalGradient:
                     AddNode(node);
-                    return;
+                    return;                
                 case SVGNodeName.Defs:
                     DontPutInNodesRemove(node);
                     break;
@@ -345,7 +356,7 @@ namespace SVGImporter.Document
             }
 
         }
-
+        
         public bool IsInlineElement(Node node)
         {
             switch (node.name)
@@ -360,7 +371,7 @@ namespace SVGImporter.Document
                 case SVGNodeName.Stop:
                     return true;
             }
-
+            
             return false;
         }
 
@@ -475,7 +486,7 @@ namespace SVGImporter.Document
                         */
                     case SVGNodeName.LinearGradient:
                     {
-                        ResolveGradientLinks();
+                        ResolveGradientLinks();                        
                         paintable.AppendLinearGradient(new SVGLinearGradientElement(this, node));
                         break;
                     }
@@ -507,8 +518,8 @@ namespace SVGImporter.Document
                         break;
                     }
                     case SVGNodeName.Style:
-                    {
-                        paintable.AddCSS(node.content);
+                    {                                        
+                        paintable.AddCSS(node.content);                                         
                         break;
                     }
                     case SVGNodeName.Use:
@@ -541,14 +552,14 @@ namespace SVGImporter.Document
                     }
                 }
             }
-        }
+        }      
 
         protected void ResolveGradientLinks()
         {
             string xlink = node.attributes.GetValue("xlink:href");
             if (!string.IsNullOrEmpty(xlink))
             {
-                if (xlink [0] == '#') xlink = xlink.Remove(0, 1);
+                if (xlink [0] == '#') xlink = xlink.Remove(0, 1);                                                                
                 if (_defs.ContainsKey(xlink))
                 {
                     Node definitionNode = _defs [xlink];
@@ -571,7 +582,7 @@ namespace SVGImporter.Document
                             if(injectNodes.Count > 0)
                             {
                                 nodes[idx].children = injectNodes;
-                                nodes.InsertRange(idx + 1, injectNodes);
+                                nodes.InsertRange(idx + 1, injectNodes);                                            
                             }
                             if(createOpenNode)
                             {

@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Document
+namespace SVGImporter.Document 
 {
     using Rendering;
     using Utils;
@@ -138,11 +138,14 @@ namespace SVGImporter.Document
             }
         }
 
-        private SVGMatrix _cachedViewBoxTransform = null;
+        private SVGMatrix _cachedViewBoxTransform = SVGMatrix.identity;
+        private bool cachedViewBox;
+
         public SVGMatrix ViewBoxTransform()
         {
-            if (this._cachedViewBoxTransform == null)
-            {
+            if (!cachedViewBox)
+            {               
+                cachedViewBox  = true;
                 Rect viewport = _paintable.viewport;
                 if(_rootElement)
                 {

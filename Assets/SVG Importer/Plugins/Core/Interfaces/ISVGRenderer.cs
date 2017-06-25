@@ -10,11 +10,10 @@ namespace SVGImporter
 {
     public interface ISVGRenderer
     {
-        System.Action<Mesh, bool> OnPrepareForRendering { get; set; }
+        System.Action<SVGLayer[], SVGAsset, bool> OnPrepareForRendering { get; set; }
         void UpdateRenderer();
+        SVGAsset vectorGraphics { get; }
 
-        MeshFilter meshFilter { get; }
-        MeshRenderer meshRenderer { get; }
         int lastFrameChanged { get; }
 
         void AddModifier(ISVGModify modifier);

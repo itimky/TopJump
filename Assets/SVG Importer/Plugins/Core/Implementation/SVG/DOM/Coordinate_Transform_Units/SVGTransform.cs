@@ -59,7 +59,7 @@ namespace SVGImporter.Rendering
 
         public SVGTransform()
         {
-            this._matrix = new SVGMatrix();
+            this._matrix = SVGMatrix.identity;
             this._type = SVGTransformMode.Matrix;
         }
 
@@ -165,41 +165,41 @@ namespace SVGImporter.Rendering
         public void SetTranslate(float tx, float ty)
         {
             this._type = SVGTransformMode.Translate;
-            this._matrix = new SVGMatrix().Translate(tx, ty);
+            this._matrix = SVGMatrix.identity.Translate(tx, ty);
         }
 
         public void SetScale(float sx, float sy)
         {
             this._type = SVGTransformMode.Scale;
-            this._matrix = new SVGMatrix().ScaleNonUniform(sx, sy);
+            this._matrix = SVGMatrix.identity.Scale(sx, sy);
         }
 
         public void SetRotate(float angle)
         {
             this._type = SVGTransformMode.Rotate;
             this._angle = angle;
-            this._matrix = new SVGMatrix().Rotate(angle);
+            this._matrix = SVGMatrix.identity.Rotate(angle);
         }
 
         public void SetRotate(float angle, float cx, float cy)
         {
             this._type = SVGTransformMode.Rotate;
             this._angle = angle;
-            this._matrix = new SVGMatrix().Translate(cx, cy).Rotate(angle).Translate(-cx, -cy);
+            this._matrix = SVGMatrix.identity.Translate(cx, cy).Rotate(angle).Translate(-cx, -cy);
         }
 
         public void SetSkewX(float angle)
         {
             this._type = SVGTransformMode.SkewX;
             this._angle = angle;
-            this._matrix = new SVGMatrix().SkewX(angle);
+            this._matrix = SVGMatrix.identity.SkewX(angle);
         }
 
         public void SetSkewY(float angle)
         {
             this._type = SVGTransformMode.SkewY;
             this._angle = angle;
-            this._matrix = new SVGMatrix().SkewY(angle);
+            this._matrix = SVGMatrix.identity.SkewY(angle);
         }
     }
 }

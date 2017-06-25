@@ -45,20 +45,20 @@ namespace SVGImporter.Utils
         {
             if (line != null && line.Count <= 1)
                 return;
-
+            
             Vector3 lastPoint = new Vector3(line[0].x , line[0].y, 0f);
             Vector3 currentPoint;
             for(int i = 0; i < line.Count; i++)
             {
                 currentPoint = new Vector3(line[i].x , line[i].y, 0f);
-
+                
                 if(i!= 0)
                 {
                     Debug.DrawLine(lastPoint, currentPoint);
                 }
-
+                
                 lastPoint = currentPoint;
-
+                
                 if(showIndexes)
                     Handles.Label(currentPoint, "   "+i.ToString());
             }
@@ -76,7 +76,7 @@ namespace SVGImporter.Utils
             float segmentsFloat = Mathf.Abs(distance / size);
             int segments = Mathf.Clamp(Mathf.CeilToInt(segmentsFloat), 1, int.MaxValue);
     //        int segmetsMinusOne = segments - 1;
-            float progress;
+            float progress; 
             float progressOffset = 1f - (1f - (segmentsFloat / (float)segments));
 
             if(segments == 1)
@@ -91,7 +91,7 @@ namespace SVGImporter.Utils
                     if(i % 2 == 1)
                     {
                         Handles.DrawLine(currentPoint, lastPoint);
-                    }
+                    }                    
                     lastPoint = currentPoint;
                 }
             }
@@ -101,20 +101,20 @@ namespace SVGImporter.Utils
         {
             if (line != null && line.Length <= 1)
                 return;
-
+            
             Vector3 lastPoint = new Vector3(line[0].x , line[0].y, 0f);
             Vector3 currentPoint;
             for(int i = 0; i < line.Length; i++)
             {
                 currentPoint = new Vector3(line[i].x , line[i].y, 0f);
-
+                
                 if(i!= 0)
                 {
                     Handles.DrawLine(lastPoint, currentPoint);
                 }
-
+                
                 lastPoint = currentPoint;
-
+                
                 if(showIndexes)
                     Handles.Label(currentPoint, "   "+i.ToString());
             }
@@ -124,25 +124,25 @@ namespace SVGImporter.Utils
         {
             if (line != null && line.Count <= 1)
                 return;
-
+            
             Vector3 lastPoint = new Vector3(line[0].x , line[0].y, 0f);
             Vector3 currentPoint;
             for(int i = 0; i < line.Count; i++)
             {
                 currentPoint = new Vector3(line[i].x , line[i].y, 0f);
-
+                
                 if(i!= 0)
                 {
                     Handles.DrawLine(lastPoint, currentPoint);
                 }
-
+                
                 lastPoint = currentPoint;
-
+                
                 if(showIndexes)
                     Handles.Label(currentPoint, "   "+i.ToString());
             }
         }
-
+        
         public static void Bezier(float precision, Vector3 start, Vector3 handle0, Vector3 handle1, Vector3 end, bool showIndexes = false)
         {
             Bezier(precision, new Vector2(start.x, start.y), new Vector2(handle0.x, handle0.y), new Vector2(handle1.x, handle1.y), new Vector2(end.x, end.y), showIndexes);
@@ -175,7 +175,7 @@ namespace SVGImporter.Utils
 
         public static void Bounds(SVGBounds bounds)
         {
-            Vector3 p0 = new Vector3(bounds.minX, bounds.minY, 0f);
+            Vector3 p0 = new Vector3(bounds.minX, bounds.minY, 0f);        
             Vector3 p1 = new Vector3(bounds.maxX, bounds.minY, 0f);
             Vector3 p2 = new Vector3(bounds.minX, bounds.maxY, 0f);
             Vector3 p3 = new Vector3(bounds.maxX, bounds.maxY, 0f);
@@ -186,18 +186,18 @@ namespace SVGImporter.Utils
             Handles.DrawLine(p2, p0);
         }
 
-        public static void Rectangle(Rect rect)
-        {
-            Vector3 p0 = new Vector3(rect.min.x, rect.min.y, 0f);
-            Vector3 p1 = new Vector3(rect.max.x, rect.min.y, 0f);
-            Vector3 p2 = new Vector3(rect.min.x, rect.max.y, 0f);
-            Vector3 p3 = new Vector3(rect.max.x, rect.max.y, 0f);
-
-            Handles.DrawLine(p0, p1);
-            Handles.DrawLine(p1, p3);
-            Handles.DrawLine(p3, p2);
-            Handles.DrawLine(p2, p0);
-        }
+		public static void Rectangle(Rect rect)
+		{
+			Vector3 p0 = new Vector3(rect.min.x, rect.min.y, 0f);        
+			Vector3 p1 = new Vector3(rect.max.x, rect.min.y, 0f);
+			Vector3 p2 = new Vector3(rect.min.x, rect.max.y, 0f);
+			Vector3 p3 = new Vector3(rect.max.x, rect.max.y, 0f);
+			
+			Handles.DrawLine(p0, p1);
+			Handles.DrawLine(p1, p3);
+			Handles.DrawLine(p3, p2);
+			Handles.DrawLine(p2, p0);
+		}
 
         public static Rect GetScreenRect(Vector3 worldPosition, float pixelRadius)
         {
@@ -205,7 +205,7 @@ namespace SVGImporter.Utils
             if (cam == null)
                 cam = Camera.main;
 
-            float radiusHalf = pixelRadius * 0.5f;
+            float radiusHalf = pixelRadius * 0.5f;        
             Vector3 screenPosition = cam.WorldToScreenPoint(worldPosition);
             return new Rect(screenPosition.x - radiusHalf, cam.pixelHeight - (screenPosition.y + radiusHalf), pixelRadius, pixelRadius);
         }
@@ -235,8 +235,8 @@ namespace SVGImporter.Utils
             float tempAngle = Mathf.Atan2(orientation.y, orientation.x);
             if(tempAngle != 0f)
                 tempAngle = Mathf.Round(tempAngle / PI_025) * PI_025;
-
-            int angle = Mathf.RoundToInt(tempAngle * Mathf.Rad2Deg);
+            
+            int angle = Mathf.RoundToInt(tempAngle * Mathf.Rad2Deg);        
             if (angle == 0 || angle == 180 || angle == -180)
             {
                 EditorGUIUtility.AddCursorRect(screenRect, MouseCursor.ResizeHorizontal);

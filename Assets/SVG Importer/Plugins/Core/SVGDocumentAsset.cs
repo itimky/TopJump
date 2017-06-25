@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
+// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
 // This code can only be used under the standard Unity Asset Store End User License Agreement
 // A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 
@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 using System.Collections;
 
-namespace SVGImporter
+namespace SVGImporter 
 {
     public enum SVGError
     {
@@ -81,6 +81,16 @@ namespace SVGImporter
             set {
                 _description = value;
             }
+        }
+
+        public static SVGDocumentAsset CreateInstance(string svgFile, SVGError[] errors = null, string title = null, string description = null)
+        {
+            SVGDocumentAsset svgDocumentAsset = ScriptableObject.CreateInstance<SVGDocumentAsset>();
+            svgDocumentAsset._description = description;
+            svgDocumentAsset._title = title;
+            svgDocumentAsset._svgFile = svgFile;
+            svgDocumentAsset._errors = errors;
+            return svgDocumentAsset;
         }
     }
 }

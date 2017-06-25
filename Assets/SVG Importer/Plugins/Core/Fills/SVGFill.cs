@@ -12,36 +12,38 @@ namespace SVGImporter.Rendering
 {
     using Utils;
 
-    public enum FILL_BLEND
+    public enum FILL_BLEND : byte
     {
-        OPAQUE,
-        ALPHA_BLENDED,
-        ADDITIVE,
-        MULTIPLY
+    	OPAQUE,
+    	ALPHA_BLENDED,
+    	ADDITIVE,
+    	MULTIPLY
     }
 
-    public enum FILL_TYPE
+    public enum FILL_TYPE : byte
     {
-        SOLID,
-        GRADIENT,
-        TEXTURE
+    	SOLID,
+    	GRADIENT,
+    	TEXTURE
     }
 
-    public enum GRADIENT_TYPE
+    public enum GRADIENT_TYPE : byte
     {
-        LINEAR = 0,
-        RADIAL = 1,
+    	LINEAR = 0,
+    	RADIAL = 1,
         CONICAL = 2
     }
 
     [System.Serializable]
     public class SVGFill : System.Object
-    {
-        public FILL_TYPE fillType;
-        public FILL_BLEND blend;
+    {	
+    	public FILL_TYPE fillType;
+    	public FILL_BLEND blend;
         public GRADIENT_TYPE gradientType;
-        public Color32 color;
-        //public Rect bounds;
+    	public Color32 color;
+        public float opacity;
+        public Rect viewport;
+        public SVGMatrix transform;
 
         public string gradientId;
         public string gradientHash {
@@ -51,17 +53,17 @@ namespace SVGImporter.Rendering
         }
 
         public CCGradient gradientColors;
-        public SVGMatrix gradientTransform;
-        public SVGMatrix transform;
 
-        public SVGLength gradientStartX;
-        public SVGLength gradientStartY;
-        public SVGLength gradientEndX;
-        public SVGLength gradientEndY;
+        public Color32 finalColor
+        {
+            get {
+                return new Color32(color.r, color.g, color.b, (byte)Mathf.RoundToInt((float)color.a * opacity));
+            }
+        }
 
         public SVGFill ()
-        {
-        }
+    	{
+    	}
 
         public SVGFill (Color32 color)
         {
@@ -93,9 +95,10 @@ namespace SVGImporter.Rendering
         {
             SVGFill fill = new SVGFill(this.color, this.blend, this.fillType, this.gradientType);
             fill.gradientId = this.gradientId;
-            fill.gradientTransform = this.gradientTransform;
-            if(gradientColors != null)
-                fill.gradientColors = gradientColors.Clone();
+            fill.transform = this.transform;
+            fill.opacity = this.opacity;;
+            fill.viewport = this.viewport;
+            if(gradientColors != null) fill.gradientColors = gradientColors.Clone();
             return fill;
         }
     }

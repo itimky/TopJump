@@ -3,7 +3,7 @@
 // A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 
 using System;
-using System.Runtime.Serialization;
+//using System.Runtime.Serialization;
 
 namespace SVGImporter.Document
 {
@@ -29,11 +29,11 @@ namespace SVGImporter.Document
         {
             code = errorCode;
         }
-
+        /*
         protected SVGException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-
+        */
         private SVGExceptionType code;
 
         public new SVGExceptionType Code

@@ -7,81 +7,77 @@ using System.Collections;
 
 namespace SVGImporter.Rendering
 {
-    public class SVGShader {
-
-        protected static Shader _GradientColorAdditive;
-        public static Shader GradientColorAdditive {
-            get {
-                if(_GradientColorAdditive == null)
-                    _GradientColorAdditive = Shader.Find ("SVG Importer/GradientColor/GradientColorAdditive");
-                return _GradientColorAdditive;
-            }
-        }
+    public class SVGShader 
+    {    	
         protected static Shader _GradientColorAlphaBlended;
-        public static Shader GradientColorAlphaBlended {
-            get {
+    	public static Shader GradientColorAlphaBlended {
+    		get {
                 if(_GradientColorAlphaBlended == null)
                     _GradientColorAlphaBlended = Shader.Find ("SVG Importer/GradientColor/GradientColorAlphaBlended");
                 return _GradientColorAlphaBlended;
-            }
-        }
-        protected static Shader _GradientColorMultiply;
-        public static Shader GradientColorMultiply {
+    		}
+    	}
+        protected static Shader _GradientColorAlphaBlendedAntialiased;
+        public static Shader GradientColorAlphaBlendedAntialiased {
             get {
-                if(_GradientColorMultiply == null)
-                    Shader.Find ("SVG Importer/GradientColor/GradientColorMultiply");
-                return _GradientColorMultiply;
+                if(_GradientColorAlphaBlendedAntialiased == null)
+                    _GradientColorAlphaBlendedAntialiased = Shader.Find ("SVG Importer/GradientColor/GradientColorAlphaBlendedAntialiased");
+                return _GradientColorAlphaBlendedAntialiased;
             }
         }
         protected static Shader _GradientColorOpaque;
-        public static Shader GradientColorOpaque {
-            get {
+    	public static Shader GradientColorOpaque {
+    		get {
                 if(_GradientColorOpaque == null)
                     _GradientColorOpaque = Shader.Find ("SVG Importer/GradientColor/GradientColorOpaque");
                 return _GradientColorOpaque;
-            }
-        }
-        protected static Shader _SolidColorAdditive;
-        public static Shader SolidColorAdditive {
-            get {
-                if(_SolidColorAdditive == null)
-                    _SolidColorAdditive = Shader.Find ("SVG Importer/SolidColor/SolidColorAdditive");
-                return _SolidColorAdditive;
-            }
+    		}
         }
         protected static Shader _SolidColorAlphaBlended;
-        public static Shader SolidColorAlphaBlended {
-            get {
+    	public static Shader SolidColorAlphaBlended {
+    		get {
                 if(_SolidColorAlphaBlended == null)
                     _SolidColorAlphaBlended = Shader.Find ("SVG Importer/SolidColor/SolidColorAlphaBlended");
                 return _SolidColorAlphaBlended;
-            }
-        }
-        protected static Shader _SolidColorMultiply;
-        public static Shader SolidColorMultiply {
+    		}
+    	}
+        protected static Shader _SolidColorAlphaBlendedAntialiased;
+        public static Shader SolidColorAlphaBlendedAntialiased {
             get {
-                if(_SolidColorMultiply == null)
-                    _SolidColorMultiply = Shader.Find ("SVG Importer/SolidColor/SolidColorMultiply");
-                return _SolidColorMultiply;
+                if(_SolidColorAlphaBlendedAntialiased == null)
+                    _SolidColorAlphaBlendedAntialiased = Shader.Find ("SVG Importer/SolidColor/SolidColorAlphaBlendedAntialiased");
+                return _SolidColorAlphaBlendedAntialiased;
             }
         }
         protected static Shader _SolidColorOpaque;
-        public static Shader SolidColorOpaque {
-            get {
+    	public static Shader SolidColorOpaque {
+    		get {
                 if(_SolidColorOpaque == null)
                     _SolidColorOpaque = Shader.Find ("SVG Importer/SolidColor/SolidColorOpaque");
                 return _SolidColorOpaque;
-            }
-        }
+    		}
+    	}
         protected static Shader _UI;
         public static Shader UI {
             get {
                 if(_UI == null)
-                    #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-                    _UI = Shader.Find ("SVG Importer/UI/DefaultLegacy");
+                    #if UNITY_4 || UNITY_5_0 || UNITY_5_1
+                    _UI = Shader.Find ("SVG Importer/UI/UILegacy");
                     #else
-                    _UI = Shader.Find ("SVG Importer/UI/Default");
+                    _UI = Shader.Find ("SVG Importer/UI/UI");
                     #endif
+                return _UI;
+            }
+        }
+        protected static Shader _UIAntialiased;
+        public static Shader UIAntialiased {
+            get {
+                if(_UIAntialiased == null)
+                #if UNITY_4 || UNITY_5_0 || UNITY_5_1
+                    _UI = Shader.Find ("SVG Importer/UI/UILegacy");
+                #else
+                _UI = Shader.Find ("SVG Importer/UI/UIAntialiased");
+                #endif
                 return _UI;
             }
         }
@@ -89,10 +85,10 @@ namespace SVGImporter.Rendering
         public static Shader UIMask {
             get {
                 if(_UIMask == null)
-                #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
-                    _UIMask = Shader.Find ("SVG Importer/UI/DefaultMask");
+                #if UNITY_4 || UNITY_5_0 || UNITY_5_1
+                    _UIMask = Shader.Find ("SVG Importer/UI/UIMaskLegacy");
                 #else
-                    _UIMask = Shader.Find ("SVG Importer/UI/DefaultMaskLegacy");
+                    _UIMask = Shader.Find ("SVG Importer/UI/UIMask");
                 #endif
                 return _UIMask;
             }

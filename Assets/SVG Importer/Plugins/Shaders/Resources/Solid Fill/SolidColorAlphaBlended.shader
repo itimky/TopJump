@@ -1,5 +1,3 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
 // Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
 // This code can only be used under the standard Unity Asset Store End User License Agreement
 // A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
@@ -22,36 +20,11 @@ Shader "SVG Importer/SolidColor/SolidColorAlphaBlended" {
 		Pass
 		{			
 			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+			#pragma vertex vertexColor
+			#pragma fragment fragmentColor
 			#pragma fragmentoption ARB_precision_hint_fastest
 			#include "UnityCG.cginc"
-			
-			struct appdata
-			{
-			    float4 vertex : POSITION;			    
-			    half4 color : COLOR;			    
-			};
-			
-			// vertex output
-			struct vertdata
-			{
-			    float4 vertex : SV_POSITION;			    
-			    half4 color : COLOR;			    
-			};
-			
-			vertdata vert(appdata ad)
-			{
-			    vertdata o;
-			    o.vertex = UnityObjectToClipPos(ad.vertex);			    
-			    o.color = ad.color;			    
-			    return o;
-			}
-			
-			half4 frag(vertdata i) : COLOR
-			{
-				return i.color;
-			}
+			#include "../../SVGImporterSolidCG.cginc"					
 			ENDCG
         }
 	}

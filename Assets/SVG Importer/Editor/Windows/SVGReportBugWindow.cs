@@ -112,17 +112,17 @@ namespace SVGImporter
 
         void OnEnable()
         {
-            SVGImporterLaunchEditor.OpenReportBugWindow();
+			SVGImporterLaunchEditor.OpenReportBugWindow();
             emailField = lastEmail;
         }
-
+        
         void OnDisable()
         {
             ResetToDefault();
         }
 
         void OnGUI()
-        {
+        {            
             GUILayout.Space(20);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -167,7 +167,7 @@ namespace SVGImporter
             }
             if(GUILayout.Button("Send"))
             {
-                SendEmail();
+                SendEmail();                
             }
             EditorGUILayout.EndHorizontal();
 
@@ -242,11 +242,11 @@ namespace SVGImporter
 
 
             MailMessage mail = new MailMessage();
-
+            
             mail.From = new MailAddress(emailField);
             mail.To.Add("support@svgimporter.com");
             mail.Subject = "Bug Report | Sender: "+emailField+" | "+titleField;
-            mail.Body = "Problem Type: "+problemType.ToString()+"\n\n"+"Problem Occurrence: "+problemOccurrence.ToString()+"\n\n"+descriptionField+"\n\n\n\n\n"+pluginVersion+systemSpecs;
+			mail.Body = "Problem Type: "+problemType.ToString()+"\n\n"+"Problem Occurrence: "+problemOccurrence.ToString()+"\n\n"+descriptionField+"\n\n\n\n\n"+pluginVersion+systemSpecs;
             if(attachments.Count > 0)
             {
                 for(int i = 0; i < attachments.Count; i++)
@@ -262,8 +262,8 @@ namespace SVGImporter
             smtpServer.Port = 587;
             smtpServer.Credentials = new System.Net.NetworkCredential("noreply.junkmail.spam", "pAssWoRd123$") as ICredentialsByHost;
             smtpServer.EnableSsl = true;
-            ServicePointManager.ServerCertificateValidationCallback =
-                delegate(object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+            ServicePointManager.ServerCertificateValidationCallback = 
+                delegate(object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
             { return true; };
             try {
                 smtpServer.Send(mail);

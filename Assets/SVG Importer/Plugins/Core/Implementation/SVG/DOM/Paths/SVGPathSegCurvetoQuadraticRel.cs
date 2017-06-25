@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     public class SVGPathSegCurvetoQuadraticRel : SVGPathSegCurvetoQuadratic
     {
@@ -16,7 +16,7 @@ namespace SVGImporter.Rendering
             this._type = SVGPathSegTypes.CurveTo_Quadratic_Rel;
             if(segment != null)
                 _previousPoint = segment.currentPoint;
-            _currentPoint = _previousPoint + new Vector2(x, y);
+            _currentPoint = _previousPoint + new Vector2(x, y);        
             _controlPoint1 = _previousPoint + new Vector2(x1, y1);
         }
         /***********************************************************************************/

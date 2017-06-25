@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering
+namespace SVGImporter.Rendering 
 {
     using Utils;
 
@@ -33,27 +33,28 @@ namespace SVGImporter.Rendering
             }
         }
 
+        protected SVGMatrix _gradientTransform;
         protected SVGMatrix _transform;
+        protected Rect _viewport;
 
         /*********************************************************************************/
         public SVGRadialGradientBrush(SVGRadialGradientElement radialGradElement)
         {
-            _fill.transform = new SVGMatrix();
+            _transform = SVGMatrix.identity;
             _radialGradElement = radialGradElement;
             Initialize();
             CreateFill();
         }
 
-        public SVGRadialGradientBrush(SVGRadialGradientElement radialGradElement, Rect bounds, SVGMatrix matrix)
+        public SVGRadialGradientBrush(SVGRadialGradientElement radialGradElement, Rect bounds, SVGMatrix matrix, Rect viewport)
         {
+            _viewport = viewport;
             _transform = matrix;
             _radialGradElement = radialGradElement;
             Initialize();
-
-    //        SetGradientVector(bounds, matrix);
-            CreateFill();
+            CreateFill(bounds);
         }
-
+        
         protected Color GetColor(SVGColor svgColor)
         {
             if(svgColor.color.a != 1)
@@ -86,7 +87,7 @@ namespace SVGImporter.Rendering
         }
 
         private void CreateFill()
-        {
+        {                
             if(_alphaBlended)
             {
                 _fill = new SVGFill(Color.white, FILL_BLEND.ALPHA_BLENDED, FILL_TYPE.GRADIENT, GRADIENT_TYPE.RADIAL);
@@ -94,22 +95,30 @@ namespace SVGImporter.Rendering
                 _fill = new SVGFill(Color.white, FILL_BLEND.OPAQUE, FILL_TYPE.GRADIENT, GRADIENT_TYPE.RADIAL);
             }
 
-            _fill.gradientTransform = _radialGradElement.gradientTransform.Consolidate().matrix;
+            _gradientTransform = _radialGradElement.gradientTransform.Consolidate().matrix;
+            _fill.gradientColors = SVGAssetImport.atlasData.AddGradient(ParseGradientColors());
+            _fill.viewport = _viewport;
+            /*
             _fill.transform = _transform;
-    //        _fill.bounds = bounds;
-            _fill.gradientColors = SVGAtlas.Instance.AddGradient(ParseGradientColors(), false);
             _fill.gradientStartX = _cx;
             _fill.gradientStartY = _cy;
             _fill.gradientEndX = _r;
             _fill.gradientEndY = _r;
+            */
         }
 
+        private void CreateFill(Rect bounds)
+        {        
+            CreateFill();
+            _fill.transform = SVGSimplePath.GetFillTransform(_fill, bounds, new SVGLength[]{_cx, _cy}, new SVGLength[]{_r, _r}, _transform, _gradientTransform);
+        }
+        
         public CCGradient ParseGradientColors()
         {
             int length = _stopColorList.Count;
             CCGradientColorKey[] colorKeys = new CCGradientColorKey[length];
             CCGradientAlphaKey[] alphaKeys = new CCGradientAlphaKey[length];
-
+           
             float currentStopOffset = 0f;
 
             for(int i = 0; i < length; i++)
@@ -118,7 +127,7 @@ namespace SVGImporter.Rendering
                 colorKeys[i] = new CCGradientColorKey(_stopColorList[i], currentStopOffset);
                 alphaKeys[i] = new CCGradientAlphaKey(_stopColorList[i].a, currentStopOffset);
             }
-
+            
             return new CCGradient(colorKeys, alphaKeys);
         }
 

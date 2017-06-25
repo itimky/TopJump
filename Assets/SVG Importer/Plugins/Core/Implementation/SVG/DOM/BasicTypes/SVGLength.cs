@@ -77,7 +77,7 @@ namespace SVGImporter.Utils
         {
             if(unitType == SVGLengthType.Percentage && svglength.unitType == SVGLengthType.Percentage)
             {
-                return new SVGLength(SVGLengthType.Percentage, this.value * svglength.value);
+                return new SVGLength(SVGLengthType.Percentage, this.value * svglength.value);                    
             } else {
                 return new SVGLength(SVGLengthType.PX, this.value * svglength.value);
             }

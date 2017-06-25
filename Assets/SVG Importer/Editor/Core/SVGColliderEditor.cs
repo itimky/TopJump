@@ -34,6 +34,6 @@ namespace SVGImporter
             {
                 serializedObject.ApplyModifiedProperties();
             }
-        }
+        }       
     }
 }
