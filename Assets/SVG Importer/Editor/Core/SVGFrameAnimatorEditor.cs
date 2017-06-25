@@ -13,13 +13,13 @@ namespace SVGImporter
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(SVGFrameAnimator))]
-	public class SVGFrameAnimatorEditor : Editor
+    public class SVGFrameAnimatorEditor : Editor
     {
-		SerializedProperty frames;
-		SerializedProperty frameIndex;
+        SerializedProperty frames;
+        SerializedProperty frameIndex;
 
-		private ReorderableList framesList;
-		private float thumbnailSize = 30f;
+        private ReorderableList framesList;
+        private float thumbnailSize = 30f;
 
         protected GUIStyle _bgStyle;
         public GUIStyle bgStyle
@@ -51,54 +51,54 @@ namespace SVGImporter
 
         void OnEnable()
         {
-			frames = serializedObject.FindProperty("frames");
-			frameIndex = serializedObject.FindProperty("frameIndex");
+            frames = serializedObject.FindProperty("frames");
+            frameIndex = serializedObject.FindProperty("frameIndex");
 
-			framesList = new ReorderableList(serializedObject, frames, true, true, true, true);
-			framesList.drawHeaderCallback = (Rect rect) => {  
-				EditorGUI.LabelField(rect, "Animation Frames");
-			};
-			framesList.elementHeight = thumbnailSize + 4;
+            framesList = new ReorderableList(serializedObject, frames, true, true, true, true);
+            framesList.drawHeaderCallback = (Rect rect) => {
+                EditorGUI.LabelField(rect, "Animation Frames");
+            };
+            framesList.elementHeight = thumbnailSize + 4;
 
-			framesList.drawElementCallback =  
-			(Rect rect, int index, bool isActive, bool isFocused) => {
-				var element = framesList.serializedProperty.GetArrayElementAtIndex(index);
-                
+            framesList.drawElementCallback =
+            (Rect rect, int index, bool isActive, bool isFocused) => {
+                var element = framesList.serializedProperty.GetArrayElementAtIndex(index);
+
                 if(frameIndex.floatValue == index)
                 {
                     GUI.Box(rect, "", bgStyle);
                 }
 
                 rect.x += 2;
-				rect.y += 2;
+                rect.y += 2;
 
-				Texture2D thumbnail = null;
-				if(element.objectReferenceValue != null)
-				{
-					thumbnail = AssetPreview.GetAssetPreview(element.objectReferenceValue);
-				}
+                Texture2D thumbnail = null;
+                if(element.objectReferenceValue != null)
+                {
+                    thumbnail = AssetPreview.GetAssetPreview(element.objectReferenceValue);
+                }
 
-				if(thumbnail != null)
-				{
-					EditorGUI.DrawPreviewTexture(new Rect(rect.x, rect.y, thumbnailSize, thumbnailSize), thumbnail);
-				}
-				EditorGUI.PropertyField(new Rect(rect.x + thumbnailSize + 4, rect.y, rect.width - thumbnailSize - 8, EditorGUIUtility.singleLineHeight), element, new GUIContent());
-			};
+                if(thumbnail != null)
+                {
+                    EditorGUI.DrawPreviewTexture(new Rect(rect.x, rect.y, thumbnailSize, thumbnailSize), thumbnail);
+                }
+                EditorGUI.PropertyField(new Rect(rect.x + thumbnailSize + 4, rect.y, rect.width - thumbnailSize - 8, EditorGUIUtility.singleLineHeight), element, new GUIContent());
+            };
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-			EditorGUILayout.Space();
+            EditorGUILayout.Space();
             Rect beforeList = GUILayoutUtility.GetLastRect();
-			framesList.DoLayoutList();
+            framesList.DoLayoutList();
             Rect afterList = GUILayoutUtility.GetLastRect();
             OnDragGUI(new Rect(beforeList.min.x, beforeList.min.y, beforeList.max.x, afterList.min.y - beforeList.min.y));
-			EditorGUILayout.Space();
-			if(frames.arraySize > 1)
-			{
-				frameIndex.floatValue = EditorGUILayout.IntSlider("Current Frame", (int)frameIndex.floatValue, 0, frames.arraySize - 1);
+            EditorGUILayout.Space();
+            if(frames.arraySize > 1)
+            {
+                frameIndex.floatValue = EditorGUILayout.IntSlider("Current Frame", (int)frameIndex.floatValue, 0, frames.arraySize - 1);
                 GUILayout.BeginHorizontal();
                 GUI.enabled = !(frameIndex.floatValue <= 0f);
                 if(GUILayout.Button("<"))
@@ -112,12 +112,12 @@ namespace SVGImporter
                 }
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
-			}
+            }
             if (EditorGUI.EndChangeCheck())
             {
                 serializedObject.ApplyModifiedProperties();
             }
-        }  
+        }
 
         void OnDragGUI(Rect hitRect)
         {

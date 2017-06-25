@@ -11,7 +11,7 @@ namespace SVGImporter.Utils
     using Rendering;
 
     public static class SVGStringExtractor
-    {        
+    {
         public static string pathCommands = "ZzMmLlCcSsQqTtAaHhVv";
 
         //--------------------------------------------------

@@ -15,7 +15,7 @@ namespace SVGImporter
 {
     using Utils;
     using Rendering;
-    
+
     [ExecuteInEditMode]
     [AddComponentMenu("Rendering/SVG Renderer", 20)]
     public class SVGRenderer : UIBehaviour, ISVGShape, ISVGRenderer
@@ -98,7 +98,7 @@ namespace SVGImporter
                 _color = value;
             }
         }
-        
+
         [FormerlySerializedAs("opaqueMaterial")]
         [SerializeField]
         protected Material _opaqueMaterial;
@@ -145,9 +145,9 @@ namespace SVGImporter
         public MeshFilter meshFilter {
             get {
                 if(_meshFilter == null)
-                {   
+                {
                     _meshFilter = GetComponent<MeshFilter>();
-                    if(_meshFilter == null) 
+                    if(_meshFilter == null)
                     {
                         _meshFilter = gameObject.AddComponent<MeshFilter>();
                     }
@@ -309,12 +309,12 @@ namespace SVGImporter
 
         // This is the main rendering method
         protected void PrepareForRendering(bool force = false)
-        {           
+        {
 #if UNITY_EDITOR
-            if(_lastSortingOrder != _sortingOrder){ 
+            if(_lastSortingOrder != _sortingOrder){
                 sortingOrder = _sortingOrder;
             }
-            if(_lastSortingLayerID != _sortingLayerID){ 
+            if(_lastSortingLayerID != _sortingLayerID){
                 sortingLayerID = _sortingLayerID;
             }
 #endif
@@ -322,7 +322,7 @@ namespace SVGImporter
             {
                 _lastVectorGraphics = null;
                 Clear();
-            } else {                
+            } else {
                 CacheDynamicMesh();
 
                 bool meshChanged = force;
@@ -335,7 +335,7 @@ namespace SVGImporter
                     colorChanged = true;
                 }
 
-                if(colorChanged && _color == Color.white){ 
+                if(colorChanged && _color == Color.white){
                     meshChanged = true;
                 }
 
@@ -354,7 +354,7 @@ namespace SVGImporter
                     UpdateColors(force);
                     materialChanged = true;
                 }
-                
+
                 if(materialChanged)
                 {
                     InitMaterials();
@@ -364,7 +364,7 @@ namespace SVGImporter
                 if(meshChanged || colorChanged)
                 {
                     _lastFrameChanged = Time.frameCount;
-                    if(OnPrepareForRendering != null) 
+                    if(OnPrepareForRendering != null)
                         OnPrepareForRendering(this.meshFilter.sharedMesh, force);
                 }
 
@@ -374,7 +374,7 @@ namespace SVGImporter
                 _lastColor = _color;
             }
         }
-        
+
         #if UNITY_EDITOR
         // Clear SVG Renderer when hit Reset in the Editor
         protected override void Reset()
@@ -400,7 +400,7 @@ namespace SVGImporter
             {
                 if(target[i] == null)
                     continue;
-                
+
                 if(target[i].HasProperty("_GradientShape"))
                     target[i].SetTexture("_GradientShape", SVGAtlas.gradientShapeTexture);
             }
@@ -484,7 +484,7 @@ namespace SVGImporter
                     }
 
                     _mesh.colors32 = _finalColors;
-                    meshFilter.sharedMesh = _mesh;     
+                    meshFilter.sharedMesh = _mesh;
                 }
             }
         }
@@ -575,7 +575,7 @@ namespace SVGImporter
                 meshRenderer.sharedMaterials = new Material[]{ firstMaterial, secondMaterial };
             }
         }
-        
+
         public void UpdateMaterials()
         {
             SwapMaterials(_color.a != 1);
@@ -601,7 +601,7 @@ namespace SVGImporter
                 PrepareForRendering(true);
 #endif
         }
-        
+
         #if UNITY_EDITOR
         void OnDrawGizmosSelected()
         {
@@ -616,7 +616,7 @@ namespace SVGImporter
             }
         }
         #endif
-        
+
         protected override void OnDisable()
         {
             EnableMeshRenderer(false);
@@ -640,11 +640,11 @@ namespace SVGImporter
         }
 
         void InitMesh()
-        {            
+        {
             if(_vectorGraphics == null)
             {
                 CleanMesh();
-            } 
+            }
             // Set mesh for rendering
             if(_vectorGraphics != null)
             {
@@ -667,13 +667,13 @@ namespace SVGImporter
 
                 if(_color == Color.white && _modifiers.Count == 0)
                 {
-                    if(meshFilter.sharedMesh != _sharedMesh) 
+                    if(meshFilter.sharedMesh != _sharedMesh)
                         meshFilter.sharedMesh = _sharedMesh;
                 } else {
                     CacheDynamicMesh();
-                    if(meshFilter.sharedMesh != _mesh) 
+                    if(meshFilter.sharedMesh != _mesh)
                         meshFilter.sharedMesh = _mesh;
-                }                             
+                }
             } else {
                 Clear();
                 _lastVectorGraphics = null;
@@ -759,7 +759,7 @@ namespace SVGImporter
                 CleanMesh();
                 CleanMaterials();
             }
-            
+
             if(_mesh != null)
             {
                 DestroyObjectInternal(_mesh);
@@ -771,7 +771,7 @@ namespace SVGImporter
                 _cachedColors = null;
             }
         }
-        
+
         void CleanMesh()
         {
             #if UNITY_EDITOR
@@ -780,7 +780,7 @@ namespace SVGImporter
                 DestroyObjectInternal(_sharedMesh);
                 _sharedMesh = null;
             }
-            #endif            
+            #endif
             if(_mesh != null)
             {
                 DestroyObjectInternal(_mesh);
@@ -811,12 +811,12 @@ namespace SVGImporter
                     meshFilter.sharedMesh = null;
                 }
             }
-            #else            
+            #else
             if(meshFilter != null)
                 meshFilter.sharedMesh = null;
             #endif
         }
-        
+
         void ClearMeshRenderer()
         {
             //Debug.Log("ClearMeshRenderer");
@@ -835,7 +835,7 @@ namespace SVGImporter
             }
             #endif
         }
-        
+
         void DestroyArray<T>(T[] array) where T : UnityEngine.Object
         {
             if(array == null)
@@ -852,7 +852,7 @@ namespace SVGImporter
         {
             if(obj == null)
                 return;
-            
+
             #if UNITY_EDITOR
             if(!UnityEditor.AssetDatabase.Contains(obj))
             {
@@ -882,7 +882,7 @@ namespace SVGImporter
             {
                 target[i].hideFlags = hideFlags;
             }
-        }            
+        }
         #endif
     }
 }

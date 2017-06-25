@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace SVGImporter
 {
-    public class SVGImporterSettings : ScriptableObject 
+    public class SVGImporterSettings : ScriptableObject
     {
         protected static string _version = "1.1.1";
         public static string version

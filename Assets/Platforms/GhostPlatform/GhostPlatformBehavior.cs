@@ -9,7 +9,7 @@ public class GhostPlatformBehavior : Pausable
     private Animator animator;
 
     void Start()
-    {        
+    {
         animator = GetComponent<Animator>();
         boxCollider2d = GetComponent<BoxCollider2D>();
         Game.RegisterPausableObject(this);

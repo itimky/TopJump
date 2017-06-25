@@ -107,15 +107,15 @@ namespace SVGImporter.ClipperLib
         {
             Clear();
         }
-        
+
         public void Clear()
         {
             for (int i = 0; i < m_AllPolys.Count; i++)
                 m_AllPolys [i] = null;
-            m_AllPolys.Clear(); 
-            m_Childs.Clear(); 
+            m_AllPolys.Clear();
+            m_Childs.Clear();
         }
-        
+
         public PolyNode GetFirst()
         {
             if (m_Childs.Count > 0)
@@ -130,7 +130,7 @@ namespace SVGImporter.ClipperLib
         }
 
     }
-        
+
     public class PolyNode
     {
         internal PolyNode m_Parent;
@@ -172,12 +172,12 @@ namespace SVGImporter.ClipperLib
 
         public PolyNode GetNext()
         {
-            if (m_Childs.Count > 0) 
+            if (m_Childs.Count > 0)
                 return m_Childs [0];
             else
-                return GetNextSiblingUp();        
+                return GetNextSiblingUp();
         }
-  
+
         internal PolyNode GetNextSiblingUp()
         {
             if (m_Parent == null)
@@ -311,8 +311,8 @@ namespace SVGImporter.ClipperLib
                 return new Int128(~val.hi, ~val.lo + 1);
         }
 
-        //nb: Constructing two new Int128 objects every time we want to multiply longs  
-        //is slow. So, although calling the Int128Mul method doesn't look as clean, the 
+        //nb: Constructing two new Int128 objects every time we want to multiply longs
+        //is slow. So, although calling the Int128Mul method doesn't look as clean, the
         //code runs significantly faster than if we'd used the * operator.
 
         public static Int128 Int128Mul(Int64 lhs, Int64 rhs)
@@ -433,17 +433,17 @@ namespace SVGImporter.ClipperLib
         public cInt Y;
 #if use_xyz
     public cInt Z;
-    
+
     public IntPoint(cInt x, cInt y, cInt z = 0)
     {
       this.X = x; this.Y = y; this.Z = z;
     }
-    
+
     public IntPoint(double x, double y, double z = 0)
     {
       this.X = (cInt)x; this.Y = (cInt)y; this.Z = (cInt)z;
     }
-    
+
     public IntPoint(DoublePoint dp)
     {
       this.X = (cInt)dp.X; this.Y = (cInt)dp.Y; this.Z = 0;
@@ -479,7 +479,7 @@ namespace SVGImporter.ClipperLib
 
         public static bool operator !=(IntPoint a, IntPoint b)
         {
-            return a.X != b.X || a.Y != b.Y; 
+            return a.X != b.X || a.Y != b.Y;
         }
 
         public override bool Equals(object obj)
@@ -536,7 +536,7 @@ namespace SVGImporter.ClipperLib
         ptSubject,
         ptClip }
     ;
-  
+
     //By far the most widely used winding rules for polygon filling are
     //EvenOdd & NonZero (GDI, GDI+, XLib, OpenGL, Cairo, AGG, Quartz, SVG, Gr32)
     //Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
@@ -548,7 +548,7 @@ namespace SVGImporter.ClipperLib
         pftPositive,
         pftNegative }
     ;
-  
+
     public enum JoinType
     {
         jtSquare,
@@ -577,7 +577,7 @@ namespace SVGImporter.ClipperLib
         dRightToLeft,
         dLeftToRight}
     ;
-    
+
     internal class TEdge
     {
         internal IntPoint Bot;
@@ -656,7 +656,7 @@ namespace SVGImporter.ClipperLib
     };
 
     public class ClipperBase
-    {    
+    {
         protected const double horizontal = -3.4E+38;
         protected const int Skip = -2;
         protected const int Unassigned = -1;
@@ -670,8 +670,8 @@ namespace SVGImporter.ClipperLib
         internal const cInt loRange = 46340;
         internal const cInt hiRange = 46340;
 #else
-        internal const cInt loRange = 0x3FFFFFFF;          
-        internal const cInt hiRange = 0x3FFFFFFFFFFFFFFFL; 
+        internal const cInt loRange = 0x3FFFFFFF;
+        internal const cInt hiRange = 0x3FFFFFFFFFFFFFFFL;
 #endif
 
         internal LocalMinima m_MinimaList;
@@ -708,7 +708,7 @@ namespace SVGImporter.ClipperLib
         }
         //------------------------------------------------------------------------------
 
-        internal bool PointOnLineSegment(IntPoint pt, 
+        internal bool PointOnLineSegment(IntPoint pt,
           IntPoint linePt1, IntPoint linePt2, bool UseFullRange)
         {
             if (UseFullRange)
@@ -818,7 +818,7 @@ namespace SVGImporter.ClipperLib
         {
             if (useFullRange)
             {
-                if (Pt.X > hiRange || Pt.Y > hiRange || -Pt.X > hiRange || -Pt.Y > hiRange) 
+                if (Pt.X > hiRange || Pt.Y > hiRange || -Pt.X > hiRange || -Pt.Y > hiRange)
                     throw new ClipperException("Coordinate outside allowed range");
             } else if (Pt.X > loRange || Pt.Y > loRange || -Pt.X > loRange || -Pt.Y > loRange)
             {
@@ -918,11 +918,11 @@ namespace SVGImporter.ClipperLib
                     while (E != Result)
                     {
                         E.NextInLML = E.Next;
-                        if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Prev.Top.X) 
+                        if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Prev.Top.X)
                             ReverseHorizontal(E);
                         E = E.Next;
                     }
-                    if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Prev.Top.X) 
+                    if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Prev.Top.X)
                         ReverseHorizontal(E);
                     Result = Result.Next; //move to the edge just beyond current bound
                 } else
@@ -945,16 +945,16 @@ namespace SVGImporter.ClipperLib
                     while (E != Result)
                     {
                         E.NextInLML = E.Prev;
-                        if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Next.Top.X) 
+                        if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Next.Top.X)
                             ReverseHorizontal(E);
                         E = E.Prev;
                     }
-                    if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Next.Top.X) 
+                    if (E.Dx == horizontal && E != EStart && E.Bot.X != E.Next.Top.X)
                         ReverseHorizontal(E);
                     Result = Result.Prev; //move to the edge just beyond current bound
                 }
             }
-        
+
             if (Result.OutIdx == Skip)
             {
                 //if edges still remain in the current bound beyond the skip edge then
@@ -1026,7 +1026,7 @@ namespace SVGImporter.ClipperLib
             List<TEdge> edges = new List<TEdge>(highI + 1);
             for (int i = 0; i <= highI; i++)
                 edges.Add(new TEdge());
-          
+
             bool IsFlat = true;
 
             //1. Basic (first) edge initialization ...
@@ -1056,10 +1056,10 @@ namespace SVGImporter.ClipperLib
                     eLoopStop = E;
                     continue;
                 }
-                if (E.Prev == E.Next) 
+                if (E.Prev == E.Next)
                     break; //only two vertices
           else if (Closed &&
-                    SlopesEqual(E.Prev.Curr, E.Curr, E.Next.Curr, m_UseFullRange) && 
+                    SlopesEqual(E.Prev.Curr, E.Curr, E.Next.Curr, m_UseFullRange) &&
                     (!PreserveCollinear ||
                     !Pt2IsBetweenPt1AndPt3(E.Prev.Curr, E.Curr, E.Next.Curr)))
                 {
@@ -1408,11 +1408,11 @@ namespace SVGImporter.ClipperLib
 
         public bool StrictlySimple
         {
-            get; 
+            get;
             set;
         }
         //------------------------------------------------------------------------------
-       
+
         private void InsertScanbeam(cInt Y)
         {
             if (m_Scanbeam == null)
@@ -1447,7 +1447,7 @@ namespace SVGImporter.ClipperLib
             if (m_ExecuteLocked)
                 return false;
             if (m_HasOpenPaths)
-                throw 
+                throw
             new ClipperException("Error: PolyTree struct is need for open path clipping.");
 
             m_ExecuteLocked = true;
@@ -1566,7 +1566,7 @@ namespace SVGImporter.ClipperLib
                 for (int i = 0; i < m_PolyOuts.Count; i++)
                 {
                     OutRec outRec = m_PolyOuts [i];
-                    if (outRec.Pts != null && !outRec.IsOpen) 
+                    if (outRec.Pts != null && !outRec.IsOpen)
                         FixupOutPolygon(outRec);
                 }
 
@@ -1578,7 +1578,7 @@ namespace SVGImporter.ClipperLib
         finally
             {
                 m_Joins.Clear();
-                m_GhostJoins.Clear();          
+                m_GhostJoins.Clear();
             }
         }
         //------------------------------------------------------------------------------
@@ -1707,7 +1707,7 @@ namespace SVGImporter.ClipperLib
                     continue;
 
                 //if output polygons share an Edge with a horizontal rb, they'll need joining later ...
-                if (Op1 != null && IsHorizontal(rb) && 
+                if (Op1 != null && IsHorizontal(rb) &&
                     m_GhostJoins.Count > 0 && rb.WindDelta != 0)
                 {
                     for (int i = 0; i < m_GhostJoins.Count; i++)
@@ -1845,7 +1845,7 @@ namespace SVGImporter.ClipperLib
                     break;
                 default: //PolyFillType.pftNegative
                     if (edge.WindCnt != -1)
-                        return false; 
+                        return false;
                     break;
             }
 
@@ -1962,7 +1962,7 @@ namespace SVGImporter.ClipperLib
                     if (Math.Abs(e.WindCnt) > 1)
                     {
                         //outside prev poly but still inside another.
-                        //when reversing direction of prev poly use the same WC 
+                        //when reversing direction of prev poly use the same WC
                         if (e.WindDelta * edge.WindDelta < 0)
                             edge.WindCnt = e.WindCnt;
               //otherwise continue to 'decrease' WC ...
@@ -2048,7 +2048,7 @@ namespace SVGImporter.ClipperLib
             if (edge1.NextInAEL == edge1.PrevInAEL ||
                 edge2.NextInAEL == edge2.PrevInAEL)
                 return;
-        
+
             if (edge1.NextInAEL == edge2)
             {
                 TEdge next = edge2.NextInAEL;
@@ -2164,9 +2164,9 @@ namespace SVGImporter.ClipperLib
             {
                 e1.OutIdx = Unassigned;
                 e2.OutIdx = Unassigned;
-            } else if (e1.OutIdx < e2.OutIdx) 
+            } else if (e1.OutIdx < e2.OutIdx)
                 AppendPolygon(e1, e2);
-            else 
+            else
                 AppendPolygon(e2, e1);
         }
         //------------------------------------------------------------------------------
@@ -2312,7 +2312,7 @@ namespace SVGImporter.ClipperLib
                 return false;
         }
         //------------------------------------------------------------------------------
-  
+
         private OutPt InsertPolyPtBetween(OutPt p1, OutPt p2, IntPoint pt)
         {
             OutPt result = new OutPt();
@@ -2348,7 +2348,7 @@ namespace SVGImporter.ClipperLib
                 }
                 e2 = e2.PrevInAEL;
             }
-            if (isHole) 
+            if (isHole)
                 outRec.IsHole = true;
         }
         //------------------------------------------------------------------------------
@@ -2428,9 +2428,9 @@ namespace SVGImporter.ClipperLib
         private OutRec GetLowermostRec(OutRec outRec1, OutRec outRec2)
         {
             //work out which polygon fragment has the correct hole state ...
-            if (outRec1.BottomPt == null) 
+            if (outRec1.BottomPt == null)
                 outRec1.BottomPt = GetBottomPt(outRec1.Pts);
-            if (outRec2.BottomPt == null) 
+            if (outRec2.BottomPt == null)
                 outRec2.BottomPt = GetBottomPt(outRec2.Pts);
             OutPt bPt1 = outRec1.BottomPt;
             OutPt bPt2 = outRec2.BottomPt;
@@ -2481,7 +2481,7 @@ namespace SVGImporter.ClipperLib
             OutRec outRec2 = m_PolyOuts [e2.OutIdx];
 
             OutRec holeStateRec;
-            if (Param1RightOfParam2(outRec1, outRec2)) 
+            if (Param1RightOfParam2(outRec1, outRec2))
                 holeStateRec = outRec2;
             else if (Param1RightOfParam2(outRec2, outRec1))
                 holeStateRec = outRec1;
@@ -2537,7 +2537,7 @@ namespace SVGImporter.ClipperLib
                 side = EdgeSide.esRight;
             }
 
-            outRec1.BottomPt = null; 
+            outRec1.BottomPt = null;
             if (holeStateRec == outRec2)
             {
                 if (outRec2.FirstLeft != outRec1)
@@ -2627,7 +2627,7 @@ namespace SVGImporter.ClipperLib
                 AddLocalMaxPoly(e1, e2, pt);
             }
             //if intersecting a subj line with a subj poly ...
-            else if (e1.PolyTyp == e2.PolyTyp && 
+            else if (e1.PolyTyp == e2.PolyTyp &&
               e1.WindDelta != e2.WindDelta && m_ClipType == ClipType.ctUnion)
             {
               if (e1.WindDelta == 0)
@@ -2649,13 +2649,13 @@ namespace SVGImporter.ClipperLib
             }
             else if (e1.PolyTyp != e2.PolyTyp)
             {
-              if ((e1.WindDelta == 0) && Math.Abs(e2.WindCnt) == 1 && 
+              if ((e1.WindDelta == 0) && Math.Abs(e2.WindCnt) == 1 &&
                 (m_ClipType != ClipType.ctUnion || e2.WindCnt2 == 0))
               {
                 AddOutPt(e1, pt);
                 if (e1Contributing) e1.OutIdx = Unassigned;
               }
-              else if ((e2.WindDelta == 0) && (Math.Abs(e1.WindCnt) == 1) && 
+              else if ((e2.WindDelta == 0) && (Math.Abs(e1.WindCnt) == 1) &&
                 (m_ClipType != ClipType.ctUnion || e1.WindCnt2 == 0))
               {
                 AddOutPt(e2, pt);
@@ -2666,7 +2666,7 @@ namespace SVGImporter.ClipperLib
             if (e1stops)
               if (e1.OutIdx < 0) DeleteFromAEL(e1);
               else throw new ClipperException("Error intersecting polylines");
-            if (e2stops) 
+            if (e2stops)
               if (e2.OutIdx < 0) DeleteFromAEL(e2);
               else throw new ClipperException("Error intersecting polylines");
             return;
@@ -2753,7 +2753,7 @@ namespace SVGImporter.ClipperLib
 
             if (e1Contributing && e2Contributing)
             {
-                if (e1stops || e2stops || 
+                if (e1stops || e2stops ||
                     (e1Wc != 0 && e1Wc != 1) || (e2Wc != 0 && e2Wc != 1) ||
                     (e1.PolyTyp != e2.PolyTyp && m_ClipType != ClipType.ctXor))
                     AddLocalMaxPoly(e1, e2, pt);
@@ -2781,7 +2781,7 @@ namespace SVGImporter.ClipperLib
                     SwapSides(e1, e2);
                     SwapPolyIndexes(e1, e2);
                 }
-            } else if ((e1Wc == 0 || e1Wc == 1) && 
+            } else if ((e1Wc == 0 || e1Wc == 1) &&
                 (e2Wc == 0 || e2Wc == 1) && !e1stops && !e2stops)
             {
                 //neither edge is currently contributing ...
@@ -2833,7 +2833,7 @@ namespace SVGImporter.ClipperLib
                             AddLocalMinPoly(e1, e2, pt);
                             break;
                     }
-                else 
+                else
                     SwapSides(e1, e2);
             }
 
@@ -2962,7 +2962,7 @@ namespace SVGImporter.ClipperLib
             //the AEL before we process the horizontal edges at the bottom of the next,
             //we need to create 'ghost' Join records of 'contrubuting' horizontals that
             //we can compare with horizontals at the bottom of the next SB.
-            if (isTopOfScanbeam) 
+            if (isTopOfScanbeam)
             if (outPt.Pt == horzEdge.Top)
                 AddGhostJoin(outPt, horzEdge.Bot);
             else
@@ -2978,7 +2978,7 @@ namespace SVGImporter.ClipperLib
             GetHorzDirection(horzEdge, out dir, out horzLeft, out horzRight);
 
             TEdge eLastHorz = horzEdge, eMaxPair = null;
-            while (eLastHorz.NextInLML != null && IsHorizontal(eLastHorz.NextInLML)) 
+            while (eLastHorz.NextInLML != null && IsHorizontal(eLastHorz.NextInLML))
                 eLastHorz = eLastHorz.NextInLML;
             if (eLastHorz.NextInLML == null)
                 eMaxPair = GetMaximaPair(eLastHorz);
@@ -2991,7 +2991,7 @@ namespace SVGImporter.ClipperLib
                 {
                     //Break if we've got to the end of an intermediate horizontal edge ...
                     //nb: Smaller Dx's are to the right of larger Dx's ABOVE the horizontal.
-                    if (e.Curr.X == horzEdge.Top.X && horzEdge.NextInLML != null && 
+                    if (e.Curr.X == horzEdge.Top.X && horzEdge.NextInLML != null &&
                         e.Dx < horzEdge.NextInLML.Dx)
                         break;
 
@@ -3011,7 +3011,7 @@ namespace SVGImporter.ClipperLib
                             else
                                 IntersectEdges(e, horzEdge, e.Top);
                             if (eMaxPair.OutIdx >= 0)
-                                throw 
+                                throw
                   new ClipperException("ProcessHorizontal error");
                             return;
                         } else if (dir == Direction.dLeftToRight)
@@ -3070,7 +3070,7 @@ namespace SVGImporter.ClipperLib
                         AddJoin(op1, op2, horzEdge.Top);
                     }
                 } else
-                    UpdateEdgeIntoAEL(ref horzEdge); 
+                    UpdateEdgeIntoAEL(ref horzEdge);
             } else if (eMaxPair != null)
             {
                 if (eMaxPair.OutIdx >= 0)
@@ -3080,7 +3080,7 @@ namespace SVGImporter.ClipperLib
                     else
                         IntersectEdges(eMaxPair, horzEdge, horzEdge.Top);
                     if (eMaxPair.OutIdx >= 0)
-                        throw 
+                        throw
               new ClipperException("ProcessHorizontal error");
                 } else
                 {
@@ -3143,9 +3143,9 @@ namespace SVGImporter.ClipperLib
                 BuildIntersectList(botY, topY);
                 if (m_IntersectList.Count == 0)
                     return true;
-                if (m_IntersectList.Count == 1 || FixupIntersectionOrder()) 
+                if (m_IntersectList.Count == 1 || FixupIntersectionOrder())
                     ProcessIntersectList();
-                else 
+                else
                     return false;
             } catch
             {
@@ -3228,7 +3228,7 @@ namespace SVGImporter.ClipperLib
         {
             //the following typecast is safe because the differences in Pt.Y will
             //be limited to the height of the scanbeam.
-            return (int)(node2.Pt.Y - node1.Pt.Y); 
+            return (int)(node2.Pt.Y - node1.Pt.Y);
         }
         //------------------------------------------------------------------------------
 
@@ -3294,7 +3294,7 @@ namespace SVGImporter.ClipperLib
         {
             ip = new IntPoint();
             double b1, b2;
-            //nb: with very large coordinate values, it's possible for SlopesEqual() to 
+            //nb: with very large coordinate values, it's possible for SlopesEqual() to
             //return false but for the edge.Dx value be equal due to double precision rounding.
             if (SlopesEqual(edge1, edge2, m_UseFullRange) || edge1.Dx == edge2.Dx)
             {
@@ -3417,7 +3417,7 @@ namespace SVGImporter.ClipperLib
                 if (IsIntermediate(e, topY))
                 {
                     OutPt op = null;
-                    if (e.OutIdx >= 0) 
+                    if (e.OutIdx >= 0)
                         op = AddOutPt(e, e.Top);
                     UpdateEdgeIntoAEL(ref e);
 
@@ -3477,7 +3477,7 @@ namespace SVGImporter.ClipperLib
 #if use_lines
         else if (e.WindDelta == 0)
         {
-          if (e.OutIdx >= 0) 
+          if (e.OutIdx >= 0)
           {
             AddOutPt(e, e.Top);
             e.OutIdx = Unassigned;
@@ -3490,7 +3490,7 @@ namespace SVGImporter.ClipperLib
             eMaxPair.OutIdx = Unassigned;
           }
           DeleteFromAEL(eMaxPair);
-        } 
+        }
 #endif
         else
                 throw new ClipperException("DoMaxima error");
@@ -3561,7 +3561,7 @@ namespace SVGImporter.ClipperLib
             {
                 OutRec outRec = m_PolyOuts [i];
                 int cnt = PointCount(outRec.Pts);
-                if ((outRec.IsOpen && cnt < 2) || 
+                if ((outRec.IsOpen && cnt < 2) ||
                     (!outRec.IsOpen && cnt < 3))
                     continue;
                 FixHoleLinkage(outRec);
@@ -3588,7 +3588,7 @@ namespace SVGImporter.ClipperLib
                 {
                     outRec.PolyNode.IsOpen = true;
                     polytree.AddChild(outRec.PolyNode);
-                } else if (outRec.FirstLeft != null && 
+                } else if (outRec.FirstLeft != null &&
                     outRec.FirstLeft.PolyNode != null)
                     outRec.FirstLeft.PolyNode.AddChild(outRec.PolyNode);
                 else
@@ -3687,10 +3687,10 @@ namespace SVGImporter.ClipperLib
         }
         //------------------------------------------------------------------------------
 
-        bool JoinHorz(OutPt op1, OutPt op1b, OutPt op2, OutPt op2b, 
+        bool JoinHorz(OutPt op1, OutPt op1b, OutPt op2, OutPt op2b,
         IntPoint Pt, bool DiscardLeft)
         {
-            Direction Dir1 = (op1.Pt.X > op1b.Pt.X ? 
+            Direction Dir1 = (op1.Pt.X > op1b.Pt.X ?
           Direction.dRightToLeft : Direction.dLeftToRight);
             Direction Dir2 = (op2.Pt.X > op2b.Pt.X ?
           Direction.dRightToLeft : Direction.dLeftToRight);
@@ -3704,8 +3704,8 @@ namespace SVGImporter.ClipperLib
             //otherwise make sure we're AT or LEFT of Pt. (Likewise with Op2b.)
             if (Dir1 == Direction.dLeftToRight)
             {
-                while (op1.Next.Pt.X <= Pt.X && 
-            op1.Next.Pt.X >= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)  
+                while (op1.Next.Pt.X <= Pt.X &&
+            op1.Next.Pt.X >= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
                     op1 = op1.Next;
                 if (DiscardLeft && (op1.Pt.X != Pt.X))
                     op1 = op1.Next;
@@ -3718,8 +3718,8 @@ namespace SVGImporter.ClipperLib
                 }
             } else
             {
-                while (op1.Next.Pt.X >= Pt.X && 
-            op1.Next.Pt.X <= op1.Pt.X && op1.Next.Pt.Y == Pt.Y) 
+                while (op1.Next.Pt.X >= Pt.X &&
+            op1.Next.Pt.X <= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
                     op1 = op1.Next;
                 if (!DiscardLeft && (op1.Pt.X != Pt.X))
                     op1 = op1.Next;
@@ -3734,7 +3734,7 @@ namespace SVGImporter.ClipperLib
 
             if (Dir2 == Direction.dLeftToRight)
             {
-                while (op2.Next.Pt.X <= Pt.X && 
+                while (op2.Next.Pt.X <= Pt.X &&
             op2.Next.Pt.X >= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
                     op2 = op2.Next;
                 if (DiscardLeft && (op2.Pt.X != Pt.X))
@@ -3749,8 +3749,8 @@ namespace SVGImporter.ClipperLib
                 ;
             } else
             {
-                while (op2.Next.Pt.X >= Pt.X && 
-            op2.Next.Pt.X <= op2.Pt.X && op2.Next.Pt.Y == Pt.Y) 
+                while (op2.Next.Pt.X >= Pt.X &&
+            op2.Next.Pt.X <= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
                     op2 = op2.Next;
                 if (!DiscardLeft && (op2.Pt.X != Pt.X))
                     op2 = op2.Next;
@@ -3797,14 +3797,14 @@ namespace SVGImporter.ClipperLib
             bool isHorizontal = (j.OutPt1.Pt.Y == j.OffPt.Y);
 
             if (isHorizontal && (j.OffPt == j.OutPt1.Pt) && (j.OffPt == j.OutPt2.Pt))
-            {          
+            {
                 //Strictly Simple join ...
                 op1b = j.OutPt1.Next;
-                while (op1b != op1 && (op1b.Pt == j.OffPt)) 
+                while (op1b != op1 && (op1b.Pt == j.OffPt))
                     op1b = op1b.Next;
                 bool reverse1 = (op1b.Pt.Y > j.OffPt.Y);
                 op2b = j.OutPt2.Next;
-                while (op2b != op2 && (op2b.Pt == j.OffPt)) 
+                while (op2b != op2 && (op2b.Pt == j.OffPt))
                     op2b = op2b.Next;
                 bool reverse2 = (op2b.Pt.Y > j.OffPt.Y);
                 if (reverse1 == reverse2)
@@ -4070,7 +4070,7 @@ namespace SVGImporter.ClipperLib
         //----------------------------------------------------------------------
 
         private void FixupFirstLefts1(OutRec OldOutRec, OutRec NewOutRec)
-        { 
+        {
             for (int i = 0; i < m_PolyOuts.Count; i++)
             {
                 OutRec outRec = m_PolyOuts [i];
@@ -4084,7 +4084,7 @@ namespace SVGImporter.ClipperLib
         //----------------------------------------------------------------------
 
         private void FixupFirstLefts2(OutRec OldOutRec, OutRec NewOutRec)
-        { 
+        {
             foreach (OutRec outRec in m_PolyOuts)
                 if (outRec.FirstLeft == OldOutRec)
                     outRec.FirstLeft = NewOutRec;
@@ -4093,7 +4093,7 @@ namespace SVGImporter.ClipperLib
 
         private static OutRec ParseFirstLeft(OutRec FirstLeft)
         {
-            while (FirstLeft != null && FirstLeft.Pts == null) 
+            while (FirstLeft != null && FirstLeft.Pts == null)
                 FirstLeft = FirstLeft.FirstLeft;
             return FirstLeft;
         }
@@ -4188,7 +4188,7 @@ namespace SVGImporter.ClipperLib
                         if (m_UsingPolyTree)
                             FixupFirstLefts1(outRec1, outRec2);
                     }
-     
+
                 } else
                 {
                     //joined 2 polygons together ...
@@ -4198,7 +4198,7 @@ namespace SVGImporter.ClipperLib
                     outRec2.Idx = outRec1.Idx;
 
                     outRec1.IsHole = holeStateRec.IsHole;
-                    if (holeStateRec == outRec2) 
+                    if (holeStateRec == outRec2)
                         outRec1.FirstLeft = outRec2.FirstLeft;
                     outRec2.FirstLeft = outRec1;
 
@@ -4211,7 +4211,7 @@ namespace SVGImporter.ClipperLib
         //------------------------------------------------------------------------------
 
         private void UpdateOutPtIdxs(OutRec outrec)
-        {  
+        {
             OutPt op = outrec.Pts;
             do
             {
@@ -4326,7 +4326,7 @@ namespace SVGImporter.ClipperLib
         // Convert self-intersecting polygons into simple polygons
         //------------------------------------------------------------------------------
 
-        public static Paths SimplifyPolygon(Path poly, 
+        public static Paths SimplifyPolygon(Path poly,
             PolyFillType fillType = PolyFillType.pftEvenOdd)
         {
             Paths result = new Paths();
@@ -4374,7 +4374,7 @@ namespace SVGImporter.ClipperLib
         }
         //---------------------------------------------------------------------------
 
-        private static bool SlopesNearCollinear(IntPoint pt1, 
+        private static bool SlopesNearCollinear(IntPoint pt1,
           IntPoint pt2, IntPoint pt3, double distSqrd)
         {
             return DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
@@ -4401,8 +4401,8 @@ namespace SVGImporter.ClipperLib
 
         public static Path CleanPolygon(Path path, double distance = 1.415)
         {
-            //distance = proximity in units/pixels below which vertices will be stripped. 
-            //Default ~= sqrt(2) so when adjacent vertices or semi-adjacent vertices have 
+            //distance = proximity in units/pixels below which vertices will be stripped.
+            //Default ~= sqrt(2) so when adjacent vertices or semi-adjacent vertices have
             //both x & y coords within 1 unit, then the second vertex will be stripped.
 
             int cnt = path.Count;
@@ -4519,7 +4519,7 @@ namespace SVGImporter.ClipperLib
         }
         //------------------------------------------------------------------------------
 
-        public static Paths MinkowskiSum(Path pattern, Paths paths, 
+        public static Paths MinkowskiSum(Path pattern, Paths paths,
           PolyFillType pathFillType, bool pathIsClosed)
         {
             Clipper c = new Clipper();
@@ -4701,14 +4701,14 @@ namespace SVGImporter.ClipperLib
         {
             //fixup orientations of all closed paths if the orientation of the
             //closed path with the lowermost vertex is wrong ...
-            if (m_lowest.X >= 0 && 
+            if (m_lowest.X >= 0 &&
                 !Clipper.Orientation(m_polyNodes.Childs [(int)m_lowest.X].m_polygon))
             {
                 for (int i = 0; i < m_polyNodes.ChildCount; i++)
                 {
                     PolyNode node = m_polyNodes.Childs [i];
                     if (node.m_endtype == EndType.etClosedPolygon ||
-                        (node.m_endtype == EndType.etClosedLine && 
+                        (node.m_endtype == EndType.etClosedLine &&
                         Clipper.Orientation(node.m_polygon)))
                         node.m_polygon.Reverse();
                 }
@@ -4765,11 +4765,11 @@ namespace SVGImporter.ClipperLib
                 m_miterLim = 0.5;
 
             double y;
-            if (ArcTolerance <= 0.0) 
+            if (ArcTolerance <= 0.0)
                 y = def_arc_tolerance;
             else if (ArcTolerance > Math.Abs(delta) * def_arc_tolerance)
                 y = Math.Abs(delta) * def_arc_tolerance;
-            else 
+            else
                 y = ArcTolerance;
             //see offset_triginometry2.svg in the documentation folder ...
             double steps = Math.PI / Math.Acos(1 - y / Math.Abs(delta));
@@ -4787,7 +4787,7 @@ namespace SVGImporter.ClipperLib
 
                 int len = m_srcPoly.Count;
 
-                if (len == 0 || (delta <= 0 && (len < 3 || 
+                if (len == 0 || (delta <= 0 && (len < 3 ||
                     node.m_endtype != EndType.etClosedPolygon)))
                     continue;
 
@@ -4832,7 +4832,7 @@ namespace SVGImporter.ClipperLib
                 m_normals.Capacity = len;
                 for (int j = 0; j < len - 1; j++)
                     m_normals.Add(GetUnitNormal(m_srcPoly [j], m_srcPoly [j + 1]));
-                if (node.m_endtype == EndType.etClosedLine || 
+                if (node.m_endtype == EndType.etClosedLine ||
                     node.m_endtype == EndType.etClosedPolygon)
                     m_normals.Add(GetUnitNormal(m_srcPoly [len - 1], m_srcPoly [0]));
                 else

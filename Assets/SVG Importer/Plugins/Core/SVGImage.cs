@@ -98,7 +98,7 @@ namespace SVGImporter
         /// <summary>
         /// Whether the Image has a border to work with.
         /// </summary>
-        
+
         public bool hasBorder
         {
             get
@@ -133,7 +133,7 @@ namespace SVGImporter
         private Vector4 GetDrawingDimensions(bool shouldPreserveAspect)
         {
             Vector2 size = sharedMesh == null ? Vector2.zero : (Vector2)sharedMesh.bounds.size;
-            
+
             Rect r = GetPixelAdjustedRect();
             // Debug.Log(string.Format("r:{2}, size:{0}, padding:{1}", size, padding, r));
 
@@ -141,7 +141,7 @@ namespace SVGImporter
             {
                 var spriteRatio = size.x / size.y;
                 var rectRatio = r.width / r.height;
-                
+
                 if (spriteRatio > rectRatio)
                 {
                     var oldHeight = r.height;
@@ -217,7 +217,7 @@ namespace SVGImporter
         protected float InverseLerp(float from, float to, float value)
         {
             if (from < to)
-            {               
+            {
                 value -= from;
                 value /= to - from;
                 return value;
@@ -230,9 +230,9 @@ namespace SVGImporter
 
         public virtual void CalculateLayoutInputHorizontal() { }
         public virtual void CalculateLayoutInputVertical() { }
-        
+
         public virtual float minWidth { get { return 0; } }
-        
+
         public virtual float preferredWidth
         {
             get
@@ -243,11 +243,11 @@ namespace SVGImporter
                 return bounds.size.x / pixelsPerUnit;
             }
         }
-        
+
         public virtual float flexibleWidth { get { return -1; } }
-        
+
         public virtual float minHeight { get { return 0; } }
-        
+
         public virtual float preferredHeight
         {
             get
@@ -258,11 +258,11 @@ namespace SVGImporter
                 return bounds.size.y / pixelsPerUnit;
             }
         }
-        
+
         public virtual float flexibleHeight { get { return -1; } }
-        
+
         public virtual int layoutPriority { get { return 0; } }
-        
+
         public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
         {
             if (m_EventAlphaThreshold >= 1)
@@ -273,7 +273,7 @@ namespace SVGImporter
 
             return true;
         }
-        
+
         private Vector2 MapCoordinate(Vector2 local, Rect rect)
         {
             Bounds bounds = sharedMesh.bounds;
@@ -288,7 +288,7 @@ namespace SVGImporter
             }
 
             base.SetMaterialDirty();
-        }  
+        }
 
         protected void UpdateGradientShape(Material material)
         {
@@ -309,7 +309,7 @@ namespace SVGImporter
             if (sharedMesh == null) { base.OnFillVBO(vbo); return; }
             Bounds bounds = sharedMesh.bounds;
             if(m_UsePivot)
-            {             
+            {
                 bounds.center += new Vector3((-0.5f + _vectorGraphics.pivotPoint.x) * bounds.size.x, (0.5f - _vectorGraphics.pivotPoint.y) * bounds.size.y, 0f);
             }
 
@@ -337,31 +337,31 @@ namespace SVGImporter
                     }
                 }
             } else {
-                
+
                 Vector4 v = GetDrawingDimensions(false);
                 Vector2 normalizedPosition;
-                
+
                 // LEFT, BOTTOM, RIGHT, TOP
                 Vector4 border = _vectorGraphics.border;
-                
+
                 Vector4 borderCalc = new Vector4(border.x + epsilon, border.y + epsilon, 1f - border.z - epsilon, 1f - border.w - epsilon);
-                
+
                 float left = v.x;
                 float top = v.y;
                 float right = v.x + v.z;
                 float bottom = v.y + v.w;
                 float size = canvas.referencePixelsPerUnit * vectorGraphics.scale * 100f;
-                
+
                 float minWidth = (border.x + border.z) * size;
                 float minHeight = (border.y + border.w) * size;
                 float scaleX = 0f; if(minWidth != 0f) scaleX = Mathf.Clamp01(v.z / minWidth);
                 float scaleY = 0f; if(minHeight != 0f) scaleY = Mathf.Clamp01(v.w / minHeight);
-                
+
                 for(int i = 0; i < tempVBOLength; i++)
                 {
                     normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, sharedUIMesh[i].position.x);
                     normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, sharedUIMesh[i].position.y);
-                    
+
                     if(normalizedPosition.x <= borderCalc.x && border.x != 0f)
                     {
                         tempVBO[i].position.x = left + normalizedPosition.x * size * scaleX;
@@ -371,7 +371,7 @@ namespace SVGImporter
                     } else {
                         tempVBO[i].position.x = v.x + normalizedPosition.x * v.z;
                     }
-                    
+
                     if(normalizedPosition.y >= borderCalc.w && border.w != 0f)
                     {
                         tempVBO[i].position.y = bottom - (1f - normalizedPosition.y) * size * scaleY;
@@ -381,10 +381,10 @@ namespace SVGImporter
                     } else {
                         tempVBO[i].position.y = v.y + normalizedPosition.y * v.w;
                     }
-                    
+
                     tempVBO[i].color = sharedUIMesh[i].color * color;
                 }
-                
+
                 if(_vectorGraphics.hasGradients)
                 {
                     for(int i = 0; i < tempVBOLength; i++)
@@ -394,7 +394,7 @@ namespace SVGImporter
                     }
                 }
             }
-            
+
             vbo.AddRange(tempVBO);
         }
 #else
@@ -414,7 +414,7 @@ namespace SVGImporter
 
             Bounds bounds = sharedMesh.bounds;
             if(m_UsePivot)
-            {             
+            {
                 bounds.center += new Vector3((-0.5f + _vectorGraphics.pivotPoint.x) * bounds.size.x, (0.5f - _vectorGraphics.pivotPoint.y) * bounds.size.y, 0f);
             }
 
@@ -447,31 +447,31 @@ namespace SVGImporter
                     vh.AddVert(vertex);
                 }
             } else {
-                
+
                 Vector4 v = GetDrawingDimensions(false);
                 Vector2 normalizedPosition;
-                
+
                 // LEFT, BOTTOM, RIGHT, TOP
                 Vector4 border = _vectorGraphics.border;
-                
+
                 Vector4 borderCalc = new Vector4(border.x + epsilon, border.y + epsilon, 1f - border.z - epsilon, 1f - border.w - epsilon);
-                
+
                 float left = v.x;
                 float top = v.y;
                 float right = v.x + v.z;
                 float bottom = v.y + v.w;
                 float size = canvas.referencePixelsPerUnit * vectorGraphics.scale * 100f;
-                
+
                 float minWidth = (border.x + border.z) * size;
                 float minHeight = (border.y + border.w) * size;
                 float scaleX = 0f; if(minWidth != 0f) scaleX = Mathf.Clamp01(v.z / minWidth);
                 float scaleY = 0f; if(minHeight != 0f) scaleY = Mathf.Clamp01(v.w / minHeight);
-                
+
                 for(int i = 0; i < tempVBOLength; i++)
                 {
                     normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x);
                     normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y);
-                    
+
                     if(normalizedPosition.x <= borderCalc.x && border.x != 0f)
                     {
                         vertex.position.x = left + normalizedPosition.x * size * scaleX;
@@ -481,7 +481,7 @@ namespace SVGImporter
                     } else {
                         vertex.position.x = v.x + normalizedPosition.x * v.z;
                     }
-                    
+
                     if(normalizedPosition.y >= borderCalc.w && border.w != 0f)
                     {
                         vertex.position.y = bottom - (1f - normalizedPosition.y) * size * scaleY;
@@ -522,7 +522,7 @@ namespace SVGImporter
                 _lastVectorGraphics = _vectorGraphics;
                 Clear();
             }
-            
+
             if(_vectorGraphics != null)
             {
                 #if UNITY_EDITOR
@@ -562,7 +562,7 @@ namespace SVGImporter
                 #endif
             }
         }
-        
+
         protected void Clear()
         {
             #if UNITY_EDITOR
@@ -582,7 +582,7 @@ namespace SVGImporter
                     DestroyObjectInternal(_defaultMaterial);
                 }
             }
-            #endif            
+            #endif
             _defaultMaterial = null;
 
             #if UNITY_4_6 || UNITY_4_7 || UNITY_4_8 || UNITY_4_9 || UNITY_4_6 || UNITY_5_0 || UNITY_5_1
@@ -593,14 +593,14 @@ namespace SVGImporter
         protected override void UpdateMaterial()
         {
             GetDefaultMaterial();
-			base.UpdateMaterial();
+            base.UpdateMaterial();
         }
 
         void DestroyObjectInternal(Object obj)
         {
             if(obj == null)
                 return;
-            
+
             #if UNITY_EDITOR
             if(!UnityEditor.AssetDatabase.Contains(obj))
             {
@@ -621,7 +621,7 @@ namespace SVGImporter
             if(target == null) return;
             target.hideFlags = hideFlags;
         }
-        
+
         void SetHideFlags(UnityEngine.Object[] target, HideFlags hideFlags)
         {
             if(target == null || target.Length == 0) return;
@@ -630,7 +630,7 @@ namespace SVGImporter
                 target[i].hideFlags = hideFlags;
             }
         }
-        
+
         #if DEBUG_MATERIALS && UNITY_EDITOR
         protected void DebugMaterial(Material material)
         {
@@ -639,7 +639,7 @@ namespace SVGImporter
             if(UnityEditor.Selection.activeGameObject == gameObject)
             {
                 Debug.Log("defaultMaterial");
-                Debug.Log("Shader Name: "+material.shader.name);            
+                Debug.Log("Shader Name: "+material.shader.name);
                 Debug.Log("_StencilComp: "+material.GetFloat("_StencilComp"));
                 Debug.Log("_Stencil: "+material.GetFloat("_Stencil"));
                 Debug.Log("_StencilOp: "+material.GetFloat("_StencilOp"));

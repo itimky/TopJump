@@ -20,7 +20,7 @@ namespace SVGImporter
         static bool materialsFoldout
         {
             get {
-                if(EditorPrefs.HasKey(SVG_IMPORTER_SVGRENDERER_MATERIALSFOLDOUTKEY)) 
+                if(EditorPrefs.HasKey(SVG_IMPORTER_SVGRENDERER_MATERIALSFOLDOUTKEY))
                     return EditorPrefs.GetBool(SVG_IMPORTER_SVGRENDERER_MATERIALSFOLDOUTKEY);
                 return false;
             }
@@ -29,11 +29,11 @@ namespace SVGImporter
             }
         }
 
-        const string SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY = "SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY"; 
+        const string SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY = "SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY";
         static bool sortingLayerFoldout
         {
             get {
-                if(EditorPrefs.HasKey(SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY)) 
+                if(EditorPrefs.HasKey(SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY))
                     return EditorPrefs.GetBool(SVG_IMPORTER_SVGRENDERER_SORTINGLAYERFOLDOUTKEY);
                 return false;
             }
@@ -176,7 +176,7 @@ namespace SVGImporter
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.LabelField("Unity Sorter", EditorStyles.boldLabel);
-                MethodInfo sortingLayerField = typeof(EditorGUILayout).GetMethod("SortingLayerField", 
+                MethodInfo sortingLayerField = typeof(EditorGUILayout).GetMethod("SortingLayerField",
                                                                                  BindingFlags.Static | BindingFlags.NonPublic,
                                                                                  System.Type.DefaultBinder,
                                                                                  new System.Type[] {typeof(GUIContent), typeof(SerializedProperty), typeof(GUIStyle), typeof(GUIStyle) },
@@ -207,7 +207,7 @@ namespace SVGImporter
             }
             //if(serializedObject.ApplyModifiedProperties() || (Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed"))
         }
-       
+
         public override string GetInfoString()
         {
             SVGAsset svgAsset = vectorGraphics.objectReferenceValue as SVGAsset;
@@ -215,7 +215,7 @@ namespace SVGImporter
                 return GetEditorInfo(svgAsset);
             return "";
         }
-        
+
         protected string GetEditorInfo(SVGAsset asset)
         {
             PropertyInfo _editor_Info = typeof(SVGAsset).GetProperty("_editor_Info", BindingFlags.NonPublic | BindingFlags.Instance);

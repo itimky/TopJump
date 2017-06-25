@@ -15,7 +15,7 @@ namespace SVGImporter
 {
     using Utils;
 
-	internal class DelayedCall
+    internal class DelayedCall
     {
         public Action callback;
         public Action<UnityEngine.WWW> wwwCallback;
@@ -31,8 +31,8 @@ namespace SVGImporter
                 this.callback();
         }
 
-		public IEnumerator WWW(string request)
-		{
+        public IEnumerator WWW(string request)
+        {
             UnityEngine.WWW www = new UnityEngine.WWW(request);
             yield return www;
             if(this.callback != null)
@@ -43,39 +43,39 @@ namespace SVGImporter
             {
                 this.wwwCallback(www);
             }
-		}
+        }
     }
 
     [InitializeOnLoad]
     public class SVGImporterLaunchEditor {
 
-		public static void OpenAboutWindow()
-		{
-			Analytics.TrackEvent("Open About Window", "app/about");
-		}
+        public static void OpenAboutWindow()
+        {
+            Analytics.TrackEvent("Open About Window", "app/about");
+        }
 
-		public static void OpenSettingsWindow()
-		{
-			Analytics.TrackEvent("Open Settings Window", "app/settings");
-		}
-		
-		public static void OpenReportBugWindow()
-		{
-			Analytics.TrackEvent("Open Report Bug", "app/ReportBug");
-		}
+        public static void OpenSettingsWindow()
+        {
+            Analytics.TrackEvent("Open Settings Window", "app/settings");
+        }
+
+        public static void OpenReportBugWindow()
+        {
+            Analytics.TrackEvent("Open Report Bug", "app/ReportBug");
+        }
 
         static DelayedCall initCall;
 
         // Begining
-		static bool launched = false;
+        static bool launched = false;
         static SVGImporterLaunchEditor() {
 
-			if(launched)
-			{
-				return;
-			} else {
-				launched = true;
-			}
+            if(launched)
+            {
+                return;
+            } else {
+                launched = true;
+            }
 
             initCall = new DelayedCall(DelayedInit);
 
@@ -91,7 +91,7 @@ namespace SVGImporter
             SVGPostprocessor.Init();
             UpdateDelegates();
 
-			Analytics.TrackEvent("Start App, Version: "+SVGImporterSettings.version, "app/start");
+            Analytics.TrackEvent("Start App, Version: "+SVGImporterSettings.version, "app/start");
             EditorCoroutine.StartCoroutine(initCall.Delay(0.5f), initCall);
         }
 
@@ -180,12 +180,12 @@ namespace SVGImporter
             var Annotation = Type.GetType("UnityEditor.Annotation, UnityEditor");
             var ClassId = Annotation.GetField("classID");
             var ScriptClass = Annotation.GetField("scriptClass");
-            
+
             Type AnnotationUtility = Type.GetType("UnityEditor.AnnotationUtility, UnityEditor");
             var GetAnnotations = AnnotationUtility.GetMethod("GetAnnotations", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
             //var SetGizmoEnabled = AnnotationUtility.GetMethod("SetGizmoEnabled", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
             var SetIconEnabled = AnnotationUtility.GetMethod("SetIconEnabled", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-            
+
             Array annotations = (Array)GetAnnotations.Invoke(null, null);
             foreach (var a in annotations)
             {
@@ -193,10 +193,10 @@ namespace SVGImporter
                 string scriptClass = (string)ScriptClass.GetValue(a);
                 if(string.IsNullOrEmpty(scriptClass)) continue;
 
-                if(scriptClass == typeof(SVGAsset).Name || 
-                   scriptClass == typeof(SVGAtlas).Name || 
-                   scriptClass == typeof(SVGImage).Name || 
-                   scriptClass == typeof(SVGRenderer).Name || 
+                if(scriptClass == typeof(SVGAsset).Name ||
+                   scriptClass == typeof(SVGAtlas).Name ||
+                   scriptClass == typeof(SVGImage).Name ||
+                   scriptClass == typeof(SVGRenderer).Name ||
                    scriptClass == typeof(SVGCollider2D).Name
                    )
                 {
@@ -415,7 +415,7 @@ namespace SVGImporter
 
             SVGImage[] svgImages = instance.GetComponentsInChildren<SVGImage>();
             if(svgImages != null && svgImages.Length > 0)
-            {            
+            {
                 for(int i = 0; i < svgImages.Length; i++)
                 {
                     if(svgImages[i] == null)
@@ -428,17 +428,17 @@ namespace SVGImporter
             }
         }
     }
-	
-	internal class Analytics
-	{
+
+    internal class Analytics
+    {
         internal const string LAST_IP_ADDRESS_KEY = "SVG_Importer_Last_IPAddress";
         internal static string ipAdress;
         const string ClickySiteID = "100849007";
         const string ClickySiteAdminKey = "5d1829818bd7c05ca2c5b5188697948c";
-        
+
         static DelayedCall wwwCall;
         static DelayedCall wwwIPCall;
-        
+
         internal static void TrackEvent(string title, string eventValue)
         {
             GetLocalIPAddressString();
@@ -452,18 +452,18 @@ namespace SVGImporter
                         "&href=" + "/"+eventValue.Replace(" ", "_") + //string that contains whatever event you want to track/log
                         "&title="+UnityEngine.WWW.EscapeURL(title)+
                         "&type=click";
-                
+
                 wwwCall = new DelayedCall();
                 EditorCoroutine.StartCoroutine(wwwCall.WWW(request), wwwCall);
             }
         }
-        
+
         internal static string GetLocalIPAddressString()
         {
             if(ipAdress == null)
             {
                 wwwIPCall = new DelayedCall();
-                wwwIPCall.wwwCallback = delegate(WWW obj) 
+                wwwIPCall.wwwCallback = delegate(WWW obj)
                 {
                     if(!string.IsNullOrEmpty(obj.text))
                     {
@@ -472,15 +472,15 @@ namespace SVGImporter
                     }
                 };
                 EditorCoroutine.StartCoroutine(wwwIPCall.WWW("https://api.ipify.org"), wwwIPCall);
-                
+
                 if(EditorPrefs.HasKey(LAST_IP_ADDRESS_KEY))
                 {
                     return EditorPrefs.GetString(LAST_IP_ADDRESS_KEY);
                 }
-            }       
-            
+            }
+
             return ipAdress;
         }
-	}
+    }
 }
 

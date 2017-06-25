@@ -35,7 +35,7 @@ public class InstancerSpiral : MonoBehaviour {
 
     Vector3 destination;
 
-	void Update() {	
+    void Update() {
         float deltaTime = Time.deltaTime * speed * _speedIntensity;
         float angleSpace, progress, spaceRad = space * Mathf.Deg2Rad * _spaceIntensity;
         float length = instancer.instances.Length;
@@ -56,6 +56,6 @@ public class InstancerSpiral : MonoBehaviour {
             instancer.instances[i].transform.localPosition = Vector3.Lerp(instancer.instances[i].transform.localPosition, destination, deltaTime);
         }
 
-	}
+    }
 
 }

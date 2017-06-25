@@ -5,24 +5,24 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
-	
+
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
 
 namespace SVGImporter
 {
-	using Utils;
+    using Utils;
 
-	internal class SVGEditorWindow : EditorWindow
-	{
+    internal class SVGEditorWindow : EditorWindow
+    {
         const int EMPTY_LAYER = 31;
 
-		//
-		// Static Fields
-		//
-		public static SVGEditorWindow s_Instance;
-		protected static SVGAsset svgAsset;
+        //
+        // Static Fields
+        //
+        public static SVGEditorWindow s_Instance;
+        protected static SVGAsset svgAsset;
 
         Camera _editorCamera;
         SVGRenderer _editorRenderer;
@@ -40,10 +40,10 @@ namespace SVGImporter
 
         Vector2 originalPivotPoint;
 
-		public static void GetWindow()
-		{
-			s_Instance = EditorWindow.GetWindow<SVGEditorWindow>(false, "SVG Asset Editor", true);
-		}
+        public static void GetWindow()
+        {
+            s_Instance = EditorWindow.GetWindow<SVGEditorWindow>(false, "SVG Asset Editor", true);
+        }
 
         Bounds assetBounds
         {
@@ -55,18 +55,18 @@ namespace SVGImporter
                     Bounds bounds = svgAsset.bounds;
                     Vector3 size = bounds.size;
                     Vector2 canvasSize = svgAsset.canvasRectangle.size;
-                    return new Bounds(new Vector3(-originalPivotPoint.x * canvasSize.x + canvasSize.x * 0.5f, originalPivotPoint.y * canvasSize.y - canvasSize.y * 0.5f, bounds.center.z), 
+                    return new Bounds(new Vector3(-originalPivotPoint.x * canvasSize.x + canvasSize.x * 0.5f, originalPivotPoint.y * canvasSize.y - canvasSize.y * 0.5f, bounds.center.z),
                                       new Vector3(canvasSize.x, canvasSize.y, bounds.size.z));
                 }
             }
         }
 
-		Rect windowRect
-		{
-			get {
-				return new Rect(0f, 0f, this.position.width, this.position.height);
-			}
-		}
+        Rect windowRect
+        {
+            get {
+                return new Rect(0f, 0f, this.position.width, this.position.height);
+            }
+        }
 
         void UpdateOriginalPivotPoint()
         {
@@ -76,16 +76,16 @@ namespace SVGImporter
             }
         }
 
-		void OnEnable()
-		{
+        void OnEnable()
+        {
             GetSVGAsset();
             UpdateOriginalPivotPoint();
-			base.minSize = new Vector2(360f, 200f);
-			s_Instance = this;
-			//Undo.undoRedoPerformed = (Undo.UndoRedoCallback)Delegate.Combine(Undo.undoRedoPerformed, new Undo.UndoRedoCallback(this.UndoRedoPerformed));
+            base.minSize = new Vector2(360f, 200f);
+            s_Instance = this;
+            //Undo.undoRedoPerformed = (Undo.UndoRedoCallback)Delegate.Combine(Undo.undoRedoPerformed, new Undo.UndoRedoCallback(this.UndoRedoPerformed));
             CreateCamera();
             CreateSVGRenderer();
-		}
+        }
 
         public void ManualUpdate()
         {
@@ -113,25 +113,25 @@ namespace SVGImporter
             Repaint();
         }
 
-        void OnGUI () 
+        void OnGUI ()
         {
             GetSVGAsset();
             if(styles == null)
             {
                 styles = new SVGEditorHandles.Styles();
             }
-            
+
             bool selectedValidObject = svgAsset != null && Selection.objects.Length == 1;
-			if(selectedValidObject)
-			{
-				Mesh sharedMesh = svgAsset.sharedMesh;
-				if(sharedMesh == null || sharedMesh.vertexCount == 0) 
-					selectedValidObject = false;
-			}
-            
-			if(!selectedValidObject)
+            if(selectedValidObject)
             {
-                SelectedWrongObject();              
+                Mesh sharedMesh = svgAsset.sharedMesh;
+                if(sharedMesh == null || sharedMesh.vertexCount == 0)
+                    selectedValidObject = false;
+            }
+
+            if(!selectedValidObject)
+            {
+                SelectedWrongObject();
             } else {
                 SelectedCorrectObject();
             }
@@ -167,7 +167,7 @@ namespace SVGImporter
                 return _editorCamera;
             }
         }
-        
+
         void RemoveCamera()
         {
             if(_editorCamera != null)
@@ -178,20 +178,20 @@ namespace SVGImporter
                 //Debug.Log("Remove Camera");
             }
         }
-        
+
         RenderTexture GetRenderTexture()
-        {            
+        {
             float aspect = 1f;
             if(svgAsset != null) aspect = assetBounds.size.x / assetBounds.size.y;
             _previewResolution = Mathf.CeilToInt(windowRect.width);
-			return RenderTexture.GetTemporary(_previewResolution, 
-			                                  Mathf.CeilToInt(_previewResolution / aspect), 
-			                                  24, 
-			                                  RenderTextureFormat.Default, 
-			                                  RenderTextureReadWrite.Default,
-			                                  4);
+            return RenderTexture.GetTemporary(_previewResolution,
+                                              Mathf.CeilToInt(_previewResolution / aspect),
+                                              24,
+                                              RenderTextureFormat.Default,
+                                              RenderTextureReadWrite.Default,
+                                              4);
         }
-        
+
         void CreateSVGRenderer()
         {
             _editorRenderer = editorRenderer;
@@ -229,7 +229,7 @@ namespace SVGImporter
                 _editorRenderer.transform.position = editorCamera.transform.forward * (editorCamera.nearClipPlane + assetBounds.size.z + 1f) - assetBounds.center;
             }
         }
-        
+
         void RenderSVGRenderer()
         {
             GetSVGAsset();
@@ -246,11 +246,11 @@ namespace SVGImporter
             }
 
             _editorRenderer.gameObject.SetActive(true);
-			editorCamera.targetTexture = GetRenderTexture();
+            editorCamera.targetTexture = GetRenderTexture();
             editorCamera.Render();
             _editorRenderer.gameObject.SetActive(false);
         }
-        
+
         void RemoveSVGRenderer()
         {
             if(_editorRenderer != null)
@@ -267,13 +267,13 @@ namespace SVGImporter
             svgAsset = Selection.activeObject as SVGAsset;
         }
 
-		void SelectedWrongObject()
-		{
-			GUILayout.Label("Please select single SVG Asset only.");
-		}
+        void SelectedWrongObject()
+        {
+            GUILayout.Label("Please select single SVG Asset only.");
+        }
 
-		void SelectedCorrectObject()
-		{
+        void SelectedCorrectObject()
+        {
             GetSVGAsset();
             UpdateEditorRendererPosition();
 
@@ -291,23 +291,23 @@ namespace SVGImporter
 
             if (Event.current.type == EventType.Repaint)
             {
-				#if UNITY_4_6
-				MethodInfo SetTemporarilyAllowIndieRenderTexture = typeof(EditorUtility).GetMethod("SetTemporarilyAllowIndieRenderTexture", BindingFlags.Static | BindingFlags.NonPublic);
-				SetTemporarilyAllowIndieRenderTexture.Invoke(null, new System.Object[]{(System.Object)true});
-				#endif
-				RenderSVGRenderer();
-				if (viewAlpha)
-				{
-					EditorGUI.DrawTextureAlpha(textureRect, editorCamera.targetTexture);
-				} else {
-					EditorGUI.DrawTextureTransparent(textureRect, editorCamera.targetTexture);
-				}
+                #if UNITY_4_6
+                MethodInfo SetTemporarilyAllowIndieRenderTexture = typeof(EditorUtility).GetMethod("SetTemporarilyAllowIndieRenderTexture", BindingFlags.Static | BindingFlags.NonPublic);
+                SetTemporarilyAllowIndieRenderTexture.Invoke(null, new System.Object[]{(System.Object)true});
+                #endif
+                RenderSVGRenderer();
+                if (viewAlpha)
+                {
+                    EditorGUI.DrawTextureAlpha(textureRect, editorCamera.targetTexture);
+                } else {
+                    EditorGUI.DrawTextureTransparent(textureRect, editorCamera.targetTexture);
+                }
 
-				RenderTexture.ReleaseTemporary(editorCamera.targetTexture);
-				editorCamera.targetTexture = null;
-				#if UNITY_4_6
-				SetTemporarilyAllowIndieRenderTexture.Invoke(null, new System.Object[]{(System.Object)false});
-				#endif
+                RenderTexture.ReleaseTemporary(editorCamera.targetTexture);
+                editorCamera.targetTexture = null;
+                #if UNITY_4_6
+                SetTemporarilyAllowIndieRenderTexture.Invoke(null, new System.Object[]{(System.Object)false});
+                #endif
             }
 
             SetupHandlesMatrix();
@@ -389,7 +389,7 @@ namespace SVGImporter
                 base.Repaint();
             }
         }
-        
+
         protected void DoTextureGUIExtras()
         {
             HandleBorderCornerScalingHandles();
@@ -400,7 +400,7 @@ namespace SVGImporter
             if(Event.current.type == EventType.Repaint)
             {
                 Vector4 border = svgAsset.border;
-                
+
                 Rect rect = new Rect(-textureOrigRect.size.x * 0.5f, -textureOrigRect.size.y * 0.5f, textureOrigRect.size.x, textureOrigRect.size.y);
                 Rect drawRect = new Rect(
                     rect.x + rect.size.x * border.x,
@@ -424,7 +424,7 @@ namespace SVGImporter
                     new Vector2(drawRect.min.x, -position.height),
                     new Vector2(drawRect.min.x, position.height)
                     );
-                
+
                 SVGEditorHandles.DrawLine(
                     new Vector2(drawRect.max.x, -position.height),
                     new Vector2(drawRect.max.x, position.height)
@@ -603,8 +603,8 @@ namespace SVGImporter
             return (!isHorizontal) ? y : x;
         }
 
-        private static Vector2 dragScreenOffset;        
-//        private static int rectSelectionID = GUIUtility.GetPermanentControlID();        
+        private static Vector2 dragScreenOffset;
+//        private static int rectSelectionID = GUIUtility.GetPermanentControlID();
         private static Vector2 currentMousePosition;
         private static Vector2 dragStartScreenPosition;
 
@@ -701,18 +701,18 @@ namespace SVGImporter
             }
         }
 
-		private void DoApplyRevertGUI()
-		{
-			if (GUILayout.Button("Revert", EditorStyles.toolbarButton, new GUILayoutOption[0]))
-			{
+        private void DoApplyRevertGUI()
+        {
+            if (GUILayout.Button("Revert", EditorStyles.toolbarButton, new GUILayoutOption[0]))
+            {
                 SVGAssetEditor assetEditor = SVGAssetEditor.Instance;
                 if(assetEditor != null)
                 {
                     assetEditor.RevertChanges();
                 }
                 UpdateOriginalPivotPoint();
-			}
-			if (GUILayout.Button("Apply", EditorStyles.toolbarButton, new GUILayoutOption[0]))
+            }
+            if (GUILayout.Button("Apply", EditorStyles.toolbarButton, new GUILayoutOption[0]))
             {
                 SVGAssetEditor assetEditor = SVGAssetEditor.Instance;
                 if(assetEditor != null)
@@ -721,14 +721,14 @@ namespace SVGImporter
                 }
                 UpdateOriginalPivotPoint();
             }
-		}
+        }
 
         protected void DoAlphaZoomToolbarGUI()
         {
             viewAlpha = GUILayout.Toggle(viewAlpha, (!viewAlpha) ? styles.RGBIcon : styles.alphaIcon, "toolbarButton", new GUILayoutOption[0]);
             viewZoom = GUILayout.HorizontalSlider(viewZoom, GetMinZoom(), 10f, new GUILayoutOption[]{GUILayout.MaxWidth(64f)});
         }
-        
+
         private void DoSelectedFrameInspector()
         {
             if (svgAsset != null)
@@ -773,8 +773,8 @@ namespace SVGImporter
             fieldLocation.y += 18f;
 
             if(customPivotPoint)
-            { 
-                EditorGUILayout.BeginHorizontal();                
+            {
+                EditorGUILayout.BeginHorizontal();
                 pivotPoint = EditorGUI.Vector2Field(fieldLocation, new GUIContent("Pivot", "The location of the SVG Asset center point in the original Rect, specified in percents."), pivotPoint);
                 EditorGUILayout.EndHorizontal();
             } else {
@@ -844,81 +844,81 @@ namespace SVGImporter
         public static void InitPreview(Rect r, PreviewRenderUtility previewUtility)
         {
             typeof(PreviewRenderUtility).GetMethod("InitPreview", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(previewUtility, new object[]{ r });
-		}
+        }
 
-		protected static Mesh GetMesh(SVGAsset targetObject)
-		{			
-			try {
-				PropertyInfo _editor_sharedMesh = typeof(SVGAsset).GetProperty("_editor_sharedMesh", BindingFlags.NonPublic | BindingFlags.Instance);           
-				return (Mesh)_editor_sharedMesh.GetValue(targetObject, new object[0]);
+        protected static Mesh GetMesh(SVGAsset targetObject)
+        {
+            try {
+                PropertyInfo _editor_sharedMesh = typeof(SVGAsset).GetProperty("_editor_sharedMesh", BindingFlags.NonPublic | BindingFlags.Instance);
+                return (Mesh)_editor_sharedMesh.GetValue(targetObject, new object[0]);
             } catch {
                 return null;
-            }            
+            }
         }
 
-		protected static Material[] GetMaterial(SVGAsset targetObject)
-		{
-			try {				
-				PropertyInfo _editor_sharedMaterials = typeof(SVGAsset).GetProperty("_editor_sharedMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
-				return (Material[])_editor_sharedMaterials.GetValue(targetObject, new object[0]);
-			} catch {
-				return null;
-			}            
+        protected static Material[] GetMaterial(SVGAsset targetObject)
+        {
+            try {
+                PropertyInfo _editor_sharedMaterials = typeof(SVGAsset).GetProperty("_editor_sharedMaterials", BindingFlags.NonPublic | BindingFlags.Instance);
+                return (Material[])_editor_sharedMaterials.GetValue(targetObject, new object[0]);
+            } catch {
+                return null;
+            }
         }
-        
+
         public static void DoRenderPreview(SVGAsset targetObject, PreviewRenderUtility previewUtility)
-		{
-			if(targetObject == null)
-				return;
-			
-			Mesh tempMesh = GetMesh(targetObject);
-			if(tempMesh == null)
-				return;
-			Material[] sharedMaterials = GetMaterial(targetObject);
-			if(tempMesh == null || sharedMaterials == null || sharedMaterials.Length == 0)
-				return;
-			
-			RenderMeshPreviewSkipCameraAndLighting(tempMesh, previewUtility, sharedMaterials);
-		}
+        {
+            if(targetObject == null)
+                return;
 
-		internal static void RenderMeshPreviewSkipCameraAndLighting(Mesh mesh, PreviewRenderUtility previewUtility, Material[] materials)
-		{
-			if (mesh == null || previewUtility == null)
-			{
-				return;
-			}
-			
-			Bounds bounds = mesh.bounds;
-			float magnitude = bounds.extents.magnitude;
-			float num = 4f * magnitude;
-			previewUtility.m_Camera.transform.position = -Vector3.forward * num;
-			previewUtility.m_Camera.transform.rotation = Quaternion.identity;
-			previewUtility.m_Camera.nearClipPlane = num - magnitude * 1.1f;
-			previewUtility.m_Camera.farClipPlane = num + magnitude * 1.1f;
-			
-			Quaternion quaternion = Quaternion.identity;
-			Vector3 pos = -bounds.center;
-			bool fog = RenderSettings.fog;
-			Unsupported.SetRenderSettingsUseFogNoDirty(false);
-			int subMeshCount = mesh.subMeshCount;
-			int meshSubset = materials.Length;
-			if (materials != null && materials.Length > 0)
-			{
-				previewUtility.m_Camera.clearFlags = CameraClearFlags.Nothing;
-				if (meshSubset < 0 || meshSubset >= subMeshCount)
-				{
-					for (int i = 0; i < subMeshCount; i++)
-					{
-						previewUtility.DrawMesh(mesh, pos, quaternion, materials[i], i);
-					}
-				}
-				else
-				{
-					previewUtility.DrawMesh(mesh, pos, quaternion, materials[0], -1);
-				}
-				previewUtility.m_Camera.Render();
-			}
-			Unsupported.SetRenderSettingsUseFogNoDirty(fog);
-		}
-	}
+            Mesh tempMesh = GetMesh(targetObject);
+            if(tempMesh == null)
+                return;
+            Material[] sharedMaterials = GetMaterial(targetObject);
+            if(tempMesh == null || sharedMaterials == null || sharedMaterials.Length == 0)
+                return;
+
+            RenderMeshPreviewSkipCameraAndLighting(tempMesh, previewUtility, sharedMaterials);
+        }
+
+        internal static void RenderMeshPreviewSkipCameraAndLighting(Mesh mesh, PreviewRenderUtility previewUtility, Material[] materials)
+        {
+            if (mesh == null || previewUtility == null)
+            {
+                return;
+            }
+
+            Bounds bounds = mesh.bounds;
+            float magnitude = bounds.extents.magnitude;
+            float num = 4f * magnitude;
+            previewUtility.m_Camera.transform.position = -Vector3.forward * num;
+            previewUtility.m_Camera.transform.rotation = Quaternion.identity;
+            previewUtility.m_Camera.nearClipPlane = num - magnitude * 1.1f;
+            previewUtility.m_Camera.farClipPlane = num + magnitude * 1.1f;
+
+            Quaternion quaternion = Quaternion.identity;
+            Vector3 pos = -bounds.center;
+            bool fog = RenderSettings.fog;
+            Unsupported.SetRenderSettingsUseFogNoDirty(false);
+            int subMeshCount = mesh.subMeshCount;
+            int meshSubset = materials.Length;
+            if (materials != null && materials.Length > 0)
+            {
+                previewUtility.m_Camera.clearFlags = CameraClearFlags.Nothing;
+                if (meshSubset < 0 || meshSubset >= subMeshCount)
+                {
+                    for (int i = 0; i < subMeshCount; i++)
+                    {
+                        previewUtility.DrawMesh(mesh, pos, quaternion, materials[i], i);
+                    }
+                }
+                else
+                {
+                    previewUtility.DrawMesh(mesh, pos, quaternion, materials[0], -1);
+                }
+                previewUtility.m_Camera.Render();
+            }
+            Unsupported.SetRenderSettingsUseFogNoDirty(fog);
+        }
+    }
 }

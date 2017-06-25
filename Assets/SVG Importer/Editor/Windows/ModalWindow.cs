@@ -23,7 +23,7 @@ namespace SVGImporter
         /// The implementation should call Create if the condition are right.
         /// </summary>
         void ModalRequest(bool shift);
-        
+
         /// <summary>
         /// Called when the associated modal is closed.
         /// </summary>
@@ -42,41 +42,41 @@ namespace SVGImporter
     public abstract class ModalWindow : EditorWindow
     {
         public const float TITLEBAR = 18;
-        
+
         protected IModal owner;
-        
+
         protected WindowResult result = WindowResult.None;
-        
+
         public WindowResult Result
         {
             get { return result; }
         }
-        
+
         protected virtual void OnLostFocus()
         {
             result = WindowResult.LostFocus;
-            
+
             if (owner != null)
                 owner.ModalClosed(this);
         }
-        
+
         protected virtual void Cancel()
         {
             result = WindowResult.Cancel;
-            
+
             if (owner != null)
                 owner.ModalClosed(this);
-            
+
             Close();
         }
-        
+
         protected virtual void Ok()
         {
             result = WindowResult.Ok;
-            
+
             if (owner != null)
                 owner.ModalClosed(this);
-            
+
             Close();
         }
 

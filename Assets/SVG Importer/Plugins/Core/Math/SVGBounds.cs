@@ -66,7 +66,7 @@ namespace SVGImporter.Utils
             _center = bounds.center;
             _size = bounds.size;
             _extents = _size * 0.5f;
-            
+
             UpdateMinMax();
         }
 
@@ -117,7 +117,7 @@ namespace SVGImporter.Utils
                 UpdateSizeExtentsCenter();
             }
         }
-        
+
         public float maxY
         {
             get
@@ -159,7 +159,7 @@ namespace SVGImporter.Utils
             set {
                 if(_maxX == value.x && _maxY == value.y)
                     return;
-                
+
                 _maxX = value.x;
                 _maxY = value.y;
                 UpdateSizeExtentsCenter();
@@ -229,7 +229,7 @@ namespace SVGImporter.Utils
 
         public bool Contains(Vector2 point)
         {
-            return (point.x >= _minX && point.x <= _maxX && point.y >= _minY && point.y <= _maxY);        
+            return (point.x >= _minX && point.x <= _maxX && point.y >= _minY && point.y <= _maxY);
         }
 
         public bool Contains(SVGBounds bounds)
@@ -244,7 +244,7 @@ namespace SVGImporter.Utils
             {
                 _minX = point.x;
                 updateSizeExtentsCenter = true;
-            } 
+            }
             if (point.x > _maxX)
             {
                 _maxX = point.x;
@@ -255,7 +255,7 @@ namespace SVGImporter.Utils
             {
                 _minY = point.y;
                 updateSizeExtentsCenter = true;
-            } 
+            }
             if (point.y > _maxY)
             {
                 _maxY = point.y;
@@ -275,36 +275,36 @@ namespace SVGImporter.Utils
             {
                 _minX = minX;
                 updateSizeExtentsCenter = true;
-            } 
+            }
             if (maxX > _maxX)
             {
                 _maxX = maxX;
                 updateSizeExtentsCenter = true;
             }
-            
+
             if (minY < _minY)
             {
                 _minY = minY;
                 updateSizeExtentsCenter = true;
-            } 
+            }
             if (maxY > _maxY)
             {
                 _maxY = maxY;
                 updateSizeExtentsCenter = true;
             }
-            
+
             if (updateSizeExtentsCenter)
                 UpdateSizeExtentsCenter();
-            
+
             return this;
         }
-        
+
         public SVGBounds Encapsulate(SVGBounds bounds)
         {
             return Encapsulate(bounds._minX, bounds._minY, bounds._maxX, bounds._maxY);
         }
 
-        
+
         public SVGBounds Encapsulate(Bounds bounds)
         {
             return Encapsulate(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
@@ -325,7 +325,7 @@ namespace SVGImporter.Utils
         {
             if (amount.x == 1f && amount.y == 1f)
                 return this;
-            
+
             _size.x *= amount.x;
             _size.y *= amount.y;
             _extents = _size * 0.5f;
@@ -335,7 +335,7 @@ namespace SVGImporter.Utils
 
         public bool Intersects(SVGBounds bounds)
         {
-            return !(_minX > bounds._maxX || 
+            return !(_minX > bounds._maxX ||
                 _maxX < bounds._minX ||
                 _minY > bounds._maxY ||
                 _maxY < bounds._minY);

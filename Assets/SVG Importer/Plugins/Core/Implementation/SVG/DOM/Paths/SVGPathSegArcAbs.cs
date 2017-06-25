@@ -4,10 +4,10 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     public class SVGPathSegArcAbs : SVGPathSeg
-    {   
+    {
         private float _r1 = 0f;
         public float r1
         {
@@ -39,7 +39,7 @@ namespace SVGImporter.Rendering
 
         //================================================================================
         public SVGPathSegArcAbs(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag, float x, float y, SVGPathSeg segment) : base()
-        {    
+        {
             this._type = SVGPathSegTypes.Arc_Abs;
             if(segment != null)
                 _previousPoint = segment.currentPoint;

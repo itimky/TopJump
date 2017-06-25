@@ -37,7 +37,7 @@ namespace SVGImporter.Geometry
             Vector3[] vertices = mesh.vertices;
             MeshBuilder leftSide = new MeshBuilder(mesh, vertices);
             MeshBuilder rightSide = new MeshBuilder(mesh, vertices);
-            
+
             // which side my vertices at?
             bool[] side = new bool[vertices.Length];
             bool allOnTheLeft = true, allOnTheRight = true;
@@ -52,12 +52,12 @@ namespace SVGImporter.Geometry
 
             if (allOnTheLeft || allOnTheRight)
                 return;
-            
+
             // build the mesh by adding triangles (possibly cut)
             for (int i = 0; i < mesh.triangles.Length; i += 3)
             {
                 int i1 = mesh.triangles [i], i2 = mesh.triangles [i + 1], i3 = mesh.triangles [i + 2];
-                
+
                 switch ((side [i1] ? 1 : 0) | (side [i2] ? 2 : 0) | (side [i3] ? 4 : 0))
                 {
                     case 0 | 0 | 0:
@@ -86,7 +86,7 @@ namespace SVGImporter.Geometry
                         break;
                 }
             }
-            
+
             // degenerate?
             if (leftSide.IsDegenerate(origin, direction))
                 return;
@@ -154,7 +154,7 @@ namespace SVGImporter.Geometry
             Dictionary<IntPair, int> map;  // dictionary from old mesh vertex pairs to new mesh
             Mesh mesh;  // the original mesh
             Vector3[] origVertices;
-            
+
             // internal: ordered pair of two ints (used as map key)
             struct IntPair
             {
@@ -172,7 +172,7 @@ namespace SVGImporter.Geometry
                     }
                 }
             }
-            
+
             public MeshBuilder(Mesh m, Vector3[] vertices)
             {
                 pos = new List<Vector3>();
@@ -184,7 +184,7 @@ namespace SVGImporter.Geometry
                 mesh = m;
                 origVertices = vertices;
             }
-            
+
             // Return the id of the vertex created from oldM.i. If it didn't exist yet, assign it a new id.
             int MergeVertex(int i)
             {
@@ -200,7 +200,7 @@ namespace SVGImporter.Geometry
                 }
                 return j;
             }
-            
+
             // Return the id of the vertex created from oldM.i1 and oldM.i2 with the interpolation parameter t.
             // If it didn't exist yet, assign it a new id.
             static void MergeCutVertex(MeshBuilder leftSide, MeshBuilder rightSide, int i1, int i2, Vector2 origin, Vector2 direction, out int jl, out int jr)
@@ -212,10 +212,10 @@ namespace SVGImporter.Geometry
                     jr = rightSide.pos.Count;
                     leftSide.map.Add(q, jl);
                     rightSide.map.Add(q, jr);
-                    
+
                     // interpolate
                     float t = CutEdge(leftSide.origVertices [i1], leftSide.origVertices [i2], origin, direction);
-                    
+
                     var pos_t = leftSide.origVertices [i1] + (leftSide.origVertices [i2] - leftSide.origVertices [i1]) * t;
                     leftSide.pos.Add(pos_t);
                     rightSide.pos.Add(pos_t);
@@ -223,25 +223,25 @@ namespace SVGImporter.Geometry
                     var col_t = Color32.Lerp(leftSide.mesh.colors32 [i1], leftSide.mesh.colors32 [i2], t);
                     leftSide.col.Add(col_t);
                     rightSide.col.Add(col_t);
-                    
+
                     var uv_t = leftSide.mesh.uv [i1] + (leftSide.mesh.uv [i2] - leftSide.mesh.uv [i1]) * t;
                     leftSide.uv.Add(uv_t);
                     rightSide.uv.Add(uv_t);
-                    
+
                     var uv2_t = leftSide.mesh.uv2 [i1] + (leftSide.mesh.uv2 [i2] - leftSide.mesh.uv2 [i1]) * t;
                     leftSide.uv2.Add(uv2_t);
                     rightSide.uv2.Add(uv2_t);
                 } else
                     jr = rightSide.map [q];
             }
-            
+
             public void AddTri(int i1, int i2, int i3)
             {
                 tri.Add(MergeVertex(i1));
                 tri.Add(MergeVertex(i2));
                 tri.Add(MergeVertex(i3));
             }
-            
+
             // The cut goes always between 1-2 and 1-3. The resulting triangle goes left and the quad goes right.
             static public void AddCutTri(MeshBuilder leftSide, MeshBuilder rightSide, int i1, int i2, int i3, Vector2 origin, Vector2 direction)
             {
@@ -252,7 +252,7 @@ namespace SVGImporter.Geometry
                 MergeCutVertex(leftSide, rightSide, i1, i2, origin, direction, out l12, out r12);
                 int l13, r13;
                 MergeCutVertex(leftSide, rightSide, i1, i3, origin, direction, out l13, out r13);
-                
+
                 leftSide.tri.Add(l1);
                 leftSide.tri.Add(l12);
                 leftSide.tri.Add(l13);
@@ -276,13 +276,13 @@ namespace SVGImporter.Geometry
                 ;
                 return res;
             }
-            
+
             // Compute the parameter of the line segment v1-v2 where it intersects the plane defined by the point origin, the vector direction and the z axis.
             static float CutEdge(Vector3 v1, Vector3 v2, Vector2 origin, Vector2 direction)
             {
                 return Mathf.Clamp01((direction.y * v1.x - direction.x * v1.y + direction.x * origin.y - direction.y * origin.x) / (direction.x * (v2.y - v1.y) - direction.y * (v2.x - v1.x)));
             }
-            
+
             public bool IsDegenerate(Vector2 origin, Vector2 direction)
             {
                 float distSum = pos.Count * (-direction.x * origin.y + direction.y * origin.x);
@@ -290,7 +290,7 @@ namespace SVGImporter.Geometry
                     distSum += direction.x * pos [k].y - direction.y * pos [k].x;
                 return Mathf.Abs(distSum) < 0.01 * direction.magnitude;
             }
-            
+
         };
     }
 }

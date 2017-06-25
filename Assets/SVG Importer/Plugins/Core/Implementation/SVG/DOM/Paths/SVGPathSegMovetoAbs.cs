@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     public class SVGPathSegMovetoAbs : SVGPathSeg
     {
@@ -20,6 +20,6 @@ namespace SVGImporter.Rendering
                 _previousPoint = _currentPoint;
             }
             _currentPoint = new Vector2(x, y);
-        }   
+        }
     }
 }

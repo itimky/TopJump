@@ -58,7 +58,7 @@ public class FallingBonusManager : Pausable
             bonus = Bonuses.First(b => b.CompareTag(TagManager.ScoreX2));
         else if (random == 0)
             bonus = Bonuses.First(b => b.CompareTag(TagManager.CoinX2));
-        
+
         if (VisibleBonuses.Contains(bonus))
             return;
 
@@ -103,7 +103,7 @@ public class FallingBonusManager : Pausable
 
     private IEnumerator ProcessMultiplier(GameObject bonus, float duration)
     {
-        ApplyBonus(bonus);            
+        ApplyBonus(bonus);
 
         var timeLeft = duration;
         var updateRate = 0.01f * Time.timeScale;
@@ -141,7 +141,7 @@ public class FallingBonusManager : Pausable
         if (bonus.CompareTag(TagManager.ScoreX2))
             ScoreManager.SetMultiplier(2);
         else if (bonus.CompareTag(TagManager.CoinX2))
-            CoinManager.SetMultiplier(2);        
+            CoinManager.SetMultiplier(2);
     }
 
     private void RemoveBonus(GameObject bonus)
@@ -150,7 +150,7 @@ public class FallingBonusManager : Pausable
             ScoreManager.ResetMultiplier();
         else if (bonus.CompareTag(TagManager.CoinX2))
             CoinManager.ResetMultiplier();
-        
+
         ActiveBonuses.Remove(bonus);
     }
 
@@ -183,7 +183,7 @@ public class FallingBonusManager : Pausable
 
     private void RegisterRepeating()
     {
-        InvokeRepeating("CreateBonus", 1f, 5f); 
+        InvokeRepeating("CreateBonus", 1f, 5f);
     }
 
     private void CancelRepeating()

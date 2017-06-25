@@ -9,12 +9,12 @@ public class AnimationActionsEditor : Editor {
 
     SerializedProperty events;
 
-    
+
     void OnEnable()
     {
         events = serializedObject.FindProperty("events");
     }
-    
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();

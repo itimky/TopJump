@@ -9,7 +9,7 @@ public class MagnetField : MonoBehaviour
     Transform tr;
     bool isEnabled;
 
-    //	// Use this for initialization
+    //    // Use this for initialization
     void Start()
     {
         coins = new List<AttractedCoin>();
@@ -37,7 +37,7 @@ public class MagnetField : MonoBehaviour
 //        }
 //
         foreach (var coin in coins.ToList())
-        {            
+        {
             if (!coin.IsActive)
                 coins.Remove(coin);
             else if (tr.parent != null)
@@ -54,7 +54,7 @@ public class MagnetField : MonoBehaviour
         var coin = other.gameObject.transform;
 //        if (coin != null && !coins.Contains(coin))//&& !coins.Any(c => c.IsSameBody(coin)))
         if (coin != null)
-            
+
 //            coins.Add(coin);
             coins.Add(new AttractedCoin(coin));
     }

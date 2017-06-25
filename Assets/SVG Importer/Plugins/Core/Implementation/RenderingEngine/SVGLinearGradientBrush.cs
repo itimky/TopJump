@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Utils;
 
@@ -82,7 +82,7 @@ namespace SVGImporter.Rendering
         }
 
         private void CreateFill()
-        {        
+        {
             if(_alphaBlended)
             {
                 _fill = new SVGFill(Color.white, FILL_BLEND.ALPHA_BLENDED, FILL_TYPE.GRADIENT, GRADIENT_TYPE.LINEAR);
@@ -115,14 +115,14 @@ namespace SVGImporter.Rendering
             Debug.Log("GradientColors, count: "+length+" Colors: "+debugColor);
             */
             float currentStopOffset = 0f;
-            
+
             for(int i = 0; i < length; i++)
             {
                 currentStopOffset = Mathf.Clamp01(_stopOffsetList[i] * 0.01f);
                 colorKeys[i] = new CCGradientColorKey(_stopColorList[i], currentStopOffset);
                 alphaKeys[i] = new CCGradientAlphaKey(_stopColorList[i].a, currentStopOffset);
             }
-            
+
             return new CCGradient(colorKeys, alphaKeys);
         }
 

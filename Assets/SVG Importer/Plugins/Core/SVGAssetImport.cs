@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter 
+namespace SVGImporter
 {
     using Document;
     using Rendering;
@@ -17,8 +17,8 @@ namespace SVGImporter
     using Utils;
 
     public class SVGAssetImport
-    {    
-        public static List<SVGError> errors;	
+    {
+        public static List<SVGError> errors;
         protected static bool _importingSVG = false;
         public static bool importingSVG
         {
@@ -36,7 +36,7 @@ namespace SVGImporter
         private Texture2D _texture = null;
         private SVGGraphics _graphics;
         private SVGDocument _svgDocument;
-    
+
 #if UNITY_EDITOR
         public SVGAssetImport(string svgFile, float vertexPerMeter = 1000f)
         {
@@ -64,7 +64,7 @@ namespace SVGImporter
             _importingSVG = true;
 
             UnityEditor.SerializedObject svgAsset = new UnityEditor.SerializedObject(asset);
-            UnityEditor.SerializedProperty sharedMesh = svgAsset.FindProperty("_sharedMesh");            
+            UnityEditor.SerializedProperty sharedMesh = svgAsset.FindProperty("_sharedMesh");
             UnityEditor.SerializedProperty sharedShaders = svgAsset.FindProperty("_sharedShaders");
 
             // clean up
@@ -150,11 +150,11 @@ namespace SVGImporter
                                          bounds.min.y + bounds.size.y * asset.pivotPoint.y);
                 } else {
                     offset = new Vector2(viewport.min.x + viewport.size.x * asset.pivotPoint.x,
-                                         viewport.min.y + viewport.size.y * asset.pivotPoint.y);                        
+                                         viewport.min.y + viewport.size.y * asset.pivotPoint.y);
                 }
 
                 // Apply pivot point and Flip Y Axis
-				for(int i = 0; i < vertices.Length; i++)
+                for(int i = 0; i < vertices.Length; i++)
                 {
                     vertices[i].x = vertices[i].x - offset.x;
                     vertices[i].y = (vertices[i].y - offset.y) * -1f;
@@ -172,7 +172,7 @@ namespace SVGImporter
                     {
                         for(int i = 0; i < outputMaterials.Length; i++)
                         {
-                            sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;                                                
+                            sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;
                         }
                     } else {
                         for(int i = 0; i < outputMaterials.Length; i++)
@@ -182,7 +182,7 @@ namespace SVGImporter
                                     outputMaterials[i].shader = SVGShader.SolidColorAlphaBlended;
                             } else if(outputMaterials[i].shader.name == SVGShader.GradientColorOpaque.name)
                             {
-                                outputMaterials[i].shader = SVGShader.SolidColorOpaque;                                
+                                outputMaterials[i].shader = SVGShader.SolidColorOpaque;
                             }
                             sharedShaders.GetArrayElementAtIndex(i).stringValue = outputMaterials[i].shader.name;
                         }
@@ -213,9 +213,9 @@ namespace SVGImporter
 
                             polygons.Add(new List<Vector2>(points));
                         }
-                        
+
                         polygons = SVGGeom.MergePolygon(polygons);
-                        
+
                         SVGPath[] paths = new SVGPath[polygons.Count];
                         for(int i = 0; i < polygons.Count; i++)
                         {
@@ -299,7 +299,7 @@ namespace SVGImporter
             output.filterMode = FilterMode.Bilinear;
             output.Apply();
             return output;
-        }  
+        }
 #endif
     }
 }

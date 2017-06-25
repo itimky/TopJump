@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class SVGLineData 
+public class SVGLineData
 {
-	public struct Edge
+    public struct Edge
     {
         public Vector2 start;
         public Vector2 end;

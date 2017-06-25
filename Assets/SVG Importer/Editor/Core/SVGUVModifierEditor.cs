@@ -31,7 +31,7 @@ public class SVGUVModifierEditor : Editor {
     {
         uvModifier = (SVGUVModifier)target;
     }
-    
+
     public override void OnInspectorGUI()
     {
         _editMode = EditorGUILayout.Toggle(new GUIContent("Edit"), _editMode);
@@ -80,7 +80,7 @@ public class SVGUVModifierEditor : Editor {
             {
                 trs = SVGTransform2D.DecomposeMatrix(uvModifier.transform.localToWorldMatrix * uvModifier.svgTransform.matrix);
             }
-            SVGHandles.TransformHandle(trs);        
+            SVGHandles.TransformHandle(trs);
             if(!uvModifier.worldSpace)
             {
                 trs = SVGTransform2D.DecomposeMatrix(uvModifier.transform.worldToLocalMatrix * uvModifier.svgTransform.matrix);
@@ -94,9 +94,9 @@ public class SVGUVModifierEditor : Editor {
             EditorUtility.SetDirty(target);
             GUI.changed = true;
         }
-        
+
         if (Event.current.type == EventType.ExecuteCommand)
-        {            
+        {
             if (Event.current.commandName == "UndoRedoPerformed")
             {
                 Repaint();

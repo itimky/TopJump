@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Utils;
 
@@ -24,7 +24,7 @@ namespace SVGImporter.Rendering
                 return _alphaBlended;
             }
         }
-        
+
         protected SVGFill _fill;
         public SVGFill fill
         {
@@ -49,11 +49,11 @@ namespace SVGImporter.Rendering
             _transform = matrix;
             _conicalGradElement = conicalGradElement;
             Initialize();
-            
+
     //        SetGradientVector(bounds, matrix);
             CreateFill();
         }
-        
+
         protected Color GetColor(SVGColor svgColor)
         {
             if(svgColor.color.a != 1)
@@ -85,7 +85,7 @@ namespace SVGImporter.Rendering
         }
 
         private void CreateFill()
-        {                
+        {
             if(_alphaBlended)
             {
                 _fill = new SVGFill(Color.white, FILL_BLEND.ALPHA_BLENDED, FILL_TYPE.GRADIENT, GRADIENT_TYPE.CONICAL);
@@ -102,13 +102,13 @@ namespace SVGImporter.Rendering
             _fill.gradientEndX = _r;
             _fill.gradientEndY = _r;
         }
-        
+
         public CCGradient ParseGradientColors()
         {
             int length = _stopColorList.Count;
             CCGradientColorKey[] colorKeys = new CCGradientColorKey[length];
             CCGradientAlphaKey[] alphaKeys = new CCGradientAlphaKey[length];
-           
+
             float currentStopOffset = 0f;
 
             for(int i = 0; i < length; i++)
@@ -117,7 +117,7 @@ namespace SVGImporter.Rendering
                 colorKeys[i] = new CCGradientColorKey(_stopColorList[i], currentStopOffset);
                 alphaKeys[i] = new CCGradientAlphaKey(_stopColorList[i].a, currentStopOffset);
             }
-            
+
             return new CCGradient(colorKeys, alphaKeys);
         }
 

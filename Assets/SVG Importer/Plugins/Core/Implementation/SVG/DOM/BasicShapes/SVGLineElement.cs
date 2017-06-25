@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Geometry;
     using Utils;
@@ -75,7 +75,7 @@ namespace SVGImporter.Rendering
             this._x2 = new SVGLength(attrList.GetValue("x2"));
             this._y2 = new SVGLength(attrList.GetValue("y2"));
             this.currentTransformList = new SVGTransformList(attrList.GetValue("transform"));
-            
+
             Rect viewport = _paintable.viewport;
             this.currentTransformList.AppendItem(new SVGTransform(SVGTransformable.GetViewBoxTransform(_attrList, ref viewport, false)));
             paintable.SetViewport(viewport);
@@ -90,7 +90,7 @@ namespace SVGImporter.Rendering
         {
             return GetPath(SVGMatrix.Identity(), svgElement);
         }
-        
+
         public static List<Vector2> GetPath(SVGMatrix matrix, SVGLineElement svgElement)
         {
             List<Vector2> output = new List<Vector2>(){
@@ -99,18 +99,18 @@ namespace SVGImporter.Rendering
             };
             return output;
         }
-        
+
         public static List<List<Vector2>> GetClipPath(SVGMatrix matrix, SVGLineElement svgElement)
         {
             List<Vector2> path = GetPath(matrix, svgElement);
             if(path == null || path.Count == 0) return null;
-            
+
             List<List<Vector2>> clipPath = new List<List<Vector2>>();
 
             List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path)};
             List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, svgElement.paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(svgElement.paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(svgElement.paintable.strokeLineCap), svgElement.paintable.miterLimit, svgElement.paintable.dashArray, svgElement.paintable.dashOffset, ClosePathRule.NEVER, SVGGraphics.roundQuality);
             if(strokePath != null && strokePath.Count > 0) clipPath.AddRange(strokePath);
-            
+
             return clipPath;
         }
 
@@ -129,22 +129,22 @@ namespace SVGImporter.Rendering
             if(svgElement.paintable.IsStroke())
                 CreateStroke(svgElement);
         }
-        
+
         static void CreateStroke(SVGLineElement svgElement)
         {
             string name = svgElement.attrList.GetValue("id");
             if (string.IsNullOrEmpty(name))
                 name = "Line Stroke ";
-            
+
             List<List<Vector2>> stroke = SVGSimplePath.CreateStroke(SVGGraphics.position_buffer, svgElement.paintable, ClosePathRule.NEVER);
             if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
             {
                 stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;            
+            if(mesh == null) return;
             mesh.name = name;
             SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
             if(antialiasingMesh != null)

@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Document;
     using Utils;
@@ -16,7 +16,7 @@ namespace SVGImporter.Rendering
         private SVGLength _r;
         private SVGLength _fx;
         private SVGLength _fy;
-      
+
         public SVGLength cx
         {
             get { return _cx; }
@@ -41,7 +41,7 @@ namespace SVGImporter.Rendering
         {
             get { return _fy; }
         }
-      
+
         public SVGConicalGradientElement(SVGParser xmlImp, Node node) : base(xmlImp, node)
         {
             string temp;

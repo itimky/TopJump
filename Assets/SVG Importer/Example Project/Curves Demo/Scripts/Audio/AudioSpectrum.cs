@@ -26,8 +26,8 @@ public class AudioSpectrum : MonoBehaviour {
         rightChannel = new float[resolution];
     }
 
-	// Update is called once per frame
-	void Update () {
+    // Update is called once per frame
+    void Update () {
 
         if(leftChannel == null || leftChannel.Length != resolution)
         {
@@ -40,5 +40,5 @@ public class AudioSpectrum : MonoBehaviour {
 
         audioSource.GetSpectrumData(leftChannel, 0, FFTWindow.BlackmanHarris);
         audioSource.GetSpectrumData(rightChannel, 1, FFTWindow.BlackmanHarris);
-	}
+    }
 }

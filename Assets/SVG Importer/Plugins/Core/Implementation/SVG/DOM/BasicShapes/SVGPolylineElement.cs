@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Geometry;
     using Utils;
@@ -42,7 +42,7 @@ namespace SVGImporter.Rendering
             this._paintable = new SVGPaintable(inheritPaintable, node);
             this._listPoints = ExtractPoints(this._attrList.GetValue("points"));
             this.currentTransformList = new SVGTransformList(attrList.GetValue("transform"));
-            
+
             Rect viewport = _paintable.viewport;
             this.currentTransformList.AppendItem(new SVGTransform(SVGTransformable.GetViewBoxTransform(_attrList, ref viewport, false)));
             paintable.SetViewport(viewport);
@@ -77,7 +77,7 @@ namespace SVGImporter.Rendering
         {
             return GetPath(SVGMatrix.Identity(), svgElement);
         }
-        
+
         public static List<Vector2> GetPath(SVGMatrix matrix, SVGPolylineElement svgElement)
         {
             List<Vector2> output = new List<Vector2>(svgElement.listPoints.Count + 1);
@@ -90,25 +90,25 @@ namespace SVGImporter.Rendering
             // Douglas Peucker Reduction
             return SVGBezier.Optimise(output, SVGGraphics.vpm);
         }
-        
+
         public static List<List<Vector2>> GetClipPath(SVGMatrix matrix, SVGPolylineElement svgElement)
         {
             List<Vector2> path = GetPath(matrix, svgElement);
             if(path == null || path.Count == 0) return null;
-            
+
             List<List<Vector2>> clipPath = new List<List<Vector2>>();
             if(svgElement.paintable.IsFill())
             {
                 clipPath.Add(path);
             }
-            
+
             if(svgElement.paintable.IsStroke())
             {
                 List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path)};
                 List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, svgElement.paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(svgElement.paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(svgElement.paintable.strokeLineCap), svgElement.paintable.miterLimit, svgElement.paintable.dashArray, svgElement.paintable.dashOffset, ClosePathRule.NEVER, SVGGraphics.roundQuality);
                 if(strokePath != null && strokePath.Count > 0) clipPath.AddRange(strokePath);
             }
-            
+
             return clipPath;
         }
 
@@ -122,19 +122,19 @@ namespace SVGImporter.Rendering
                 return;
 
             SVGGraphics.position_buffer = GetPath(svgElement.transformMatrix, svgElement);
-            
+
             if(svgElement.paintable.IsFill())
                 CreateFill(svgElement);
             if(svgElement.paintable.IsStroke())
                 CreateStroke(svgElement);
         }
-        
+
         static void CreateFill(SVGPolylineElement svgElement)
         {
             string name = svgElement.attrList.GetValue("id");
             if (string.IsNullOrEmpty(name))
                 name = "Polyline Fill";
-            
+
             List<List<Vector2>> path;
             if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
             {
@@ -142,7 +142,7 @@ namespace SVGImporter.Rendering
             } else {
                 path = new List<List<Vector2>>(){SVGGraphics.position_buffer};
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
             if(mesh == null) return;
@@ -155,7 +155,7 @@ namespace SVGImporter.Rendering
                 SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
             }
         }
-        
+
         static void CreateStroke(SVGPolylineElement svgElement)
         {
             string name = svgElement.attrList.GetValue("id");
@@ -167,10 +167,10 @@ namespace SVGImporter.Rendering
             {
                 stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;            
+            if(mesh == null) return;
             mesh.name = name;
             SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
             if(antialiasingMesh != null)

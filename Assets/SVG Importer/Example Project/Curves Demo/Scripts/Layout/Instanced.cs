@@ -13,7 +13,7 @@ public class Instanced : MonoBehaviour {
 
     [FormerlySerializedAs("onUpdate")]
     [SerializeField]
-    protected TriggerEvent m_onUpdate = new TriggerEvent();    
+    protected TriggerEvent m_onUpdate = new TriggerEvent();
     public TriggerEvent onUpdate
     {
         get { return m_onUpdate; }

@@ -68,7 +68,7 @@ namespace SVGImporter.Rendering
             _totalMatrix = null;
         }
 
-        
+
         public void AppendItemAt(SVGTransform newItem, int index)
         {
             _listTransform.Insert(index, newItem);

@@ -26,13 +26,13 @@ namespace SVGImporter.Rendering
         {
             if(position_buffer == null || position_buffer.Count == 0)
                 return;
-            
+
             string output = "";
             for(int i = 0; i < position_buffer.Count; i++)
             {
                 output += position_buffer[i].ToString()+", ";
             }
-            
+
             UnityEngine.Debug.Log(output);
         }
 
@@ -42,9 +42,9 @@ namespace SVGImporter.Rendering
                 return _currentDepthOffset;
             }
         }
-        
+
         public static int IncreaseDepth()
-        {           
+        {
             return _currentDepthOffset++;
         }
 
@@ -73,7 +73,7 @@ namespace SVGImporter.Rendering
         private float _vertexPerMeter = 1000f;
         public float vertexPerMeter
         {
-            get {           
+            get {
                 return _vertexPerMeter;
             }
         }
@@ -91,7 +91,7 @@ namespace SVGImporter.Rendering
                 meshes.Clear();
                 meshes = null;
             }
-            
+
             if(depthTree != null)
             {
                 depthTree.Clear();
@@ -132,11 +132,11 @@ namespace SVGImporter.Rendering
         {
             _vpm = 1f;
             if(vertexPerMeter > 0f)
-			{
+            {
                 _vpm = 1000f / vertexPerMeter;
-			} else {
-				_vpm = 1000f;
-			}
+            } else {
+                _vpm = 1000f;
+            }
 
             if(_vpm != 0f)
             {

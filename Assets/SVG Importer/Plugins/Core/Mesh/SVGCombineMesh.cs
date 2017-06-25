@@ -21,7 +21,7 @@ namespace SVGImporter.Utils
             Mesh mesh = new Mesh();
             mesh.CombineMeshes(combineInstances, false, false);
             return mesh;
-        }   
+        }
 
     }
 }

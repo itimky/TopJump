@@ -95,7 +95,7 @@ namespace SVGImporter
             if (playOnAwake)
                 Play();
         }
-        
+
         // Update is called once per frame
         protected virtual void LateUpdate()
         {
@@ -105,7 +105,7 @@ namespace SVGImporter
             if (progress >= 0f && direction)
             {
                 progress += Time.deltaTime * timeScale;
-                
+
                 if (progress >= duration)
                 {
                     AnimationEnded();
@@ -113,7 +113,7 @@ namespace SVGImporter
             } else if (progress <= duration && !direction)
             {
                 progress -= Time.deltaTime * timeScale;
-                
+
                 if (progress <= 0)
                 {
                     AnimationEnded();

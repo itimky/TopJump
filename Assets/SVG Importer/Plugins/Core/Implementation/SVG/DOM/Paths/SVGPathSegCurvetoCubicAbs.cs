@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     public class SVGPathSegCurvetoCubicAbs : SVGPathSegCurvetoCubic
     {
@@ -18,7 +18,7 @@ namespace SVGImporter.Rendering
             this._type = SVGPathSegTypes.CurveTo_Cubic_Abs;
             if(segment != null)
                 _previousPoint = segment.currentPoint;
-            _currentPoint = new Vector2(x, y);        
+            _currentPoint = new Vector2(x, y);
             _controlPoint1 = new Vector2(x1, y1);
             _controlPoint2 = new Vector2(x2, y2);
 

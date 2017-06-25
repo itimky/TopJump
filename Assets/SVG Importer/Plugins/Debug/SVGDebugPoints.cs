@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System;
 
 namespace SVGImporter.Utils
-{        
+{
     public class SVGDebugPoints : MonoBehaviour
     {
 #if UNITY_EDITOR
@@ -34,7 +34,7 @@ namespace SVGImporter.Utils
                 Vector3 position = transform.GetChild(i).localPosition;
                 Gizmos.DrawSphere(position, UnityEditor.HandleUtility.GetHandleSize(position) * 0.1f);
             }
-            
+
             if(count > 1)
             {
                 Vector3 lastPosition = transform.GetChild(0).transform.localPosition;

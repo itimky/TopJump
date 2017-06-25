@@ -14,20 +14,20 @@ namespace SVGImporter
 
     public class SVGAtlas : MonoBehaviour {
 
-		protected static Texture2D _whiteTexture;
-		public static Texture2D whiteTexture
-		{
-			get {
-				if(_whiteTexture == null) _whiteTexture = GenerateWhiteTexture();
-				return _whiteTexture;
-			}
-		}
+        protected static Texture2D _whiteTexture;
+        public static Texture2D whiteTexture
+        {
+            get {
+                if(_whiteTexture == null) _whiteTexture = GenerateWhiteTexture();
+                return _whiteTexture;
+            }
+        }
 
         protected static Texture2D _gradientShapeTexture;
         public static Texture2D gradientShapeTexture
         {
             get {
-                if(_gradientShapeTexture == null) _gradientShapeTexture = GenerateGradientShapeTexture(_gradientShapeTextureSize);                
+                if(_gradientShapeTexture == null) _gradientShapeTexture = GenerateGradientShapeTexture(_gradientShapeTextureSize);
                 return _gradientShapeTexture;
             }
         }
@@ -48,7 +48,7 @@ namespace SVGImporter
         {
             if (gradientShapeTexture == null)
                 return;
-            
+
             DestroyImmediate(_gradientShapeTexture);
             _gradientShapeTexture = null;
         }
@@ -60,19 +60,19 @@ namespace SVGImporter
         public Material opaqueGradient;
         public Material transparentGradient;
 
-    	public List<CCGradient> gradients;	
-    	public List<Texture2D> atlasTextures;		
-    	public List<Material> materials;
-    	
-    	public int gradientWidth = 128;
-    	public int gradientHeight = 4;
-    	public int atlasTextureWidth = 512;
+        public List<CCGradient> gradients;
+        public List<Texture2D> atlasTextures;
+        public List<Material> materials;
+
+        public int gradientWidth = 128;
+        public int gradientHeight = 4;
+        public int atlasTextureWidth = 512;
         public int atlasTextureHeight = 512;
-    	public int imageIndex = 0;
-    	public int atlasIndex = 0;
-    	
-    	public Dictionary<string, CCGradient> gradientCache;
-    	
+        public int imageIndex = 0;
+        public int atlasIndex = 0;
+
+        public Dictionary<string, CCGradient> gradientCache;
+
         protected void Awake()
         {
             DontDestroyOnLoad(gameObject);
@@ -93,7 +93,7 @@ namespace SVGImporter
                     _Instance = go.GetComponent<SVGAtlas>();
                     _Instance.Init();
                 }
-                
+
                 return _Instance;
             }
         }
@@ -157,20 +157,20 @@ namespace SVGImporter
             _Instance = null;
         }
 
-    	protected void Init ()
-    	{				
-    		if (gradients == null)
-    			gradients = new List<CCGradient> ();
-    		
-    		if (materials == null)
-    			materials = new List<Material> ();
+        protected void Init ()
+        {
+            if (gradients == null)
+                gradients = new List<CCGradient> ();
 
-    		InitGradientCache ();
+            if (materials == null)
+                materials = new List<Material> ();
+
+            InitGradientCache ();
             CreateDefaultGradient();
-    	}
-    	
+        }
+
         protected void CreateDefaultGradient()
-        {       
+        {
             CCGradientColorKey[] colorKeys = new CCGradientColorKey[]{
                 new CCGradientColorKey(Color.white, 0f), new CCGradientColorKey(Color.white, 1f)
             };
@@ -192,33 +192,33 @@ namespace SVGImporter
         }
 
         protected void InitGradientCache ()
-    	{		
-    		if (gradientCache == null) {
-    			gradientCache = new Dictionary<string, CCGradient> ();
-    		
-    			for (int i = 0; i < gradients.Count; i++) {
-    				if (!gradientCache.ContainsKey (gradients [i].hash)) {
-    					gradientCache.Add (gradients [i].hash, gradients [i]);
-    				}
-    			}
-    		}
-    	}
-    	
-    	public void RebuildGradientCache ()
-    	{
-    		ClearGradientCache ();
-    		InitGradientCache ();
-    	}
-    	
+        {
+            if (gradientCache == null) {
+                gradientCache = new Dictionary<string, CCGradient> ();
+
+                for (int i = 0; i < gradients.Count; i++) {
+                    if (!gradientCache.ContainsKey (gradients [i].hash)) {
+                        gradientCache.Add (gradients [i].hash, gradients [i]);
+                    }
+                }
+            }
+        }
+
+        public void RebuildGradientCache ()
+        {
+            ClearGradientCache ();
+            InitGradientCache ();
+        }
+
         public CCGradient AddGradient (CCGradient gradient, bool renderAtlasTexture = true)
         {
             if (gradient == null || !gradient.initialised)
                 return null;
-            
+
             if (gradientCache == null || gradientCache.Count == 0)
                 RebuildGradientCache ();
-            
-            if (gradientCache.ContainsKey (gradient.hash)) {          
+
+            if (gradientCache.ContainsKey (gradient.hash)) {
                 gradient = gradientCache [gradient.hash];
                 return gradient;
             }
@@ -237,80 +237,80 @@ namespace SVGImporter
                     CreateAtlasTexture (atlasIndex, atlasTextureWidth, atlasTextureHeight);
                 }
 
-				RenderGradient (atlasTextures [atlasIndex], gradient, x, y, gradientWidth, gradientHeight);
+                RenderGradient (atlasTextures [atlasIndex], gradient, x, y, gradientWidth, gradientHeight);
                 atlasTextures [atlasIndex].Apply ();
             }
 
             return  gradient;
         }
 
-    	public CCGradient GetGradient (int index)
-    	{
-    		if (gradients == null)
-    			return null;
-    		
-    		if (gradients.Count == 0)
-    			return null;
-    		
-    		index = Mathf.Clamp (index, 0, gradients.Count - 1);
-    		return gradients [index];
-    	}
-    	
+        public CCGradient GetGradient (int index)
+        {
+            if (gradients == null)
+                return null;
+
+            if (gradients.Count == 0)
+                return null;
+
+            index = Mathf.Clamp (index, 0, gradients.Count - 1);
+            return gradients [index];
+        }
+
         public SVGFill GetGradient (SVGFill gradient)
-    	{
-    		gradient.gradientColors = GetGradient (gradient.gradientColors);
-    		return gradient;
-    	}
-    	
-    	public CCGradient GetGradient (CCGradient gradient)
-    	{
-    		if (gradient == null || !gradient.initialised)
-    			return null;
-    		
-    		Init ();
-    		InitGradientCache ();
-    		
-    		if (gradientCache.ContainsKey (gradient.hash)) {			
-    			gradient = gradientCache [gradient.hash];
+        {
+            gradient.gradientColors = GetGradient (gradient.gradientColors);
+            return gradient;
+        }
+
+        public CCGradient GetGradient (CCGradient gradient)
+        {
+            if (gradient == null || !gradient.initialised)
+                return null;
+
+            Init ();
+            InitGradientCache ();
+
+            if (gradientCache.ContainsKey (gradient.hash)) {
+                gradient = gradientCache [gradient.hash];
                 gradient.references++;
-    			return gradient;		
-    		} else {
-    			return null;
-    		}
-    	}
-        
+                return gradient;
+            } else {
+                return null;
+            }
+        }
+
         const int pixelOffset = 1;
         public static void RenderGradient (Texture2D texture, CCGradient gradient, int x, int y, int gradientWidth, int gradientHeight)
         {
             //Debug.Log(string.Format("x: {0}, y: {1}, gradient: {2}", x, y, gradient));
             if (texture == null || gradient == null || !gradient.initialised)
                 return;
-            
+
             float tempWidth = gradientWidth - 1 - pixelOffset * 2;
             Color[] pixels = new Color[gradientWidth * gradientHeight];
-            
+
             Color pixel;
-            
+
             for (int i = 0; i < gradientWidth; i++) {
                 pixel = gradient.Evaluate ((float)(i - pixelOffset) / tempWidth);
                 for(int j = 0; j < gradientHeight; j++) {
                     pixels [gradientWidth * j + i] = pixel;
                 }
             }
-            
+
             texture.SetPixels(x, y, gradientWidth, gradientHeight, pixels);
         }
 
-    	public int imagePerRow {
-    		get {
-    			return atlasTextureWidth / gradientWidth;
-    		}
-    	}
+        public int imagePerRow {
+            get {
+                return atlasTextureWidth / gradientWidth;
+            }
+        }
 
         public bool GetCoords (out int x, out int y)
-        {           
-            bool newTexture = (atlasTextures == null || atlasTextures.Count == 0);            
-			GetCoords(out x, out y, imageIndex, gradientWidth, gradientHeight, atlasTextureWidth, atlasTextureHeight);
+        {
+            bool newTexture = (atlasTextures == null || atlasTextures.Count == 0);
+            GetCoords(out x, out y, imageIndex, gradientWidth, gradientHeight, atlasTextureWidth, atlasTextureHeight);
             /*
             if (y + gradientHeight > atlasTextureHeight) {
                 y = x = imageIndex = 0;
@@ -321,50 +321,50 @@ namespace SVGImporter
             return newTexture;
         }
 
-		public static void GetCoords(out int x, out int y, int imageIndex, int gradientWidth, int gradientHeight, int atlasTextureWidth, int atlasTextureHeight)
-		{
-			int index = imageIndex * gradientWidth;
-			x = index % atlasTextureWidth;
-			y = Mathf.FloorToInt (index / atlasTextureWidth) * gradientHeight;
-		}
+        public static void GetCoords(out int x, out int y, int imageIndex, int gradientWidth, int gradientHeight, int atlasTextureWidth, int atlasTextureHeight)
+        {
+            int index = imageIndex * gradientWidth;
+            x = index % atlasTextureWidth;
+            y = Mathf.FloorToInt (index / atlasTextureWidth) * gradientHeight;
+        }
 
         public Texture CreateAtlasTexture (int index, int width, int height)
         {
             if (atlasTextures == null)
                 atlasTextures = new List<Texture2D> ();
 
-			Texture2D texture = CreateTexture(width, height);            
+            Texture2D texture = CreateTexture(width, height);
             texture.name = "Atlas "+index.ToString();
-            
-            if (index >= atlasTextures.Count - 1) {               
+
+            if (index >= atlasTextures.Count - 1) {
                 atlasTextures.Add (texture);
-            } else if (index >= 0) {                         
+            } else if (index >= 0) {
                 atlasTextures [index] = texture;
             }
 
-			return texture;
+            return texture;
         }
 
-		public static Texture2D CreateTexture(int width, int height)
-		{
-			Texture2D texture = new Texture2D (width, height, TextureFormat.ARGB32, false);
-			texture.filterMode = FilterMode.Bilinear;
-			texture.wrapMode = TextureWrapMode.Clamp;
-//			texture.alphaIsTransparency = true;
-			texture.anisoLevel = 0;
-			return texture;
-		}
+        public static Texture2D CreateTexture(int width, int height)
+        {
+            Texture2D texture = new Texture2D (width, height, TextureFormat.ARGB32, false);
+            texture.filterMode = FilterMode.Bilinear;
+            texture.wrapMode = TextureWrapMode.Clamp;
+//            texture.alphaIsTransparency = true;
+            texture.anisoLevel = 0;
+            return texture;
+        }
 
         public void RebuildAtlas ()
         {
             if (gradients == null || gradients.Count == 0)
                 return;
-            
+
             ClearAtlasTextures ();
-            
+
             imageIndex = 0;
             atlasIndex = 0;
-            
+
             CreateAtlasTexture (atlasIndex, atlasTextureWidth, atlasTextureHeight);
             int x, y;
             for (int i = 0; i < gradients.Count; i++) {
@@ -372,40 +372,40 @@ namespace SVGImporter
                 if (newTexture) {
                     CreateAtlasTexture (atlasIndex, atlasTextureWidth, atlasTextureHeight);
                 }
-                
+
                 gradients [i].atlasIndex = atlasIndex;
                 gradients [i].index = imageIndex;
-				RenderGradient (atlasTextures [atlasIndex], gradients [i], x, y, gradientWidth, gradientHeight);
-                
+                RenderGradient (atlasTextures [atlasIndex], gradients [i], x, y, gradientWidth, gradientHeight);
+
                 imageIndex++;
             }
-            
+
             for (int i = 0; i < atlasTextures.Count; i++) {
                 atlasTextures [i].Apply (false);
-            }       
+            }
         }
 
-		public static Texture2D GenerateGradientAtlasTexture(CCGradient[] gradients, int gradientWidth, int gradientHeight)
-		{
-//			Debug.Log("GenerateGradientAtlasTexture");
+        public static Texture2D GenerateGradientAtlasTexture(CCGradient[] gradients, int gradientWidth, int gradientHeight)
+        {
+//            Debug.Log("GenerateGradientAtlasTexture");
 
-			if(gradients == null || gradients.Length == 0)
-				return null;
+            if(gradients == null || gradients.Length == 0)
+                return null;
 
-			int gradientCount = gradients.Length;
-			int atlasTextureWidth = gradientWidth * 2;
-			int atlasTextureHeight = Mathf.CeilToInt((gradientCount * gradientWidth) / atlasTextureWidth) * gradientHeight + gradientHeight;
-			Texture2D texture = CreateTexture(atlasTextureWidth, atlasTextureHeight);
+            int gradientCount = gradients.Length;
+            int atlasTextureWidth = gradientWidth * 2;
+            int atlasTextureHeight = Mathf.CeilToInt((gradientCount * gradientWidth) / atlasTextureWidth) * gradientHeight + gradientHeight;
+            Texture2D texture = CreateTexture(atlasTextureWidth, atlasTextureHeight);
 
-			int x, y;
-			for (int i = 0; i < gradients.Length; i++) {
-				GetCoords(out x, out y, i, gradientWidth, gradientHeight, atlasTextureWidth, atlasTextureHeight);
-				RenderGradient (texture, gradients [i], x, y, gradientWidth, gradientHeight);		
-			}
+            int x, y;
+            for (int i = 0; i < gradients.Length; i++) {
+                GetCoords(out x, out y, i, gradientWidth, gradientHeight, atlasTextureWidth, atlasTextureHeight);
+                RenderGradient (texture, gradients [i], x, y, gradientWidth, gradientHeight);
+            }
 
-			texture.Apply (false);
-			return texture;
-		}
+            texture.Apply (false);
+            return texture;
+        }
 
         const float PI2 = Mathf.PI * 2f;
         public static Texture2D GenerateGradientShapeTexture (int textureSize)
@@ -416,22 +416,22 @@ namespace SVGImporter
             texture.anisoLevel = 0;
             texture.filterMode = FilterMode.Trilinear;
             texture.wrapMode = TextureWrapMode.Clamp;
-            
+
             int totalPixels = gradientShapeTextureSize * gradientShapeTextureSize;
             Color32[] texturePixels = new Color32[totalPixels];
             float angle;
-            
+
             float x = 0, y = 0, halfSize = gradientShapeTextureSize * 0.5f, sizeMinusOne = gradientShapeTextureSize - 1;
             for (int i = 0; i < totalPixels; i++) {
                 x = i % gradientShapeTextureSize;
                 y = Mathf.Floor ((float)i / (float)gradientShapeTextureSize);
-                
+
                 // linear
                 texturePixels [i].r = (byte)Mathf.RoundToInt (x / sizeMinusOne * 255);
-                
+
                 // radial
                 texturePixels [i].g = (byte)Mathf.RoundToInt (Mathf.Clamp01 (Mathf.Sqrt (Mathf.Pow (halfSize - x, 2f) + Mathf.Pow (halfSize - y, 2f)) / (halfSize - 1f)) * 255);
-                
+
                 // conical
                 angle = Mathf.Atan2(-halfSize + y, -halfSize + x);
                 if(angle < 0)
@@ -442,28 +442,28 @@ namespace SVGImporter
                 texturePixels [i].b = (byte)Mathf.RoundToInt(Mathf.Clamp01((angle / PI2)) * 255);
                 //texturePixels [i].b = (byte)Mathf.RoundToInt (Mathf.Clamp01 (Mathf.Sqrt (Mathf.Pow (halfSize - x, 2f) + Mathf.Pow (halfSize - y, 2f)) / (halfSize - 1f)) * 255);
                 //texturePixels [i].b = (byte)Mathf.RoundToInt (Mathf.Clamp01 (((1f - Mathf.Abs (halfSize - x) / halfSize)) * (1f - (Mathf.Abs (halfSize - y) / halfSize))) * 255);
-                
+
                 // solid
                 texturePixels [i].a = (byte)255;
             }
-            
+
             texture.SetPixels32 (texturePixels);
             texture.Apply (true);
             return texture;
         }
 
-		public static Texture2D GenerateWhiteTexture ()
-		{
-			Texture2D texture = new Texture2D (1, 1, TextureFormat.ARGB32, false);
-			texture.hideFlags = HideFlags.DontSave;
-			texture.name = "White Texture";
-			texture.anisoLevel = 0;
-			texture.filterMode = FilterMode.Bilinear;
-			texture.wrapMode = TextureWrapMode.Clamp;
-			texture.SetPixel(0, 0, Color.white);
-			texture.Apply (false);
-			return texture;
-		}
+        public static Texture2D GenerateWhiteTexture ()
+        {
+            Texture2D texture = new Texture2D (1, 1, TextureFormat.ARGB32, false);
+            texture.hideFlags = HideFlags.DontSave;
+            texture.name = "White Texture";
+            texture.anisoLevel = 0;
+            texture.filterMode = FilterMode.Bilinear;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.SetPixel(0, 0, Color.white);
+            texture.Apply (false);
+            return texture;
+        }
 
         public Material GetMaterial (SVGFill fill)
         {
@@ -481,9 +481,9 @@ namespace SVGImporter
             }
             return output;
         }
-        
+
         protected Material GetGradientMaterial (SVGFill fill)
-        {       
+        {
             Material output = null;
             Shader shader = null;
             switch (fill.blend) {
@@ -503,12 +503,12 @@ namespace SVGImporter
                     shader = SVGShader.GradientColorOpaque;
                     break;
             }
-            
+
             for (int i = 0; i < materials.Count; i++) {
                 if (materials [i] == null)
-                    continue;           
+                    continue;
                 if (materials [i].shader != shader)
-                    continue;           
+                    continue;
                 if (fill.gradientColors.atlasIndex < 0 || fill.gradientColors.atlasIndex >= atlasTextures.Count)
                     continue;
                 Texture texture = atlasTextures [fill.gradientColors.atlasIndex];
@@ -516,21 +516,21 @@ namespace SVGImporter
                     continue;
                 if (materials [i].GetTexture ("_GradientColor") != texture)
                     continue;
-                
+
                 output = materials [i];
                 output.SetTexture ("_GradientShape", gradientShapeTexture);
                 output.SetVector ("_Params", new Vector4 (atlasTextureWidth, atlasTextureHeight, gradientWidth, gradientHeight));
             }
-            
+
             if (output == null) {
                 output = new Material (shader);
                 Texture2D texture = atlasTextures [fill.gradientColors.atlasIndex];
                 output.SetTexture ("_GradientColor", texture);
                 output.SetTexture ("_GradientShape", gradientShapeTexture);
                 output.SetVector ("_Params", new Vector4 (atlasTextureWidth, atlasTextureHeight, gradientWidth, gradientHeight));
-                materials.Add (output);           
+                materials.Add (output);
             }
-         
+
             return output;
         }
 
@@ -575,7 +575,7 @@ namespace SVGImporter
         }
 
         protected Material GetColorMaterial (SVGFill fill)
-        {       
+        {
             Material output = null;
             Shader shader = null;
             switch (fill.blend) {
@@ -595,19 +595,19 @@ namespace SVGImporter
                     shader = SVGShader.SolidColorOpaque;
                     break;
             }
-            
+
             for (int i = 0; i < materials.Count; i++) {
                 if (materials [i] == null)
-                    continue;           
+                    continue;
                 if (materials [i].shader != shader)
-                    continue;           
-                
-                output = materials [i];           
+                    continue;
+
+                output = materials [i];
             }
-            
+
             if (output == null) {
                 output = new Material (shader);
-                materials.Add (output);           
+                materials.Add (output);
             }
             return output;
         }
@@ -635,12 +635,12 @@ namespace SVGImporter
         {
             if (gradientCache != null)
                 gradientCache.Clear ();
-            
+
             gradientCache = null;
         }
-        
+
         public void ClearAllData ()
-        {       
+        {
             ClearGradientCache ();
             gradients.Clear ();
         }
@@ -664,22 +664,22 @@ namespace SVGImporter
         {
             if (atlasTextures == null || atlasTextures.Count == 0)
                 return;
-            
+
             imageIndex = 0;
             atlasIndex = 0;
-            
+
 //            string assetPath;
             for (int i = 0; i < atlasTextures.Count; i++) {
                 if (atlasTextures [i] == null)
                     continue;
-                           
+
                 DestroyObjectInternal(atlasTextures [i]);
                 atlasTextures [i] = null;
             }
-            
+
             atlasTextures.Clear ();
         }
-        
+
         static void DestroyObjectInternal(UnityEngine.Object target)
         {
             #if UNITY_EDITOR
@@ -698,20 +698,20 @@ namespace SVGImporter
         {
             return Camera.allCameras;
         }
-        
+
         internal static void AddComponent<T>(Component component) where T : MonoBehaviour
         {
             if(component == null)
                 return;
-            
-            GameObject gameObject = component.gameObject; 
-            
+
+            GameObject gameObject = component.gameObject;
+
             if(gameObject == null)
                 return;
-            
+
             if(gameObject.GetComponent<T>() != null)
                 return;
-            
+
             gameObject.AddComponent<T>();
         }
     }
@@ -720,12 +720,12 @@ namespace SVGImporter
     internal sealed class PrivateBetaBuild : MonoBehaviour
     {
         Camera camera;
-        
+
         void OnGUI()
         {
             if(camera == null)
                 camera = GetComponent<Camera>();
-            
+
             string labelText = "SVG Importer | Private Beta Build";
             GUI.skin.box.fontSize = Screen.height / 40;
             Vector2 labelSize = GUI.skin.box.CalcSize(new GUIContent(labelText));
@@ -733,7 +733,7 @@ namespace SVGImporter
             Rect finRect = new Rect(camera.pixelWidth - labelSize.x - offset, camera.pixelHeight - labelSize.y - offset, labelSize.x, labelSize.y);
             GUI.Box(finRect, new GUIContent(labelText));
         }
-        
+
         internal static void Init()
         {
             Camera[] cameras = SVGAtlas.GetAllCameras();

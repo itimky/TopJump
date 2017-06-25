@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter 
+namespace SVGImporter
 {
     using Rendering;
     using Utils;
@@ -24,7 +24,7 @@ namespace SVGImporter
 
         protected SVGTransform2D tempTransform = new SVGTransform2D();
         Matrix4x4 lastMatrix;
-        
+
         // This method is invoked by Unity when rendering to Camera
         void OnWillRenderObject()
         {
@@ -32,7 +32,7 @@ namespace SVGImporter
             if(svgTransform == null || lastMatrix == svgTransform.matrix) return;
             svgRenderer.UpdateRenderer();
         }
-        
+
         protected virtual void PrepareForRendering (Mesh sharedMesh, bool force) {
             if(sharedMesh == null) return;
 
@@ -45,7 +45,7 @@ namespace SVGImporter
             }
 
             Quaternion rotation = Quaternion.Euler(0f, 0f, -tempTransform.rotation);
-            Vector2 scale = new Vector2((tempTransform.scale.x == 0f) ? 0f : 1f / tempTransform.scale.x, 
+            Vector2 scale = new Vector2((tempTransform.scale.x == 0f) ? 0f : 1f / tempTransform.scale.x,
                                         (tempTransform.scale.y == 0f) ? 0f : 1f / tempTransform.scale.y);
 
             Vector3[] vertices = sharedMesh.vertices;
@@ -56,16 +56,16 @@ namespace SVGImporter
             {
                 uv[i].x = -vertices[i].x + tempTransform.position.x;
                 uv[i].y = -vertices[i].y + tempTransform.position.y;
-                
+
                 uv[i] = rotation * uv[i];
-                
+
                 uv[i].x *= scale.x;
                 uv[i].y *= scale.y;
-                
+
                 uv[i].x += 0.5f;
                 uv[i].y += 0.5f;
             }
-            
+
             sharedMesh.uv = uv;
             lastMatrix = svgTransform.matrix;
         }
@@ -77,10 +77,10 @@ namespace SVGImporter
             svgRenderer.AddModifier(this);
             svgRenderer.OnPrepareForRendering += PrepareForRendering;
         }
-        
+
         void Clear()
         {
-            if(svgRenderer != null) 
+            if(svgRenderer != null)
             {
                 svgRenderer.OnPrepareForRendering -= PrepareForRendering;
                 svgRenderer.RemoveModifier(this);
@@ -88,12 +88,12 @@ namespace SVGImporter
             }
             svgShape = null;
         }
-        
+
         void OnEnable()
         {
             Init();
         }
-        
+
         void OnDisable()
         {
             Clear();

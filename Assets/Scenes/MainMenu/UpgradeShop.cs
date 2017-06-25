@@ -39,7 +39,7 @@ public class UpgradeShop : MonoBehaviour
             JetPackUpgradePrice.gameObject.SetActive(false);
             return;
         }
-        
+
         JetPackUpgradePrice.text = LevelToPrices[jetPackLevel + 1].ToString();
     }
 

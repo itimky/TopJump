@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Rendering;
     using Geometry;
@@ -76,7 +76,7 @@ namespace SVGImporter.Rendering
             this._rx = new SVGLength(attrList.GetValue("rx"));
             this._ry = new SVGLength(attrList.GetValue("ry"));
             this.currentTransformList = new SVGTransformList(attrList.GetValue("transform"));
-            
+
             Rect viewport = _paintable.viewport;
             this.currentTransformList.AppendItem(new SVGTransform(SVGTransformable.GetViewBoxTransform(_attrList, ref viewport, false)));
             paintable.SetViewport(viewport);
@@ -86,37 +86,37 @@ namespace SVGImporter.Rendering
         {
             this.inheritTransformList = transformList;
         }
-        
+
         public static List<Vector2> GetPath(SVGEllipseElement svgElement)
         {
             return GetPath(SVGMatrix.Identity(), svgElement);
         }
-        
+
         public static List<Vector2> GetPath(SVGMatrix matrix, SVGEllipseElement svgElement)
         {
             List<Vector2> output = Ellipse(svgElement.cx.value, svgElement.cy.value, svgElement.rx.value, svgElement.ry.value, matrix);
-            output.Add(output[0]);            
+            output.Add(output[0]);
             return output;
         }
-        
+
         public static List<List<Vector2>> GetClipPath(SVGMatrix matrix, SVGEllipseElement svgElement)
         {
             List<Vector2> path = GetPath(matrix, svgElement);
             if(path == null || path.Count == 0) return null;
-            
+
             List<List<Vector2>> clipPath = new List<List<Vector2>>();
             if(svgElement.paintable.IsFill())
             {
                 clipPath.Add(path);
             }
-            
+
             if(svgElement.paintable.IsStroke())
             {
                 List<StrokeSegment[]> segments = new List<StrokeSegment[]>(){SVGSimplePath.GetSegments(path)};
                 List<List<Vector2>> strokePath = SVGLineUtils.StrokeShape(segments, svgElement.paintable.strokeWidth, Color.black, SVGSimplePath.GetStrokeLineJoin(svgElement.paintable.strokeLineJoin), SVGSimplePath.GetStrokeLineCap(svgElement.paintable.strokeLineCap), svgElement.paintable.miterLimit, svgElement.paintable.dashArray, svgElement.paintable.dashOffset, ClosePathRule.ALWAYS, SVGGraphics.roundQuality);
                 if(strokePath != null && strokePath.Count > 0) clipPath.AddRange(strokePath);
             }
-            
+
             return clipPath;
         }
 
@@ -126,9 +126,9 @@ namespace SVGImporter.Rendering
         }
 
         const float PI2 = Mathf.PI * 2f;
-        
+
         public static void Create(SVGEllipseElement svgElement)
-        {        
+        {
             if(svgElement.paintable.visibility != SVGVisibility.Visible || svgElement.paintable.display == SVGDisplay.None)
                 return;
 
@@ -144,7 +144,7 @@ namespace SVGImporter.Rendering
             string name = svgElement.attrList.GetValue("id");
             if (string.IsNullOrEmpty(name))
                 name = "Ellipse Fill";
-            
+
             List<List<Vector2>> path;
             if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
             {
@@ -152,7 +152,7 @@ namespace SVGImporter.Rendering
             } else {
                 path = new List<List<Vector2>>(){SVGGraphics.position_buffer};
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
             if(mesh == null) return;
@@ -165,22 +165,22 @@ namespace SVGImporter.Rendering
                 SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
             }
         }
-        
+
         static void CreateStroke(SVGEllipseElement svgElement)
         {
             string name = svgElement.attrList.GetValue("id");
             if (string.IsNullOrEmpty(name))
                 name = "Ellipse Stroke ";
-            
+
             List<List<Vector2>> stroke = SVGSimplePath.CreateStroke(SVGGraphics.position_buffer, svgElement.paintable, ClosePathRule.ALWAYS);
             if(svgElement.paintable.clipPathList != null && svgElement.paintable.clipPathList.Count > 0)
             {
                 stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;            
+            if(mesh == null) return;
             mesh.name = name;
             SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
             if(antialiasingMesh != null)
@@ -190,44 +190,44 @@ namespace SVGImporter.Rendering
                 SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
             }
         }
-        
+
         const float circleConstant = 0.551915024494f;
-        public static List<Vector2> Ellipse(float cx, float cy, float rx, float ry, SVGMatrix matrix) {        
+        public static List<Vector2> Ellipse(float cx, float cy, float rx, float ry, SVGMatrix matrix) {
             List<Vector2> output = new List<Vector2>();
-            
+
             cx -= rx;
             cy -= ry;
-            
+
             float handleDistanceX = circleConstant * rx;
             float handleDistanceY = circleConstant * ry;
             Vector2 handleRight = new Vector2(handleDistanceX, 0f);
             Vector2 handleLeft = new Vector2(-handleDistanceX, 0f);
             Vector2 handleUp = new Vector2(0f, -handleDistanceY);
             Vector2 handleDown = new Vector2(0f, handleDistanceY);
-            
+
             Vector2 topCenter = new Vector2(cx + rx, cy);
             Vector2 left = new Vector2(cx, cy + ry);
 //            Vector2 center = new Vector2(cx + rx, cy + ry);
             Vector2 right = new Vector2(cx + rx * 2f, cy + ry );
             Vector2 bottomCenter = new Vector2(cx + rx, cy + ry * 2f);
-            
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(topCenter), 
-                                                    matrix.Transform(topCenter + handleRight), 
+
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(topCenter),
+                                                    matrix.Transform(topCenter + handleRight),
                                                     matrix.Transform(right + handleUp),
                                                     matrix.Transform(right)));
-            
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(right), 
-                                                    matrix.Transform(right + handleDown), 
+
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(right),
+                                                    matrix.Transform(right + handleDown),
                                                     matrix.Transform(bottomCenter + handleRight),
                                                     matrix.Transform(bottomCenter)));
-            
+
             output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(bottomCenter),
                                                     matrix.Transform(bottomCenter + handleLeft),
                                                     matrix.Transform(left + handleDown),
                                                     matrix.Transform(left)));
-            
-            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(left), 
-                                                    matrix.Transform(left + handleUp), 
+
+            output.AddRange(SVGGeomUtils.CubicCurve(matrix.Transform(left),
+                                                    matrix.Transform(left + handleUp),
                                                     matrix.Transform(topCenter + handleLeft),
                                                     matrix.Transform(topCenter)));
 

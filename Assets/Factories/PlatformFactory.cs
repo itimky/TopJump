@@ -52,7 +52,7 @@ public class PlatformFactory : MonoBehaviour
         bonusPlatformQueue = new Queue<GameObject>();
 
         for (int i = 0; i < instanceCount; i++)
-            simpleQueue.Enqueue(Game.MakePrefabInstance(simplePrefab));        
+            simpleQueue.Enqueue(Game.MakePrefabInstance(simplePrefab));
 
         for (int i = 0; i < instanceCount / 3; i++)
         {
@@ -108,7 +108,7 @@ public class PlatformFactory : MonoBehaviour
 
         if (platform == null)
             platform = Reuse(simpleQueue);
-        
+
 
         return platform;
     }

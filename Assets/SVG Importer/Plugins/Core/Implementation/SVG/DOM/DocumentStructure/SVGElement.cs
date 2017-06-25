@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Document 
+namespace SVGImporter.Document
 {
     using Rendering;
     using Utils;
@@ -142,7 +142,7 @@ namespace SVGImporter.Document
         public SVGMatrix ViewBoxTransform()
         {
             if (this._cachedViewBoxTransform == null)
-            {               
+            {
                 Rect viewport = _paintable.viewport;
                 if(_rootElement)
                 {

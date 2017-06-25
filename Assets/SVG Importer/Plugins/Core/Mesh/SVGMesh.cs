@@ -13,8 +13,8 @@ namespace SVGImporter.Geometry
     using Utils;
 
     public class SVGMesh : System.Object
-    {        
-        public static float meshScale = 1f;        
+    {
+        public static float meshScale = 1f;
         public static Vector4 border;
         public static bool sliceMesh = false;
         public static float minDepthOffset = 0.001f;
@@ -38,9 +38,9 @@ namespace SVGImporter.Geometry
         }
 
         protected SVGFill _fill;
-        public SVGFill fill 
-        { 
-            get { return _fill; } 
+        public SVGFill fill
+        {
+            get { return _fill; }
         }
 
         protected Vector3[] _vertices;
@@ -49,7 +49,7 @@ namespace SVGImporter.Geometry
             get { return _vertices; }
             set { _vertices = value; }
         }
-               
+
         protected Vector2[] _uvs;
         public Vector2[] uvs
         {
@@ -84,7 +84,7 @@ namespace SVGImporter.Geometry
             get { return _bounds; }
             set { _bounds = value; }
         }
-        
+
         public SVGMesh(Mesh mesh, SVGFill svgFill, float opacity = 1f)
         {
             if (mesh == null)
@@ -131,74 +131,74 @@ namespace SVGImporter.Geometry
 
             _triangles = new int[trianglesLength];
 
-			// Correct Winding
-			int triangle0, triangle1, triangle2;
-			Vector2 vector0, vector1, vector2;
-			float winding;
+            // Correct Winding
+            int triangle0, triangle1, triangle2;
+            Vector2 vector0, vector1, vector2;
+            float winding;
             for (int i = 0; i < trianglesLength; i+=3)
             {
-				triangle0 = mesh.triangles [i];
-				triangle1 = mesh.triangles [i + 1];
-				triangle2 = mesh.triangles [i + 2];
+                triangle0 = mesh.triangles [i];
+                triangle1 = mesh.triangles [i + 1];
+                triangle2 = mesh.triangles [i + 2];
 
-				vector0 = _vertices[triangle0];
-				vector1 = _vertices[triangle1];
-				vector2 = _vertices[triangle2];
+                vector0 = _vertices[triangle0];
+                vector1 = _vertices[triangle1];
+                vector2 = _vertices[triangle2];
 
-				winding = (vector1.x - vector0.x) * (vector1.y + vector0.y);
-				winding += (vector2.x - vector1.x) * (vector2.y + vector1.y);
-				winding += (vector0.x - vector2.x) * (vector0.y + vector2.y);
+                winding = (vector1.x - vector0.x) * (vector1.y + vector0.y);
+                winding += (vector2.x - vector1.x) * (vector2.y + vector1.y);
+                winding += (vector0.x - vector2.x) * (vector0.y + vector2.y);
 
-				if(winding < 0)
-				{				
-	                _triangles [i] = mesh.triangles [i];
-					_triangles [i + 1] = mesh.triangles [i + 1];
-					_triangles [i + 2] = mesh.triangles [i + 2];
-				} else {
-					_triangles [i] = mesh.triangles [i];
-					_triangles [i + 2] = mesh.triangles [i + 1];
-					_triangles [i + 1] = mesh.triangles [i + 2];
-				}
+                if(winding < 0)
+                {
+                    _triangles [i] = mesh.triangles [i];
+                    _triangles [i + 1] = mesh.triangles [i + 1];
+                    _triangles [i + 2] = mesh.triangles [i + 2];
+                } else {
+                    _triangles [i] = mesh.triangles [i];
+                    _triangles [i + 2] = mesh.triangles [i + 1];
+                    _triangles [i + 1] = mesh.triangles [i + 2];
+                }
             }
 
             if (mesh.colors32 != null && mesh.colors32.Length > 0)
             {
                 _colors = new Color32[length];
                 for (int i = 0; i < length; i++)
-                {        
+                {
                     _colors [i] = mesh.colors32 [i];
                     if(opacity != 1f) _colors[i].a = (byte)Mathf.RoundToInt((_colors[i].a / 255 * opacity) * 255);
                 }
             } else {
-				_colors = new Color32[length];
+                _colors = new Color32[length];
                 Color32 color = new Color32((byte)255, (byte)255, (byte)255, (byte)Mathf.RoundToInt(opacity * 255));
-				for (int i = 0; i < length; i++)
-				{
+                for (int i = 0; i < length; i++)
+                {
                     _colors [i] = color;
-				}
-			}
+                }
+            }
 
             if (mesh.uv != null && mesh.uv.Length > 0)
             {
                 _uvs = new Vector2[length];
                 for (int i = 0; i < length; i++)
-                {        
+                {
                     _uvs [i] = mesh.uv [i];
                 }
             } else {
-				_uvs = new Vector2[length];
-			}
+                _uvs = new Vector2[length];
+            }
 
             if (mesh.uv2 != null && mesh.uv2.Length > 0)
             {
                 _uvs2 = new Vector2[length];
                 for (int i = 0; i < length; i++)
-                {        
+                {
                     _uvs2 [i] = mesh.uv2 [i];
                 }
             } else {
-				_uvs2 = new Vector2[length];
-			}
+                _uvs2 = new Vector2[length];
+            }
         }
 
         public void UpdateDepth()
@@ -232,12 +232,12 @@ namespace SVGImporter.Geometry
         protected static Mesh CreateAutomaticMesh(out Material[] materials)
         {
             materials = new Material[0];
-            
+
             if(sliceMesh) Create9Slice();
 
             // Z Sort meshes
             if(SVGMesh.format == SVGAssetFormat.Opaque)
-            {    
+            {
                 int meshCount = SVGGraphics.meshes.Count;
                 SVGFill fill;
 
@@ -246,7 +246,7 @@ namespace SVGImporter.Geometry
                     SVGBounds meshBounds = SVGBounds.InfiniteInverse;
                     for (int i = 0; i < meshCount; i++)
                     {
-                        if (SVGGraphics.meshes [i] == null) continue;                
+                        if (SVGGraphics.meshes [i] == null) continue;
                         meshBounds.Encapsulate(SVGGraphics.meshes [i].bounds);
                     }
 
@@ -260,7 +260,7 @@ namespace SVGImporter.Geometry
                     {
                         if (SVGGraphics.meshes [i] == null)
                             continue;
-                        
+
                         fill = SVGGraphics.meshes [i]._fill;
                         if (fill != null)
                         {
@@ -281,7 +281,7 @@ namespace SVGImporter.Geometry
                                         highestMesh = nodes[j];
                                     }
                                 }
-                                
+
                                 if(fill.blend == FILL_BLEND.OPAQUE)
                                 {
                                     SVGGraphics.meshes [i]._depth = highestDepth + 1;
@@ -303,14 +303,14 @@ namespace SVGImporter.Geometry
                     {
                         if (SVGGraphics.meshes [i] == null)
                             continue;
-                        
+
                         fill = SVGGraphics.meshes [i]._fill;
                         if (fill != null)
                         {
                             if (fill.blend == FILL_BLEND.OPAQUE || lastBlendType == FILL_BLEND.OPAQUE)
                             {
                                 SVGGraphics.meshes [i]._depth = SVGGraphics.IncreaseDepth();
-                            } else 
+                            } else
                             {
                                 SVGGraphics.meshes [i]._depth = SVGGraphics.currentDepthOffset;
                             }
@@ -330,14 +330,14 @@ namespace SVGImporter.Geometry
                                 combineInstancesTransparent);
 
             int count = combineInstancesOpaque.Count + combineInstancesTransparent.Count;
-            
+
             if (count == 0)
                 return null;
-            
+
             List<Material> outputMaterials = new List<Material>(count);
-            
+
             List<CombineInstance> combineInstances = new List<CombineInstance>();
-            
+
             if (combineInstancesOpaque.Count > 0)
             {
                 outputMaterials.Add(SVGAtlas.Instance.opaqueGradient);
@@ -349,10 +349,10 @@ namespace SVGImporter.Geometry
                 outputMaterials.Add(SVGAtlas.Instance.transparentGradient);
                 combineInstances.Add(GetCombinedInstance(combineInstancesTransparent));
             }
-            
+
             if(outputMaterials.Count != 0)
                 materials = outputMaterials.ToArray();
-            
+
             if (combineInstances.Count > 1)
             {
                 Mesh output = new Mesh();
@@ -373,7 +373,7 @@ namespace SVGImporter.Geometry
             SVGBounds meshBounds = SVGBounds.InfiniteInverse;
             for (int i = 0; i < meshCount; i++)
             {
-                if (SVGGraphics.meshes [i] == null) continue;                
+                if (SVGGraphics.meshes [i] == null) continue;
                 meshBounds.Encapsulate(SVGGraphics.meshes [i].bounds);
             }
 
@@ -386,13 +386,13 @@ namespace SVGImporter.Geometry
                 for(int i = 0; i < meshCount; i++)
                 {
                     if(SVGMesh.border.x > 0)
-                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(Mathf.Lerp(min.x, max.x, SVGMesh.border.x), 0f), Vector2.up); 
+                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(Mathf.Lerp(min.x, max.x, SVGMesh.border.x), 0f), Vector2.up);
                     if(SVGMesh.border.y > 0)
-                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(0f, Mathf.Lerp(min.y, max.y, 1f - SVGMesh.border.y)), Vector2.right);                     
+                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(0f, Mathf.Lerp(min.y, max.y, 1f - SVGMesh.border.y)), Vector2.right);
                     if(SVGMesh.border.z > 0)
-                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(Mathf.Lerp(min.x, max.x, 1f - SVGMesh.border.z), 0f), Vector2.up);                     
+                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(Mathf.Lerp(min.x, max.x, 1f - SVGMesh.border.z), 0f), Vector2.up);
                     if(SVGMesh.border.w > 0)
-                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(0f, Mathf.Lerp(min.y, max.y, SVGMesh.border.w)), Vector2.right); 
+                        SVGMeshCutter.MeshSplit(SVGGraphics.meshes [i], new Vector2(0f, Mathf.Lerp(min.y, max.y, SVGMesh.border.w)), Vector2.right);
                 }
             }
         }
@@ -422,9 +422,9 @@ namespace SVGImporter.Geometry
             return combinedInstance;
         }
 
-        protected static void GetCombineInstances(List<CombineInstance> combineInstancesOpaque,                                         
+        protected static void GetCombineInstances(List<CombineInstance> combineInstancesOpaque,
                                             List<CombineInstance> combineInstancesTransparent)
-        {       
+        {
             int count = SVGGraphics.meshes.Count;
             SVGFill fill;
 
@@ -467,9 +467,9 @@ namespace SVGImporter.Geometry
             {
                 if (SVGGraphics.meshes [i] == null)
                     continue;
-                
+
     //            fill = SVGGraphics.meshes [i]._fill;
-                
+
                 combineMesh = SVGGraphics.meshes [i].mesh;
                 if(combineMesh == null || combineMesh.vertexCount == 0)
                     continue;
@@ -483,7 +483,7 @@ namespace SVGImporter.Geometry
         }
 
         public Mesh mesh
-        { 
+        {
             get
             {
     //        Debug.Log(_vertices);
@@ -497,7 +497,7 @@ namespace SVGImporter.Geometry
 
                 int length = _vertices.Length;
                 int trianglesLength = _triangles.Length;
-            
+
                 Vector3[] finVertices = new Vector3[length];
                 for (int i = 0; i < length; i++)
                 {
@@ -505,14 +505,14 @@ namespace SVGImporter.Geometry
                     meshBounds.Encapsulate(_vertices [i]);
                 }
                 output.vertices = finVertices;
-            
+
                 int[] finTriangles = new int[trianglesLength];
                 for (int i = 0; i < trianglesLength; i++)
                 {
                     finTriangles [i] = _triangles [i];
                 }
                 output.triangles = finTriangles;
-            
+
                 if (_colors != null && _colors.Length > 0)
                 {
                     Color32[] finColors = new Color32[length];
@@ -522,13 +522,13 @@ namespace SVGImporter.Geometry
                     }
                     output.colors32 = finColors;
                 } else {
-					Color32[] finColors = new Color32[length];
-					for (int i = 0; i < length; i++)
-					{
-						finColors [i] = Color.white;
-					}
-					output.colors32 = finColors;
-				}
+                    Color32[] finColors = new Color32[length];
+                    for (int i = 0; i < length; i++)
+                    {
+                        finColors [i] = Color.white;
+                    }
+                    output.colors32 = finColors;
+                }
 
                 if (_uvs != null && _uvs.Length > 0)
                 {
@@ -539,8 +539,8 @@ namespace SVGImporter.Geometry
                     }
                     output.uv = finUvs;
                 } else {
-					output.uv = new Vector2[length];
-				}
+                    output.uv = new Vector2[length];
+                }
 
                 if (_uvs2 != null && _uvs2.Length > 0)
                 {
@@ -551,9 +551,9 @@ namespace SVGImporter.Geometry
                     }
                     output.uv2 = finUvs2;
                 } else {
-					output.uv2 = new Vector2[length];
-				}
-            
+                    output.uv2 = new Vector2[length];
+                }
+
                 return output;
             }
         }

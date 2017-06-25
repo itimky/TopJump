@@ -44,7 +44,7 @@ namespace SVGImporter.Rendering
                 case SVGStrokeLineJoinMethod.Bevel:
                     return StrokeLineJoin.bevel;
             }
-            
+
             return StrokeLineJoin.bevel;
         }
 
@@ -69,10 +69,10 @@ namespace SVGImporter.Rendering
             }
 
             return segments.ToArray();
-        }      
+        }
 
         public static Color GetStrokeColor(SVGPaintable paintable)
-        {   
+        {
             Color color = paintable.strokeColor.Value.color;
             color.a *= paintable.strokeOpacity * paintable.opacity;
             paintable.svgFill = new SVGFill(color, FILL_BLEND.OPAQUE, FILL_TYPE.SOLID);
@@ -84,10 +84,10 @@ namespace SVGImporter.Rendering
         {
             if(inputShapes == null || inputShapes.Count == 0 || paintable == null || paintable.strokeWidth <= 0f)
                 return null;
-            
+
             return CreateStroke(new List<List<Vector2>>(){inputShapes}, paintable, closePath);
         }
-        
+
         public static List<List<Vector2>> CreateStroke(List<List<Vector2>> inputShapes, SVGPaintable paintable, ClosePathRule closePath = ClosePathRule.NEVER)
         {
             if(inputShapes == null || inputShapes.Count == 0 || paintable == null || paintable.strokeWidth <= 0f)
@@ -98,7 +98,7 @@ namespace SVGImporter.Rendering
             {
                 if(inputShapes[i] == null || inputShapes[i].Count < 2)
                     continue;
-                
+
                 segments.Add(GetSegments(inputShapes[i]));
             }
 
@@ -112,7 +112,7 @@ namespace SVGImporter.Rendering
 
             return CreateStrokeMesh(new List<List<Vector2>>(){inputShapes}, paintable, closePath);
         }
-        
+
         public static Mesh CreateStrokeMesh(List<List<Vector2>> inputShapes, SVGPaintable paintable, ClosePathRule closePath = ClosePathRule.NEVER)
         {
             if(inputShapes == null || inputShapes.Count == 0 || paintable == null || paintable.strokeWidth <= 0f)
@@ -142,7 +142,7 @@ namespace SVGImporter.Rendering
 
             AddInputShape(inputShapes);
 
-            Color color = GetStrokeColor(paintable);            
+            Color color = GetStrokeColor(paintable);
 
             float strokeWidth = paintable.strokeWidth;
             if(inputShapes.Count > 1)
@@ -172,11 +172,11 @@ namespace SVGImporter.Rendering
             {
                 CombineInstance[] combineInstances = new CombineInstance[inputShapes.Count];
                 for(int i = 0; i < inputShapes.Count; i++)
-                {         
+                {
                     combineInstances[i] = new CombineInstance();
                     combineInstances[i].mesh = SVGMeshUtils.VectorLine(inputShapes[i].ToArray(), colorA, colorB, width, width * 0.5f, closePath);
                 }
-                
+
                 Mesh mesh = new Mesh();
                 mesh.CombineMeshes(combineInstances, true, false);
                 return mesh;
@@ -186,7 +186,7 @@ namespace SVGImporter.Rendering
         }
 
         public static Mesh CreatePolygon(List<Vector2> inputShapes, SVGPaintable paintable, SVGMatrix matrix, out Mesh antialiasingMesh)
-        {        
+        {
             if(inputShapes == null || inputShapes.Count == 0)
             {
                 antialiasingMesh = null;
@@ -197,7 +197,7 @@ namespace SVGImporter.Rendering
         }
 
         public static Mesh CreatePolygon(List<List<Vector2>> inputShapes, SVGPaintable paintable, SVGMatrix matrix, out Mesh antialiasingMesh)
-        {   
+        {
             antialiasingMesh = null;
             if(inputShapes == null || inputShapes.Count == 0)
             {
@@ -228,10 +228,10 @@ namespace SVGImporter.Rendering
                         paintable.svgFill = new SVGFill(color);
                     } else {
                         color = paintable.fillColor.Value.color;
-                        color.a *= paintable.fillOpacity; 
+                        color.a *= paintable.fillOpacity;
                         paintable.svgFill = new SVGFill(color);
                     }
-                    
+
                     paintable.svgFill.fillType = FILL_TYPE.SOLID;
                     if(color.a == 1)
                     {
@@ -241,7 +241,7 @@ namespace SVGImporter.Rendering
                     }
                 }
                     break;
-                case SVGPaintMethod.LinearGradientFill:      
+                case SVGPaintMethod.LinearGradientFill:
                 {
                     SVGLinearGradientBrush linearGradBrush = paintable.GetLinearGradientBrush(bounds, matrix);
                     paintable.svgFill = linearGradBrush.fill;
@@ -259,7 +259,7 @@ namespace SVGImporter.Rendering
                     paintable.svgFill = conicalGradBrush.fill;
                 }
                     break;
-                case SVGPaintMethod.PathDraw:  
+                case SVGPaintMethod.PathDraw:
                 {
                     Color color = Color.black;
                     SVGColorType colorType = paintable.fillColor.Value.colorType;
@@ -272,7 +272,7 @@ namespace SVGImporter.Rendering
                         color.a *= paintable.strokeOpacity;
                         paintable.svgFill = new SVGFill(color);
                     }
-                    
+
                     paintable.svgFill.fillType = FILL_TYPE.SOLID;
                     if(color.a == 1)
                     {
@@ -293,7 +293,7 @@ namespace SVGImporter.Rendering
             {
                 if(simplifiedShapes[i] == null)
                     continue;
-                
+
                 pathLength = simplifiedShapes[i].Count;
                 path = new LibTessDotNet.ContourVertex[pathLength];
                 Vector2 position;
@@ -336,7 +336,7 @@ namespace SVGImporter.Rendering
 
             Color32[] colors32 = new Color32[meshVertexCount];
 
-            for (int i = 0; i < meshVertexCount; i++) 
+            for (int i = 0; i < meshVertexCount; i++)
             {
                 colors32 [i].r = fillColor.r;
                 colors32 [i].g = fillColor.g;
@@ -390,14 +390,14 @@ namespace SVGImporter.Rendering
 
                 uv = new Vector2[meshVertexCount];
                 Vector2 uvPoint = Vector2.zero;
-                SVGMatrix svgFillTransform = GetFillTransform(svgPaintable, bounds);                
+                SVGMatrix svgFillTransform = GetFillTransform(svgPaintable, bounds);
                 Rect viewport = svgPaintable.viewport;
                 for (int i = 0; i < meshVertexCount; i++)
                 {
                     uvPoint.x = vertices [i].x;
                     uvPoint.y = vertices [i].y;
                     uvPoint = svgFillTransform.Transform(uvPoint);
-                    
+
                     uv [i].x = (uvPoint.x - viewport.x) / viewport.width;
                     uv [i].y = (uvPoint.y - viewport.y) / viewport.height;
                 }
@@ -435,7 +435,7 @@ namespace SVGImporter.Rendering
 
             return bounds;
         }
-        
+
         private static Rect GetRect(List<Vector2> array)
         {
             if(array == null || array.Count == 0)
@@ -455,7 +455,7 @@ namespace SVGImporter.Rendering
                 if(array[i].y > max.y)
                     max.y = array[i].y;
             }
-            
+
             return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
         }
 
@@ -463,7 +463,7 @@ namespace SVGImporter.Rendering
         {
             if(array == null || array.Count == 0)
                 return new Rect();
-            
+
             Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
             Vector2 max = new Vector2(float.MinValue, float.MinValue);
             int arrayLength = array.Count;
@@ -486,7 +486,7 @@ namespace SVGImporter.Rendering
                         max.y = array[i][j].y;
                 }
             }
-            
+
             return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
         }
 
@@ -508,18 +508,18 @@ namespace SVGImporter.Rendering
         {
             Vector2 point = Vector2.zero;
             if(posX.unitType != SVGLengthType.Percentage)
-            { 
-                point.x = posX.value; 
-            } else { 
-                point.x = bounds.x + bounds.width * (posX.value / 100f); 
+            {
+                point.x = posX.value;
+            } else {
+                point.x = bounds.x + bounds.width * (posX.value / 100f);
             }
 
-            if(posY.unitType != SVGLengthType.Percentage) 
-            { 
-                point.y = posY.value; 
-            } else 
-            { 
-                point.y = bounds.y + bounds.height * (posY.value / 100f); 
+            if(posY.unitType != SVGLengthType.Percentage)
+            {
+                point.y = posY.value;
+            } else
+            {
+                point.y = bounds.y + bounds.height * (posY.value / 100f);
             }
 
             return point;
@@ -543,7 +543,7 @@ namespace SVGImporter.Rendering
                         Vector2 startPoint = GetGradientVector(svgFill.gradientStartX, svgFill.gradientStartY, bounds);
                         Vector2 endPoint = GetGradientVector(svgFill.gradientEndX, svgFill.gradientEndY, bounds);
 
-                        Vector2 gradientVector = endPoint - startPoint;        
+                        Vector2 gradientVector = endPoint - startPoint;
                         Vector2 normalizedVector = Vector2.zero;
 
                         float angle = Mathf.Atan2(gradientVector.y, gradientVector.x) * Mathf.Rad2Deg;
@@ -586,7 +586,7 @@ namespace SVGImporter.Rendering
                         transform = transform.Translate(viewport.center);
                         transform = transform.ScaleNonUniform(normalizedVector.x, normalizedVector.y);
                         transform = transform.Translate(-point);
-                        
+
                         transform = transform.Multiply(gradientMatrix.Inverse());
                         transform = transform.Multiply(svgFill.transform.Inverse());
 
@@ -599,39 +599,39 @@ namespace SVGImporter.Rendering
                         if(svgFill.gradientEndX.unitType == SVGLengthType.Percentage) radius *= 0.5f;
 
                         float radiusTimesTwo = radius * 2f;
-                        
+
                         Vector2 normalizedVector = Vector2.zero;
-                        
+
                         if(radiusTimesTwo != 0f)
                         {
                             normalizedVector.x = viewport.width / radiusTimesTwo;
                             normalizedVector.y = viewport.height / radiusTimesTwo;
                         }
-                        
+
                         transform = transform.Translate(viewport.center);
                         transform = transform.ScaleNonUniform(normalizedVector.x, normalizedVector.y);
                         transform = transform.Translate(-point);
-                        
+
                         transform = transform.Multiply(gradientMatrix.Inverse());
                         transform = transform.Multiply(svgFill.transform.Inverse());
-                        
+
                         break;
                     }
                 }
             }
-            
+
             return transform;
         }
 
         protected static void AddInputShape(List<List<Vector2>> inputShapes)
-        {            
+        {
             if(inputShapes == null) return;
             for(int i = 0; i < inputShapes.Count; i++)
             {
                 if(inputShapes[i] == null || inputShapes[i].Count == 0) continue;
                 SVGGraphics.paths.Add(new SVGPath(inputShapes[i].ToArray()));
             }
-            
+
         }
     }
 }

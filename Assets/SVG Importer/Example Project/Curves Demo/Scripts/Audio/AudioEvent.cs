@@ -23,10 +23,10 @@ public class AudioEvent : MonoBehaviour {
 
     [System.Serializable]
     public class TriggerEvent : UnityEvent<float> { }
-    
+
     [FormerlySerializedAs("onAudio")]
     [SerializeField]
-    protected TriggerEvent m_onAudio = new TriggerEvent();    
+    protected TriggerEvent m_onAudio = new TriggerEvent();
     public TriggerEvent onAudio
     {
         get { return m_onAudio; }

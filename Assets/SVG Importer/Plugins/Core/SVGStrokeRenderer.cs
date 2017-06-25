@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter 
+namespace SVGImporter
 {
     using Rendering;
     using Utils;
@@ -25,7 +25,7 @@ namespace SVGImporter
         public float[] dashArray;
         public float dashOffset;
         public ClosePathRule closeLine = ClosePathRule.ALWAYS;
-        
+
         protected ISVGShape svgShape;
         protected ISVGRenderer svgRenderer;
 
@@ -60,7 +60,7 @@ namespace SVGImporter
                     {
                         segments[j] = new StrokeSegment(shape[i].points[j], shape[i].points[j + 1]);
                     }
-                    
+
                     meshes[i] = SVGLineUtils.StrokeMesh(segments, width, color, lineJoin, lineCap, mitterLimit, dashArray, dashOffset, closeLine, roundQuality);
                 }
 
@@ -87,7 +87,7 @@ namespace SVGImporter
 
         void Clear()
         {
-            if(svgRenderer != null) 
+            if(svgRenderer != null)
             {
                 svgRenderer.OnPrepareForRendering -= PrepareForRendering;
                 svgRenderer.RemoveModifier(this);

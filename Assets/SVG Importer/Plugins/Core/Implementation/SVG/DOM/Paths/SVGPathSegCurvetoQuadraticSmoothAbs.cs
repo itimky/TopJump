@@ -16,7 +16,7 @@ namespace SVGImporter.Rendering
             if (segment != null)
                 _previousPoint = segment.currentPoint;
             _currentPoint = new Vector2(x, y);
-            
+
             SVGPathSegCurvetoQuadratic pSegment = segment as SVGPathSegCurvetoQuadratic;
             if (pSegment != null)
             {
@@ -34,6 +34,6 @@ namespace SVGImporter.Rendering
             {
                 return _controlPoint1;
             }
-        }   
+        }
     }
 }

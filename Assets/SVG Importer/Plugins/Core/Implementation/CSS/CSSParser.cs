@@ -67,7 +67,7 @@ namespace SVGImporter.Utils
                 if(element == null || element.Length != 2) continue;
 
                 Dictionary<string, string> attributeDictionary = new Dictionary<string, string>();
-                
+
                 string[] attributes = element[1].Split(new char[]{attributeEndChar}, System.StringSplitOptions.RemoveEmptyEntries);
                 attributesLength = attributes.Length;
                 for(j = 0; j < attributesLength; j++)

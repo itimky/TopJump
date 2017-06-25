@@ -14,7 +14,7 @@ public class AnimationAction : System.Object
 
     public string name;
     public ActionEvent actionEvent = new ActionEvent();
-    
+
     public void InvokeAnimationAction()
     {
         actionEvent.Invoke();

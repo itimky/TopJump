@@ -42,8 +42,8 @@ public class InstancerGrid : MonoBehaviour {
 
     Vector3 destination;
 
-	void Update() {
-	
+    void Update() {
+
         float length = instancer.instances.Length;
         int finalGrid = Mathf.RoundToInt(grid * _gridIntensity);
         bool finalSquare = square && _squareIntensity >= 0.5f;
@@ -80,6 +80,6 @@ public class InstancerGrid : MonoBehaviour {
             instancer.instances[i].transform.localPosition = Vector3.Lerp(instancer.instances[i].transform.localPosition, destination, deltaTime);
         }
 
-	}
+    }
 
 }

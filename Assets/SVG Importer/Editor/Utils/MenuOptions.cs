@@ -17,18 +17,18 @@ namespace SVGImporter
         private const float  kThinHeight  = 20f;
 
         private static Vector2 s_ImageGUIElementSize    = new Vector2(100f, 100f);
-        
+
         private static void SetPositionVisibleinSceneView(RectTransform canvasRTransform, RectTransform itemTransform)
         {
             // Find the best scene view
             SceneView sceneView = SceneView.lastActiveSceneView;
             if (sceneView == null && SceneView.sceneViews.Count > 0)
                 sceneView = SceneView.sceneViews[0] as SceneView;
-            
+
             // Couldn't find a SceneView. Don't set position.
             if (sceneView == null || sceneView.camera == null)
                 return;
-            
+
             // Create world space Plane from canvas position.
             Vector2 localPlanePosition;
             Camera camera = sceneView.camera;
@@ -38,31 +38,31 @@ namespace SVGImporter
                 // Adjust for canvas pivot
                 localPlanePosition.x = localPlanePosition.x + canvasRTransform.sizeDelta.x * canvasRTransform.pivot.x;
                 localPlanePosition.y = localPlanePosition.y + canvasRTransform.sizeDelta.y * canvasRTransform.pivot.y;
-                
+
                 localPlanePosition.x = Mathf.Clamp(localPlanePosition.x, 0, canvasRTransform.sizeDelta.x);
                 localPlanePosition.y = Mathf.Clamp(localPlanePosition.y, 0, canvasRTransform.sizeDelta.y);
-                
+
                 // Adjust for anchoring
                 position.x = localPlanePosition.x - canvasRTransform.sizeDelta.x * itemTransform.anchorMin.x;
                 position.y = localPlanePosition.y - canvasRTransform.sizeDelta.y * itemTransform.anchorMin.y;
-                
+
                 Vector3 minLocalPosition;
                 minLocalPosition.x = canvasRTransform.sizeDelta.x * (0 - canvasRTransform.pivot.x) + itemTransform.sizeDelta.x * itemTransform.pivot.x;
                 minLocalPosition.y = canvasRTransform.sizeDelta.y * (0 - canvasRTransform.pivot.y) + itemTransform.sizeDelta.y * itemTransform.pivot.y;
-                
+
                 Vector3 maxLocalPosition;
                 maxLocalPosition.x = canvasRTransform.sizeDelta.x * (1 - canvasRTransform.pivot.x) - itemTransform.sizeDelta.x * itemTransform.pivot.x;
                 maxLocalPosition.y = canvasRTransform.sizeDelta.y * (1 - canvasRTransform.pivot.y) - itemTransform.sizeDelta.y * itemTransform.pivot.y;
-                
+
                 position.x = Mathf.Clamp(position.x, minLocalPosition.x, maxLocalPosition.x);
                 position.y = Mathf.Clamp(position.y, minLocalPosition.y, maxLocalPosition.y);
             }
-            
+
             itemTransform.anchoredPosition = position;
             itemTransform.localRotation = Quaternion.identity;
             itemTransform.localScale = Vector3.one;
         }
-        
+
         private static GameObject CreateUIElementRoot(string name, MenuCommand menuCommand, Vector2 size)
         {
             GameObject parent = menuCommand.context as GameObject;
@@ -71,11 +71,11 @@ namespace SVGImporter
                 parent = GetOrCreateCanvasGameObject();
             }
             GameObject child = new GameObject(name);
-            
+
             Undo.RegisterCreatedObjectUndo(child, "Create " + name);
             Undo.SetTransformParent(child.transform, parent.transform, "Parent " + child.name);
             GameObjectUtility.SetParentAndAlign(child, parent);
-            
+
             RectTransform rectTransform = child.AddComponent<RectTransform>();
             rectTransform.sizeDelta = size;
             if (parent != menuCommand.context) // not a context click, so center in sceneview
@@ -92,7 +92,7 @@ namespace SVGImporter
             GameObject go = CreateUIElementRoot("Image", menuCommand, s_ImageGUIElementSize);
             go.AddComponent<SVGImage>();
         }
-        
+
         [MenuItem("GameObject/2D Object/SVG Renderer", false, 2003)]
         static public void AddRenderer(MenuCommand menuCommand)
         {
@@ -110,7 +110,7 @@ namespace SVGImporter
             root.AddComponent<CanvasScaler>();
             root.AddComponent<GraphicRaycaster>();
             Undo.RegisterCreatedObjectUndo(root, "Create " + root.name);
-            
+
             // if there is no event system add one...
             CreateEventSystem(false);
             return root;
@@ -120,7 +120,7 @@ namespace SVGImporter
         {
             CreateEventSystem(select, null);
         }
-        
+
         private static void CreateEventSystem(bool select, GameObject parent)
         {
             var esys = Object.FindObjectOfType<EventSystem>();
@@ -130,31 +130,31 @@ namespace SVGImporter
                 GameObjectUtility.SetParentAndAlign(eventSystem, parent);
                 esys = eventSystem.AddComponent<EventSystem>();
                 eventSystem.AddComponent<StandaloneInputModule>();
-                eventSystem.AddComponent<TouchInputModule>();                
+                eventSystem.AddComponent<TouchInputModule>();
                 Undo.RegisterCreatedObjectUndo(eventSystem, "Create " + eventSystem.name);
             }
-            
+
             if (select && esys != null)
             {
                 Selection.activeGameObject = esys.gameObject;
             }
         }
-        
+
         // Helper function that returns a Canvas GameObject; preferably a parent of the selection, or other existing Canvas.
         static public GameObject GetOrCreateCanvasGameObject()
         {
             GameObject selectedGo = Selection.activeGameObject;
-            
+
             // Try to find a gameobject that is the selected GO or one if its parents.
             Canvas canvas = (selectedGo != null) ? selectedGo.GetComponentInParent<Canvas>() : null;
             if (canvas != null && canvas.gameObject.activeInHierarchy)
                 return canvas.gameObject;
-            
+
             // No canvas in selection or its parents? Then use just any canvas..
             canvas = Object.FindObjectOfType(typeof(Canvas)) as Canvas;
             if (canvas != null && canvas.gameObject.activeInHierarchy)
                 return canvas.gameObject;
-            
+
             // No canvas in the scene at all? Then create a new one.
             return MenuOptions.CreateNewUI();
         }
@@ -162,7 +162,7 @@ namespace SVGImporter
         public static GameObject CreateEmptyGameObject(string name)
         {
             GameObject go = new GameObject(name);
-            
+
             if (Selection.activeTransform != null)
                 go.transform.SetParent(Selection.activeTransform);
 
@@ -180,7 +180,7 @@ namespace SVGImporter
             go.transform.position = destination;
             Selection.activeGameObject = go;
             SceneView.RepaintAll();
-            
+
             Undo.RegisterCreatedObjectUndo (go, "Create "+name);
 
             return go;

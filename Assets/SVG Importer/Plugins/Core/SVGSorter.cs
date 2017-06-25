@@ -22,7 +22,7 @@ namespace SVGImporter
         int layerIndexStart;
 
         #if UNITY_EDITOR
-    	void LateUpdate()
+        void LateUpdate()
         {
             if(sort) Sort();
         }

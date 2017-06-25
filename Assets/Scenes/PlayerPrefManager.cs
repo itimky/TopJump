@@ -24,7 +24,7 @@ public static class PlayerPrefManager
 
 
     static string TagToDurationKey(string tag)
-    {        
+    {
         return tag + PlayerPrefKeys.Duration;
     }
 

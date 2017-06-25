@@ -5,7 +5,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     public class SVGPathSegList
     {
@@ -32,7 +32,7 @@ namespace SVGImporter.Rendering
             {
                 return null;
             }
-            return (SVGPathSeg)this._segList [index];        
+            return (SVGPathSeg)this._segList [index];
         }
         public SVGPathSeg GetLastItem()
         {

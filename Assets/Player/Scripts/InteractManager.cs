@@ -24,7 +24,7 @@ public class InteractManager
             else
                 Jump(player, jumpVelocity);
         }
-            
+
     }
 
     private static void Jump(GameObject player, Vector2 velocity)

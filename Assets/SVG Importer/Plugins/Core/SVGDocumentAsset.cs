@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 using System.Collections;
 
-namespace SVGImporter 
+namespace SVGImporter
 {
     public enum SVGError
     {

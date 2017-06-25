@@ -57,7 +57,7 @@ public class CoinManager : MonoBehaviour, IGameOverHandler
     }
 
     public static void AddGold(GameObject gold)
-    {        
+    {
         CoinFactory.GoldBeenUsed(gold);
         Gold += multiplier;
         var pickupAudio = CoinPickups[MoveController.currentTileNum];
@@ -100,7 +100,7 @@ public class MultiplierPanel
     {
         if (isEnabled)
             return;
-        
+
         isEnabled = true;
         panel.transform.localScale = new Vector3(1, 1, 1);
 //        panel.SetActive(true);
@@ -111,7 +111,7 @@ public class MultiplierPanel
     {
         if (!isEnabled)
             return;
-        
+
         isEnabled = false;
         panel.transform.localScale = Vector3.zero;
 //        panel.SetActive(false);

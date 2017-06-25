@@ -14,14 +14,14 @@ public class SpikePlatformBehavior : Pausable
     }
 
     void Toggle()
-    {        
+    {
         IsHarmful = !IsHarmful;
     }
 
     float prepauseSpeed;
 
     public override void Pause()
-    {        
+    {
         prepauseSpeed = animator.speed;
         animator.speed = 0;
     }

@@ -57,7 +57,7 @@ namespace SVGImporter
             }
         }
 
-    	void LateUpdate()
+        void LateUpdate()
         {
             if(frameIndex != lastFrameIndex)
             {

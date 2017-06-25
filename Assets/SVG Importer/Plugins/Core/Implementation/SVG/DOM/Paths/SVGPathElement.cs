@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     using Geometry;
     using Utils;
@@ -285,14 +285,14 @@ namespace SVGImporter.Rendering
                     temp.BeforeRender(summaryTransformList);
             }
         }
-        
+
         public static List<List<Vector2>> GetPaths(SVGPathElement svgElement)
         {
             return GetPaths(SVGMatrix.Identity(), svgElement);
         }
-        
+
         public static List<List<Vector2>> GetPaths(SVGMatrix matrix, SVGPathElement svgElement)
-        {            
+        {
             lastCommand = SVGPathSegTypes.Unknown;
 
             List<Vector2> positionBuffer = new List<Vector2>();
@@ -303,7 +303,7 @@ namespace SVGImporter.Rendering
             {
                 GetSegment(svgElement, segList.GetItem(i), output, positionBuffer, matrix);
             }
-            
+
             if(lastCommand != SVGPathSegTypes.Close && positionBuffer.Count > 0)
             {
                 output.Add(new List<Vector2>(positionBuffer.ToArray()));
@@ -354,7 +354,7 @@ namespace SVGImporter.Rendering
 
         static List<List<Vector2>> paths;
         static SVGPathSegTypes lastCommand;
-        
+
         public static void Create(SVGPathElement svgElement)
         {
             if(svgElement.paintable.visibility != SVGVisibility.Visible || svgElement.paintable.display == SVGDisplay.None)
@@ -365,7 +365,7 @@ namespace SVGImporter.Rendering
             if(svgElement.paintable.IsFill())
                 CreateFill(svgElement);
             if(svgElement.paintable.IsStroke())
-                CreateStroke(svgElement); 
+                CreateStroke(svgElement);
 
             paths = null;
         }
@@ -383,7 +383,7 @@ namespace SVGImporter.Rendering
             } else {
                 path = paths;
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGSimplePath.CreatePolygon(path, svgElement.paintable, svgElement.transformMatrix, out antialiasingMesh);
             if(mesh == null) return;
@@ -396,7 +396,7 @@ namespace SVGImporter.Rendering
                 SVGGraphics.AddMesh(new SVGMesh(antialiasingMesh, svgFill, svgElement.paintable.opacity));
             }
         }
-        
+
         static void CreateStroke(SVGPathElement svgElement)
         {
             string name = svgElement.attrList.GetValue("id");
@@ -408,10 +408,10 @@ namespace SVGImporter.Rendering
             {
                 stroke = SVGGeom.ClipPolygon(stroke, svgElement.paintable.clipPathList);
             }
-            
+
             Mesh antialiasingMesh;
             Mesh mesh = SVGLineUtils.TessellateStroke(stroke, SVGSimplePath.GetStrokeColor(svgElement.paintable), out antialiasingMesh);
-            if(mesh == null) return;            
+            if(mesh == null) return;
             mesh.name = name;
             SVGGraphics.AddMesh(new SVGMesh(mesh, svgElement.paintable.svgFill, svgElement.paintable.opacity));
             if(antialiasingMesh != null)
@@ -467,14 +467,14 @@ namespace SVGImporter.Rendering
                     SVGPathSegCurvetoCubicRel curvetoCubicRel = segment as SVGPathSegCurvetoCubicRel;
                     #if PATH_COMMAND_DEBUG
                     Debug.Log("curvetoCubicRel");
-                    #endif          
+                    #endif
                     positionBuffer.AddRange(SVGGeomUtils.CubicCurve(SVGGeomUtils.TransformPoint(curvetoCubicRel.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoCubicRel.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoCubicRel.controlPoint2, matrix), SVGGeomUtils.TransformPoint(curvetoCubicRel.currentPoint, matrix)));
                     break;
                 case SVGPathSegTypes.CurveTo_Cubic_Smooth_Abs:
                     SVGPathSegCurvetoCubicSmoothAbs curvetoCubicSmoothAbs = segment as SVGPathSegCurvetoCubicSmoothAbs;
                     #if PATH_COMMAND_DEBUG
                     Debug.Log("curvetoCubicSmoothAbs");
-                    #endif               
+                    #endif
                     positionBuffer.AddRange(SVGGeomUtils.CubicCurve(SVGGeomUtils.TransformPoint(curvetoCubicSmoothAbs.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothAbs.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothAbs.controlPoint2, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothAbs.currentPoint, matrix)));
                     break;
                 case SVGPathSegTypes.CurveTo_Cubic_Smooth_Rel:
@@ -483,7 +483,7 @@ namespace SVGImporter.Rendering
                     Debug.Log("curvetoCubicSmoothRel");
                     #endif
                     positionBuffer.AddRange(SVGGeomUtils.CubicCurve(SVGGeomUtils.TransformPoint(curvetoCubicSmoothRel.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothRel.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothRel.controlPoint2, matrix), SVGGeomUtils.TransformPoint(curvetoCubicSmoothRel.currentPoint, matrix)));
-                    
+
                     break;
                 case SVGPathSegTypes.CurveTo_Quadratic_Abs:
                     SVGPathSegCurvetoQuadraticAbs curvetoQuadraticAbs = segment as SVGPathSegCurvetoQuadraticAbs;
@@ -498,7 +498,7 @@ namespace SVGImporter.Rendering
                     Debug.Log("curvetoQuadraticRel");
                     #endif
                     positionBuffer.AddRange(SVGGeomUtils.QuadraticCurve(SVGGeomUtils.TransformPoint(curvetoQuadraticRel.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticRel.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticRel.currentPoint, matrix)));
-                    
+
                     break;
                 case SVGPathSegTypes.CurveTo_Quadratic_Smooth_Abs:
                     SVGPathSegCurvetoQuadraticSmoothAbs curvetoQuadraticSmoothAbs = segment as SVGPathSegCurvetoQuadraticSmoothAbs;
@@ -506,7 +506,7 @@ namespace SVGImporter.Rendering
                     Debug.Log("curvetoQuadraticSmoothAbs");
                     #endif
                     positionBuffer.AddRange(SVGGeomUtils.QuadraticCurve(SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothAbs.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothAbs.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothAbs.currentPoint, matrix)));
-                    
+
                     break;
                 case SVGPathSegTypes.CurveTo_Quadratic_Smooth_Rel:
                     SVGPathSegCurvetoQuadraticSmoothRel curvetoQuadraticSmoothRel = segment as SVGPathSegCurvetoQuadraticSmoothRel;
@@ -514,7 +514,7 @@ namespace SVGImporter.Rendering
                     Debug.Log("curvetoQuadraticSmoothRel");
                     #endif
                     positionBuffer.AddRange(SVGGeomUtils.QuadraticCurve(SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothRel.previousPoint, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothRel.controlPoint1, matrix), SVGGeomUtils.TransformPoint(curvetoQuadraticSmoothRel.currentPoint, matrix)));
-                    
+
                     break;
                 case SVGPathSegTypes.LineTo_Abs:
                     SVGPathSegLinetoAbs linetoAbs = segment as SVGPathSegLinetoAbs;
@@ -589,7 +589,7 @@ namespace SVGImporter.Rendering
                     positionBuffer.Add(SVGGeomUtils.TransformPoint(movetoRel.currentPoint, matrix));
                     break;
             }
-            
+
             lastCommand = segment.type;
             return true;
         }

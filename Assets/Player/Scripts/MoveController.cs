@@ -79,11 +79,11 @@ public class MoveController : MonoBehaviour
                     startTime = Time.time;
                     yield return null;
                 }
-     
+
                 var target = targets.Peek();
                 // move ending
                 if (tr.position.x == target)
-                {                    
+                {
                     tr.position = new Vector2(target, tr.position.y);
                     targets.Dequeue();
                     startPos = tr.position.x;

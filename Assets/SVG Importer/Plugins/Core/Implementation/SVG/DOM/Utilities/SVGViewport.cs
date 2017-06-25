@@ -7,11 +7,11 @@ using System.Collections;
 
 namespace SVGImporter.Utils
 {
-    public class SVGViewport 
+    public class SVGViewport
     {
         const string None = "none";
         const string xMinYMin = "xminymin";
-        const string xMidYMin = "xmidymin";       
+        const string xMidYMin = "xmidymin";
         const string xMaxYMin = "xmaxymin";
         const string xMinYMid = "xminymid";
         const string xMidYMid = "xmidymid";
@@ -36,7 +36,7 @@ namespace SVGImporter.Utils
             xMidYMax,
             xMaxYMax
         }
-        
+
         public enum MeetOrSlice
         {
             Meet, // Inside viewport
@@ -76,7 +76,7 @@ namespace SVGImporter.Utils
                     return MeetOrSlice.Meet;
                 case Slice:
                     return MeetOrSlice.Slice;
-                    
+
             }
 
             return MeetOrSlice.Meet;
@@ -99,12 +99,12 @@ namespace SVGImporter.Utils
         {
             if(inputStrings == null || inputStrings.Length == 0)
                 return Align.xMidYMid;
-            
+
             for(int i = 0; i < inputStrings.Length; i++)
             {
                 if(string.IsNullOrEmpty(inputStrings[i]))
                     continue;
-                
+
                 switch(inputStrings[i].ToLower())
                 {
                     case None:
@@ -129,7 +129,7 @@ namespace SVGImporter.Utils
                         return Align.xMaxYMax;
                 }
             }
-            
+
             return Align.xMidYMid;
         }
         public static Align GetAlignFromString(string inputText)
@@ -175,7 +175,7 @@ namespace SVGImporter.Utils
                 case Align.xMidYMin:
                     return xMidYMin;
                 case Align.xMaxYMin:
-                    return xMaxYMin;      
+                    return xMaxYMin;
                 case Align.xMinYMid:
                     return xMinYMid;
                 case Align.xMidYMid:
@@ -221,10 +221,10 @@ namespace SVGImporter.Utils
                         return new Rect(align.x, align.y, size.x, size.y);
                 }
             }
-            
+
             return viewport;
         }
-        
+
         protected static Vector2 Getalign(Rect viewport, Vector2 size, Align align)
         {
             switch(align)
@@ -248,7 +248,7 @@ namespace SVGImporter.Utils
                 case Align.xMaxYMax:
                     return new Vector2(viewport.x + (viewport.width - size.x), viewport.y + (viewport.height - size.y));
             }
-            
+
             return new Vector2(viewport.x, viewport.y);
         }
     }

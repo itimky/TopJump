@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System;
 
 namespace SVGImporter.Utils
-{        
+{
     public static class SVGDebug
     {
         public static void DebugPoints(List<List<Vector2>> path)

@@ -39,7 +39,7 @@ public class SVGDebugMeshEditor : Editor {
         get {
             if(EditorPrefs.HasKey(SVG_IMPORTER_SHOWPOINTS_KEY))
                 return EditorPrefs.GetBool(SVG_IMPORTER_SHOWPOINTS_KEY);
-            
+
             return false;
         }
         set {
@@ -47,7 +47,7 @@ public class SVGDebugMeshEditor : Editor {
         }
     }
 
-	public override void OnInspectorGUI()
+    public override void OnInspectorGUI()
     {
         SVGDebugMesh debugMesh = (SVGDebugMesh)target;
         if(debugMesh != null)
@@ -63,10 +63,10 @@ public class SVGDebugMeshEditor : Editor {
                     int[] triangles = mesh.triangles;
                     Vector2[] uv = mesh.uv;
                     Vector2[] uv2 = mesh.uv2;
-					#if !UNITY_4_6
+                    #if !UNITY_4_6
                     Vector2[] uv3 = mesh.uv3;
                     Vector2[] uv4 = mesh.uv4;
-					#endif
+                    #endif
                     Vector3[] normals = mesh.normals;
                     Vector4[] tangents = mesh.tangents;
 
@@ -80,12 +80,12 @@ public class SVGDebugMeshEditor : Editor {
                         EditorGUILayout.LabelField("uv: "+uv.Length);
                     if(uv2 != null)
                         EditorGUILayout.LabelField("uv2: "+uv2.Length);
-					#if !UNITY_4_6
+                    #if !UNITY_4_6
                     if(uv3 != null)
                         EditorGUILayout.LabelField("uv3: "+uv3.Length);
                     if(uv4 != null)
                         EditorGUILayout.LabelField("uv4: "+uv4.Length);
-					#endif
+                    #endif
                     if(normals != null)
                         EditorGUILayout.LabelField("normals: "+normals.Length);
                     if(tangents != null)
@@ -120,10 +120,10 @@ public class SVGDebugMeshEditor : Editor {
 //                    int[] triangles = mesh.triangles;
                     Vector2[] uv = mesh.uv;
                     Vector2[] uv2 = mesh.uv2;
-					#if !UNITY_4_6
+                    #if !UNITY_4_6
                     Vector2[] uv3 = mesh.uv3;
                     Vector2[] uv4 = mesh.uv4;
-					#endif
+                    #endif
                     Vector3[] normals = mesh.normals;
                     Vector4[] tangents = mesh.tangents;
 
@@ -158,7 +158,7 @@ public class SVGDebugMeshEditor : Editor {
                                     if(uv2 == null || uv2.Length != vertexCount) continue;
                                     Handles.Label(vertices[i], uv2[i].ToString());
                                     break;
-								#if !UNITY_4_6
+                                #if !UNITY_4_6
                                 case DebugType.UV3:
                                     if(uv3 == null || uv3.Length != vertexCount) continue;
                                     Handles.Label(vertices[i], uv3[i].ToString());
@@ -167,7 +167,7 @@ public class SVGDebugMeshEditor : Editor {
                                     if(uv4 == null || uv4.Length != vertexCount) continue;
                                     Handles.Label(vertices[i], uv4[i].ToString());
                                     break;
-								#endif
+                                #endif
                                 case DebugType.NORMALS:
                                     if(normals == null || normals.Length != vertexCount) continue;
                                     Handles.Label(vertices[i], normals[i].ToString());

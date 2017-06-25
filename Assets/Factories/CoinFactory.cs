@@ -51,7 +51,7 @@ public class CoinFactory : MonoBehaviour
         SetPosition(coin.transform);
         objectQueue.Enqueue(coin);
     }
-        
+
     //
     //    private GameObject GenerateCoin()
     //    {
@@ -98,10 +98,10 @@ public class CoinFactory : MonoBehaviour
                     else
                         xPos = Game.positions[index - 1];
                 }
-    
+
                 coinsLineLeft = Random.Range(3, 10);
             }
-    
+
             transform.localPosition = new Vector2(xPos, nextY);
             nextY += verticalDistance;
             coinsLineLeft--;
@@ -117,7 +117,7 @@ public class CoinFactory : MonoBehaviour
                     lineCount = 2;
                 else
                     lineCount = 1;
-    
+
                 var possibleXPoses = Game.positions.ToList();
                 xPoses = new List<float>();
                 for (int i = 0; i < lineCount; i++)
@@ -128,13 +128,13 @@ public class CoinFactory : MonoBehaviour
                 }
                 coinsLineLeft = Random.Range(3, 6);
             }
-    
+
             toSetPosition.Add(transform);
             if (xPoses.Count == toSetPosition.Count)
             {
                 for (int i = 0; i < xPoses.Count; i++)
                     toSetPosition[i].localPosition = new Vector2(xPoses[i], nextY);
-    
+
                 nextY += verticalDistance;
                 coinsLineLeft--;
                 toSetPosition.Clear();

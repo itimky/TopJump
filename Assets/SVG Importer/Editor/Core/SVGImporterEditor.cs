@@ -38,21 +38,21 @@ namespace SVGImporter
                 string[] guids = AssetDatabase.FindAssets("t:SVGImporterSettings");
                 if(guids == null || guids.Length == 0)
                 {
-                    ScriptableObject asset = ScriptableObject.CreateInstance<SVGImporterSettings>();                        
+                    ScriptableObject asset = ScriptableObject.CreateInstance<SVGImporterSettings>();
                     AssetDatabase.CreateAsset(asset, path + slash + assetName);
                     AssetDatabase.SaveAssets();
 
-					_settings = (SVGImporterSettings)AssetDatabase.LoadAssetAtPath(path + assetName, typeof(SVGImporterSettings));
+                    _settings = (SVGImporterSettings)AssetDatabase.LoadAssetAtPath(path + assetName, typeof(SVGImporterSettings));
                     if(_settings != null)
                     {
                         EditorUtility.SetDirty(_settings);
                     }
                 } else {
-					_settings = (SVGImporterSettings)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(SVGImporterSettings));
+                    _settings = (SVGImporterSettings)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(SVGImporterSettings));
                 }
             }
         }
-        
+
         public static void Init()
         {
             CreateSettings();
@@ -61,13 +61,13 @@ namespace SVGImporter
 
         protected static void InitIcons()
         {
-			if(!System.IO.Directory.Exists(gizmosPath))
+            if(!System.IO.Directory.Exists(gizmosPath))
             {
                 AssetDatabase.CreateFolder(path, "Gizmos");
             }
             if(settings.defaultSVGIcon != null)
             {
-				if(AssetDatabase.LoadAssetAtPath(gizmosAssetIconPath, typeof(Texture2D)) == null)
+                if(AssetDatabase.LoadAssetAtPath(gizmosAssetIconPath, typeof(Texture2D)) == null)
                 {
                     File.WriteAllBytes(Application.dataPath + "/Gizmos/"+gizmosAssetIconPath, settings.defaultSVGIcon.EncodeToPNG());
                     AssetDatabase.Refresh();

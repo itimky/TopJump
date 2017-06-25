@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
+namespace SVGImporter.Rendering
 {
     public enum SVGPathSegTypes : ushort
     {
@@ -82,11 +82,11 @@ namespace SVGImporter.Rendering
             get { return _segList.GetPreviousSegment(_index); }
         }
         /***********************************************************************************/
-        public Vector2 currentPoint 
-        { 
+        public Vector2 currentPoint
+        {
             get{
                 return _currentPoint;
-            } 
+            }
         }
 
         public Vector2 previousPoint

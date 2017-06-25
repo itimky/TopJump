@@ -68,7 +68,7 @@ namespace SVGImporter
             public override bool IsDone(float deltaTime)
             {
                 TimeLeft -= deltaTime;
-                return TimeLeft < 0; 
+                return TimeLeft < 0;
             }
         }
 
@@ -194,7 +194,7 @@ namespace SVGImporter
         void GoStopCoroutine(IEnumerator routine, object thisReference)
         {
             GoStopActualRoutine(CreateCoroutine(routine, thisReference));
-            
+
         }
 
         void GoStopCoroutine(string methodName, object thisReference)
@@ -280,7 +280,7 @@ namespace SVGImporter
             foreach (var pair in coroutineDict)
             {
                 List<Coroutine> coroutines = pair.Value;
-                
+
                 for (int i = coroutines.Count-1; i >= 0; i--)
                 {
                     Coroutine coroutine = coroutines [i];
@@ -316,7 +316,7 @@ namespace SVGImporter
 
             return false;
         }
-        
+
         // returns false if no next, returns true if OK
         bool Process(Coroutine coroutine)
         {

@@ -14,33 +14,33 @@ namespace SVGImporter.Rendering
 
     public enum FILL_BLEND
     {
-    	OPAQUE,
-    	ALPHA_BLENDED,
-    	ADDITIVE,
-    	MULTIPLY
+        OPAQUE,
+        ALPHA_BLENDED,
+        ADDITIVE,
+        MULTIPLY
     }
 
     public enum FILL_TYPE
     {
-    	SOLID,
-    	GRADIENT,
-    	TEXTURE
+        SOLID,
+        GRADIENT,
+        TEXTURE
     }
 
     public enum GRADIENT_TYPE
     {
-    	LINEAR = 0,
-    	RADIAL = 1,
+        LINEAR = 0,
+        RADIAL = 1,
         CONICAL = 2
     }
 
     [System.Serializable]
     public class SVGFill : System.Object
-    {	
-    	public FILL_TYPE fillType;
-    	public FILL_BLEND blend;
+    {
+        public FILL_TYPE fillType;
+        public FILL_BLEND blend;
         public GRADIENT_TYPE gradientType;
-    	public Color32 color;
+        public Color32 color;
         //public Rect bounds;
 
         public string gradientId;
@@ -60,8 +60,8 @@ namespace SVGImporter.Rendering
         public SVGLength gradientEndY;
 
         public SVGFill ()
-    	{
-    	}
+        {
+        }
 
         public SVGFill (Color32 color)
         {

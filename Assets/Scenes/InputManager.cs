@@ -52,18 +52,18 @@ public class InputManager : MonoBehaviour
 
 
     private void ProcessInput()
-    {        
+    {
         if (Input.GetButtonDown("Horizontal"))
         {
             var axis = Input.GetAxis("Horizontal");
             if (axis > 0)
                 SwipeDirection = MoveDirection.Right;
             else
-                SwipeDirection = MoveDirection.Left;          
+                SwipeDirection = MoveDirection.Left;
         }
         else
             SwipeDirection = MoveDirection.None;
-        
+
 //        if (Input.GetButtonDown("Jump"))
 //            Tap = true;
 //        else
@@ -77,7 +77,7 @@ public class InputManager : MonoBehaviour
 
         if (Input.touchCount == 0)
             return;
-             
+
         foreach (Touch touch in Input.touches)
         {
             switch (touch.phase)
@@ -103,7 +103,7 @@ public class InputManager : MonoBehaviour
 //                        SetTap(touch);
 //                    isTapping = false;
                     isSwiping = false;
-                    break;                        
+                    break;
             }
         }
     }
@@ -139,21 +139,21 @@ public class InputManager : MonoBehaviour
     //    }
 
     private void SetSwipe(Touch touch)
-    {        
+    {
         float gestureTime = Time.time - fingerStartTime;
         float gestureDist = (touch.position - fingerStartPos).magnitude;
 
         if (gestureTime < maxSwipeTime && gestureDist > minSwipeDist)
         {
-            var swipeType = GetSwipeType(touch.position);                           
+            var swipeType = GetSwipeType(touch.position);
             if (swipeType.x != 0.0f)
             {
                 isSwiping = false;
                 if (swipeType.x > 0.0f)
                     SwipeDirection = MoveDirection.Right;
                 else
-                    SwipeDirection = MoveDirection.Left;                              
-            }                       
+                    SwipeDirection = MoveDirection.Left;
+            }
         }
         else
             SwipeDirection = MoveDirection.None;

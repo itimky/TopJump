@@ -29,7 +29,7 @@ public class EdgeTest : MonoBehaviour {
 
                 for(int i = 1; i < edges.Length; i++)
                 {
-                    Gizmos.DrawLine(vertices[edges[i].vertexIndex[0]], 
+                    Gizmos.DrawLine(vertices[edges[i].vertexIndex[0]],
                                     vertices[edges[i].vertexIndex[1]]);
                     UnityEditor.Handles.Label(vertices[edges[i].vertexIndex[0]], i.ToString());
                 }
@@ -49,9 +49,9 @@ public class EdgeTest : MonoBehaviour {
                     }
                 }
             }
-            
+
             Gizmos.matrix = oldMatrix;
-        }                
+        }
     }
 #endif
 }

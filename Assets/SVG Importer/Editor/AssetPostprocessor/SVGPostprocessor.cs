@@ -11,7 +11,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace SVGImporter 
+namespace SVGImporter
 {
     public class SVGPostprocessor : AssetPostprocessor
     {
@@ -68,13 +68,13 @@ namespace SVGImporter
         {
             return asset.EndsWith(extension, System.StringComparison.OrdinalIgnoreCase);
         }
-        
+
         public static string ConvertToInternalPath(string asset)
         {
             string left = asset.Substring(0, asset.Length - svgExtension.Length);
             return left + assetExtension;
         }
-        
+
         // This is called always when importing something
         static void OnPostprocessAllAssets
             (
@@ -102,7 +102,7 @@ namespace SVGImporter
                 {
                     SVGAsset svgAsset = AssetDatabase.LoadAssetAtPath(asset, typeof(SVGAsset)) as SVGAsset;
                     if(svgAsset != null)
-                    {                        
+                    {
                         reimportSVGAssets.Add(svgAsset);
                     }
                 }
@@ -111,36 +111,36 @@ namespace SVGImporter
             importTotalAssets = importSVGAssets.Count;
             reImportTotalAssets = reimportSVGAssets.Count;
 
-			if(importTotalAssets + reImportTotalAssets > 0)
-			{				
-				AssetDatabase.StartAssetEditing();
-			} else {
-				EditorUtility.ClearProgressBar();
-				importSVGAssets.Clear();
-				importSVGAssets = null;
-				reimportSVGAssets.Clear();
-				reimportSVGAssets = null;
-				return;
-			}
+            if(importTotalAssets + reImportTotalAssets > 0)
+            {
+                AssetDatabase.StartAssetEditing();
+            } else {
+                EditorUtility.ClearProgressBar();
+                importSVGAssets.Clear();
+                importSVGAssets = null;
+                reimportSVGAssets.Clear();
+                reimportSVGAssets = null;
+                return;
+            }
 
             //Debug.Log("importedAssets: " + importedAssets.Length +"\n"+string.Join("\n", importSVGAssets.ToArray()));
 //            Debug.Log("importedAssets: " + importedAssets.Length +"\n"+string.Join("\n", importedAssets));
 
             // Import SVG Assets
 
-			int importSVGAssetsLength = importSVGAssets.Count;
-			string importSVGAsset;
-			int currentAssetIndex = 0;
-			for(int i = 0; i < importSVGAssetsLength; i++)
+            int importSVGAssetsLength = importSVGAssets.Count;
+            string importSVGAsset;
+            int currentAssetIndex = 0;
+            for(int i = 0; i < importSVGAssetsLength; i++)
             {
-				importSVGAsset = importSVGAssets[i];                
+                importSVGAsset = importSVGAssets[i];
                 float importProgress = (float)currentAssetIndex / (float)importTotalAssets;
-				if(EditorUtility.DisplayCancelableProgressBar("Importing SVG Assets", "Importing SVG Asset: "+importSVGAsset+"...", importProgress))
+                if(EditorUtility.DisplayCancelableProgressBar("Importing SVG Assets", "Importing SVG Asset: "+importSVGAsset+"...", importProgress))
                 {
                     EditorUtility.ClearProgressBar();
                     break;
                 } else {
-					ImportVGAsset(importSVGAsset);
+                    ImportVGAsset(importSVGAsset);
                     currentAssetIndex++;
                 }
             }
@@ -168,11 +168,11 @@ namespace SVGImporter
             reimportSVGAssets.Clear();
             reimportSVGAssets = null;
 
-			AssetDatabase.SaveAssets();
-			AssetDatabase.StopAssetEditing();
-			AssetDatabase.Refresh();
-			Canvas.ForceUpdateCanvases();
-			SceneView.RepaintAll();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.StopAssetEditing();
+            AssetDatabase.Refresh();
+            Canvas.ForceUpdateCanvases();
+            SceneView.RepaintAll();
         }
 
         static void ReimportSVGAsset(SVGAsset svgAsset, string asset)
@@ -202,9 +202,9 @@ namespace SVGImporter
                 AssetDatabase.CreateAsset(svgAsset, outputFileName);
             }
             AssetDatabase.DeleteAsset(asset);
-            
-			FieldInfo _svgFile = typeof(SVGAsset).GetField("_svgFile", BindingFlags.NonPublic | BindingFlags.Instance);
-			_svgFile.SetValue(svgAsset, svgText);
+
+            FieldInfo _svgFile = typeof(SVGAsset).GetField("_svgFile", BindingFlags.NonPublic | BindingFlags.Instance);
+            _svgFile.SetValue(svgAsset, svgText);
 
             MethodInfo _editor_ApplyChanges = typeof(SVGAsset).GetMethod("_editor_ApplyChanges", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_ApplyChanges.Invoke(svgAsset, new object[]{true});
@@ -224,8 +224,8 @@ namespace SVGImporter
             FieldInfo _editor_antialiasingWidth = typeof(SVGAsset).GetField("_antialiasingWidth", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_antialiasingWidth.SetValue(asset, SVGImporterEditor.settings.defaultAntialiasingWidth);
 
-			FieldInfo _editor_meshCompression = typeof(SVGAsset).GetField("_meshCompression", BindingFlags.NonPublic | BindingFlags.Instance);
-			_editor_meshCompression.SetValue(asset, SVGImporterEditor.settings.defaultMeshCompression);
+            FieldInfo _editor_meshCompression = typeof(SVGAsset).GetField("_meshCompression", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_meshCompression.SetValue(asset, SVGImporterEditor.settings.defaultMeshCompression);
 
             FieldInfo _editor_vpm = typeof(SVGAsset).GetField("_vpm", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_vpm.SetValue(asset, SVGImporterEditor.settings.defaultVerticesPerMeter);
@@ -238,7 +238,7 @@ namespace SVGImporter
 
             FieldInfo _editor_compressDepth = typeof(SVGAsset).GetField("_compressDepth", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_compressDepth.SetValue(asset, SVGImporterEditor.settings.defaultCompressDepth);
-            
+
             FieldInfo _editor_customPivotPoint = typeof(SVGAsset).GetField("_customPivotPoint", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_customPivotPoint.SetValue(asset, SVGImporterEditor.settings.defaultCustomPivotPoint);
 
@@ -248,8 +248,8 @@ namespace SVGImporter
             FieldInfo _editor_generateCollider = typeof(SVGAsset).GetField("_generateCollider", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_generateCollider.SetValue(asset, SVGImporterEditor.settings.defaultGenerateCollider);
 
-			FieldInfo _editor_keepSVGFile = typeof(SVGAsset).GetField("_keepSVGFile", BindingFlags.NonPublic | BindingFlags.Instance);
-			_editor_keepSVGFile.SetValue(asset, SVGImporterEditor.settings.defaultKeepSVGFile);
+            FieldInfo _editor_keepSVGFile = typeof(SVGAsset).GetField("_keepSVGFile", BindingFlags.NonPublic | BindingFlags.Instance);
+            _editor_keepSVGFile.SetValue(asset, SVGImporterEditor.settings.defaultKeepSVGFile);
 
             FieldInfo _editor_ignoreSVGCanvas = typeof(SVGAsset).GetField("_ignoreSVGCanvas", BindingFlags.NonPublic | BindingFlags.Instance);
             _editor_ignoreSVGCanvas.SetValue(asset, SVGImporterEditor.settings.defaultIgnoreSVGCanvas);
@@ -269,7 +269,7 @@ namespace SVGImporter
         void OnPreprocessTexture() {
             if(assetPath != assetIconPath)
                 return;
-            
+
             TextureImporter textureImporter  = (TextureImporter) assetImporter;
             textureImporter.textureType = TextureImporterType.Default;
             textureImporter.alphaIsTransparency = true;

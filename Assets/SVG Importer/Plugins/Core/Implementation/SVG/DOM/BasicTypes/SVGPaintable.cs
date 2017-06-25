@@ -6,8 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SVGImporter.Rendering 
-{    
+namespace SVGImporter.Rendering
+{
     using Utils;
     using Document;
 
@@ -158,7 +158,7 @@ namespace SVGImporter.Rendering
         }
 
         public SVGFill svgFill;
-        
+
         public SVGColor? fillColor
         {
             get { return this._fillColor; }
@@ -336,10 +336,10 @@ namespace SVGImporter.Rendering
                 this._visibility = inheritPaintable.visibility;
                 this._display = inheritPaintable.display;
                 this._clipRule = inheritPaintable.clipRule;
-                this._viewport = inheritPaintable._viewport;           
+                this._viewport = inheritPaintable._viewport;
                 this._fillRule = inheritPaintable._fillRule;
                 this._cssStyle = inheritPaintable._cssStyle;
-                this._clipPathList = CloneClipPathList(inheritPaintable._clipPathList);                
+                this._clipPathList = CloneClipPathList(inheritPaintable._clipPathList);
                 this._linearGradList = inheritPaintable._linearGradList;
                 this._radialGradList = inheritPaintable._radialGradList;
                 this._conicalGradList = inheritPaintable._conicalGradList;
@@ -378,7 +378,7 @@ namespace SVGImporter.Rendering
 
                 if (isStrokeWidth == false)
                     this._strokeWidth.NewValueSpecifiedUnits(inheritPaintable.strokeWidth);
-                
+
                 _opacity *= inheritPaintable._opacity;
                 _fillOpacity *= inheritPaintable._fillOpacity;
                 _strokeOpacity *= inheritPaintable._strokeOpacity;
@@ -389,7 +389,7 @@ namespace SVGImporter.Rendering
 
         //style="fill: #ffffff; stroke:#000000; stroke-width:0.172"
         private void Initialize(AttributeList attrList)
-        {         
+        {
             ReadStyle(attrList.Get);
             ReadStyle(attrList.GetValue("style"));
         }
@@ -484,9 +484,9 @@ namespace SVGImporter.Rendering
                         }
                     }
                 }
-            } 
+            }
         }
-        
+
         private List<List<Vector2>> GetClipPath(Node node, SVGMatrix svgMatrix)
         {
             SVGTransformList transformList = new SVGTransformList();
@@ -528,7 +528,7 @@ namespace SVGImporter.Rendering
                     {
                         if (xlink [0] == '#')
                             xlink = xlink.Remove(0, 1);
-                        
+
                         if (SVGParser._defs.ContainsKey(xlink))
                         {
                             Node definitionNode = SVGParser._defs [xlink];
@@ -657,7 +657,7 @@ namespace SVGImporter.Rendering
                     break;
                 case "scroll":
                     _overflow = SVGOverflow.scroll;
-                    break;                
+                    break;
             }
         }
 
@@ -670,7 +670,7 @@ namespace SVGImporter.Rendering
                     break;
                 case "evenodd":
                     _clipRule = SVGClipRule.evenodd;
-                    break;                            
+                    break;
             }
         }
 
@@ -820,7 +820,7 @@ namespace SVGImporter.Rendering
             if (string.IsNullOrEmpty(this._gradientID))
             {
                 return false;
-            }            
+            }
             return _conicalGradList.ContainsKey(this._gradientID);
         }
 
@@ -905,7 +905,7 @@ namespace SVGImporter.Rendering
                 _radialGradList.Add(radialGradElement.id, radialGradElement);
             }
         }
-        
+
         public void AppendConicalGradient(SVGConicalGradientElement conicalGradElement)
         {
             if(_conicalGradList.ContainsKey(conicalGradElement.id))
@@ -928,7 +928,7 @@ namespace SVGImporter.Rendering
         {
             if(!_radialGradList.ContainsKey(this._gradientID))
                 return null;
-            
+
             return new SVGRadialGradientBrush(_radialGradList[this._gradientID], bounds, matrix);
         }
 
@@ -936,7 +936,7 @@ namespace SVGImporter.Rendering
         {
             if(!_conicalGradList.ContainsKey(this._gradientID))
                 return null;
-            
+
             return new SVGConicalGradientBrush(_conicalGradList[this._gradientID], bounds, matrix);
         }
     }
