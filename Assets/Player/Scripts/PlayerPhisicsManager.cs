@@ -20,7 +20,7 @@ public class PlayerPhisicsManager : Pausable
 		Game.RegisterPausableObject(this);
 		_audio = GetComponent<PlayerAudio>();
 		rigidbody2d = GetComponent<Rigidbody2D>();
-		_fallingBonusManager = GetComponent<FallingBonusManager>();
+		_fallingBonusManager = GameObject.Find("Game").GetComponent<FallingBonusManager>();
 		_playerInfo = GetComponent<PlayerInfo>();
 	}
 
@@ -35,7 +35,7 @@ public class PlayerPhisicsManager : Pausable
 	{
 		if (Game.IsGameOver)
 			return;
-        
+
 		if (other.gameObject.layer == LayerManager.FallingBonuses)
 			_fallingBonusManager.AddBonus(other.gameObject);
 		else
@@ -90,7 +90,7 @@ public class PlayerPhisicsManager : Pausable
 	{
 		if (Game.IsGameOver)
 			return;
-		
+
 		base.Pause();
 		prepauseVelocity = rigidbody2d.velocity;
 		rigidbody2d.Sleep();
