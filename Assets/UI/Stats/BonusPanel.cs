@@ -31,7 +31,7 @@ public class BonusPanel : MonoBehaviour
 
     private BonusItem MakeBonusItem(RectTransform bonus)
     {
-        return new BonusItem(bonus, bonus.FindChild("ScaleSlider").GetComponent<Slider>());
+        return new BonusItem(bonus, bonus.Find("ScaleSlider").GetComponent<Slider>());
     }
 
     public static void AddBonus(string tag)
