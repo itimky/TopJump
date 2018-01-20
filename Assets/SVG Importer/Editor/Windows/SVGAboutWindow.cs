@@ -18,7 +18,7 @@ namespace SVGImporter
         private static GUIContent s_Header;
         
 		private const string kSpecialThanksNames = "Thanks to my girlfriend Kate to her endless patience\nand support and also thanks to my beloved parents.";
-        private const string kSpecialThanksNamesTesters = "Thanks to Anders Gallon for his exquisite bugreports. Big thanks to JaimeAL for his great forum support!";
+        private const string kSpecialThanksNamesTesters = "Thanks to Anders Gallon for his exquisite bugreports.\nBig thanks to JaimeAL for his great forum support!";
         
         private static GUIContent s_ClipperLogo;
         
@@ -145,7 +145,7 @@ namespace SVGImporter
 		static void OnLastRectClick(Action action)
 		{
 			Rect lastRect = GUILayoutUtility.GetLastRect();
-			if(Event.current.type == EventType.mouseDown && lastRect.Contains(Event.current.mousePosition))
+			if(Event.current.type == EventType.MouseDown && lastRect.Contains(Event.current.mousePosition))
 			{
 				if(action == null)
 					return;

@@ -184,9 +184,9 @@ namespace SVGImporter
         {            
             float aspect = 1f;
             if(svgAsset != null) aspect = assetBounds.size.x / assetBounds.size.y;
-            _previewResolution = Mathf.CeilToInt(windowRect.width);
-			return RenderTexture.GetTemporary(_previewResolution, 
-			                                  Mathf.CeilToInt(_previewResolution / aspect), 
+            _previewResolution = Mathf.Clamp(Mathf.CeilToInt(windowRect.width), 0, 8192);
+			return RenderTexture.GetTemporary(_previewResolution,
+                                              Mathf.Clamp(Mathf.CeilToInt(_previewResolution / aspect), 0, 8192), 
 			                                  24, 
 			                                  RenderTextureFormat.Default, 
 			                                  RenderTextureReadWrite.Default,
@@ -248,6 +248,7 @@ namespace SVGImporter
 
             _editorRenderer.gameObject.SetActive(true);
 			editorCamera.targetTexture = GetRenderTexture();
+            SVGAtlas.Instance.OnPreRender();
             editorCamera.Render();
             _editorRenderer.gameObject.SetActive(false);
         }
@@ -933,10 +934,10 @@ namespace SVGImporter
 			Bounds bounds = mesh.bounds;
 			float magnitude = bounds.extents.magnitude;
 			float num = 4f * magnitude;
-			previewUtility.m_Camera.transform.position = -Vector3.forward * num;
-			previewUtility.m_Camera.transform.rotation = Quaternion.identity;
-			previewUtility.m_Camera.nearClipPlane = num - magnitude * 1.1f;
-			previewUtility.m_Camera.farClipPlane = num + magnitude * 1.1f;
+			previewUtility.camera.transform.position = -Vector3.forward * num;
+			previewUtility.camera.transform.rotation = Quaternion.identity;
+			previewUtility.camera.nearClipPlane = num - magnitude * 1.1f;
+			previewUtility.camera.farClipPlane = num + magnitude * 1.1f;
 			
 			Quaternion quaternion = Quaternion.identity;
 			Vector3 pos = -bounds.center;
@@ -946,7 +947,7 @@ namespace SVGImporter
 			int meshSubset = materials.Length;
 			if (materials != null && materials.Length > 0)
 			{
-				previewUtility.m_Camera.clearFlags = CameraClearFlags.Nothing;
+				previewUtility.camera.clearFlags = CameraClearFlags.Nothing;
 				if (meshSubset < 0 || meshSubset >= subMeshCount)
 				{
 					for (int i = 0; i < subMeshCount; i++)
@@ -958,7 +959,7 @@ namespace SVGImporter
 				{
 					previewUtility.DrawMesh(mesh, pos, quaternion, materials[0], -1);
 				}
-				previewUtility.m_Camera.Render();
+				previewUtility.camera.Render();
 			}
 			Unsupported.SetRenderSettingsUseFogNoDirty(fog);
 		}

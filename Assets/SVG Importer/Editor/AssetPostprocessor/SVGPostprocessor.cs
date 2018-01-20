@@ -221,7 +221,7 @@ namespace SVGImporter
 
         protected static void InitDefaultValues(SVGAsset asset)
         {
-            FieldInfo _editor_format = typeof(SVGAsset).GetField("_format", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo _editor_format = typeof(SVGAsset).GetField("_format", BindingFlags.NonPublic | BindingFlags.Instance);            
             _editor_format.SetValue(asset, SVGImporterEditor.settings.defaultSVGFormat);
 
             FieldInfo _editor_useGradients = typeof(SVGAsset).GetField("_useGradients", BindingFlags.NonPublic | BindingFlags.Instance);

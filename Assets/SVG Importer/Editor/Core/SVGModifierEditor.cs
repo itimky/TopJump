@@ -289,20 +289,20 @@ namespace SVGImporter
 
 			if(selectingLayers)
 			{
-				SVGAsset svgAsset = GetSVGAsset();
-				if(position.Contains(current.mousePosition))
-				{
-					int controlID = GUIUtility.GetControlID(controlIDHash, FocusType.Passive);
-					GUIUtility.hotControl = controlID;
-
+                SVGAsset svgAsset = GetSVGAsset();
+                
+                if (position.Contains(current.mousePosition))
+				{					
 					if(current.button == 0)
 					{
 						switch (current.type)
 						{						
-						case EventType.mouseDown:
-							clickGUIPosition = current.mousePosition;
+						case EventType.MouseDown:
+                                int controlID = GUIUtility.GetControlID(controlIDHash, FocusType.Passive);
+                                GUIUtility.hotControl = controlID;
+                                clickGUIPosition = current.mousePosition;
 							break;
-						case EventType.mouseUp:
+						case EventType.MouseUp:
 							if((current.mousePosition - clickGUIPosition).sqrMagnitude < 0.1f)
 							{
 								layerIndex = GetHighestLayerAtPoint(svgAsset.layers, localMousePosition);
@@ -320,11 +320,12 @@ namespace SVGImporter
 								}
 							}
 							current.Use();
-							break;
+                                GUIUtility.hotControl = 0;
+                                break;
 						}
 					}
 				} else {
-					if(layerList.hilightedLayer >= 0)
+                    if (layerList.hilightedLayer >= 0)
 					{
 						SVGLayer[] layers = svgAsset.layers;
 						if(layerList.hilightedLayer < layers.Length)
@@ -336,7 +337,7 @@ namespace SVGImporter
 
 				if (GUI.changed) EditorUtility.SetDirty(target);
 
-				if(current.type == EventType.repaint)
+				if(current.type == EventType.Repaint)
 				{
 					Color handlesColor = Handles.color;
 					Handles.color = new Color(1f, 1f, 1f, 0.5f);

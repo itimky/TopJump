@@ -468,6 +468,7 @@ namespace SVGImporter
         {
             if(hasGradients)
             {
+                MonoBehaviour mb = reference as MonoBehaviour;                
                 if(SVGAtlas.beingDestroyed) return;
                 for(int i = 0; i < _sharedGradients.Length; i++)
                 {
@@ -488,6 +489,7 @@ namespace SVGImporter
         {
             if(hasGradients)
             {
+                MonoBehaviour mb = reference as MonoBehaviour;                
                 int totalReferences = 0;
                 if(SVGAtlas.beingDestroyed) return;
                 for(int i = 0; i < _sharedGradients.Length; i++)

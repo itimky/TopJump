@@ -47,15 +47,9 @@ namespace SVGImporter
             }
         }
 
-        public static void UpdateAntialiasing(float screenWidth = 1f, float screenHeight = 1f)
+        public static void UpdateAntialiasing()
         {
-            float inverseWidth = 0f;
-            if(screenWidth > 0f) inverseWidth = 1f / screenWidth;
-            float inverseHeight = 0f;
-            if(screenHeight > 0f) inverseHeight = 1f / screenHeight;
-
-            Shader.SetGlobalVector("SVG_GRADIENT_ANTIALIASING_WIDTH", new Vector4(Get.defaultAntialiasingWidth * inverseWidth, Get.defaultAntialiasingWidth * inverseHeight, 0f, 0f));
-            Shader.SetGlobalVector("SVG_SOLID_ANTIALIASING_WIDTH", new Vector4(Get.defaultAntialiasingWidth * inverseWidth, Get.defaultAntialiasingWidth * inverseHeight, 0f, 0f));
+            Shader.SetGlobalFloat("SVG_ANTIALIASING_WIDTH", Get.defaultAntialiasingWidth);
         }
 
         protected static string _version = "1.1.3";
